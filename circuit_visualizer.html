@@ -797,37 +797,40 @@
             <g transform="translate(45, 485)">
               <rect x="-6" y="-6" width="382" height="335" rx="12" fill="#0b1120" stroke="#1e293b" stroke-width="1.5" />
 
-              <!-- A. RASPBERRY PI PICO (LEFT: 21mm x 51mm real proportions) -->
+              <!-- A. RASPBERRY PI PICO (ROTATED 180°: USB FACING OUTWARD AT BOTTOM) -->
               <!-- Position: x=12, y=15, width=135, height=305 -->
-              <g class="interactive-part" transform="translate(12, 15)" data-name="Raspberry Pi Pico">
+              <g class="interactive-part" transform="translate(12, 15)" data-name="Raspberry Pi Pico (USB Bottom-Facing)">
                 <rect x="0" y="0" width="135" height="305" rx="7" fill="url(#picoGreen)" stroke="#15803d" stroke-width="2" filter="url(#buttonShadow)" />
                 <rect x="6" y="6" width="123" height="293" rx="4" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-dasharray="3,3" />
 
-                <!-- USB Port -->
-                <rect x="42" y="-10" width="50" height="20" rx="3" fill="#cbd5e1" stroke="#475569" />
+                <!-- Micro-USB Port: Rotated to Face Bottom Edge of Remote -->
+                <rect x="42" y="295" width="51" height="22" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="1.4" />
+                <rect x="52" y="304" width="31" height="8" rx="2" fill="#090d16" />
+                <text x="67.5" y="328" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">USB OUTSIDE</text>
+
                 <!-- RP2040 Chip -->
-                <rect x="45" y="120" width="45" height="45" rx="3" fill="#1e293b" stroke="#334155" />
-                <text x="68" y="145" fill="#e2e8f0" font-family="'Fira Code', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">RP2040</text>
+                <rect x="45" y="125" width="45" height="45" rx="3" fill="#1e293b" stroke="#334155" />
+                <text x="67.5" y="150" fill="#e2e8f0" font-family="'Fira Code', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">RP2040</text>
                 
-                <!-- BOOTSEL -->
-                <circle cx="68" cy="65" r="9" fill="#cbd5e1" />
-                <text x="68" y="83" fill="#f8fafc" font-size="6.5" font-weight="bold" text-anchor="middle">BOOTSEL</text>
+                <!-- BOOTSEL Button (Inverted lower half) -->
+                <circle cx="67.5" cy="225" r="8" fill="#cbd5e1" />
+                <text x="67.5" y="242" fill="#f8fafc" font-size="6.5" font-weight="bold" text-anchor="middle">BOOTSEL</text>
 
                 <!-- Onboard LED -->
-                <circle id="picoOnboardLed" cx="48" cy="35" r="3.5" fill="#22c55e" opacity="0.6" />
-                <text x="48" y="47" fill="#86efac" font-size="6" font-family="monospace" text-anchor="middle">LED</text>
+                <circle id="picoOnboardLed" cx="85" cy="265" r="3.5" fill="#22c55e" opacity="0.6" />
+                <text x="85" y="277" fill="#86efac" font-size="6" font-family="monospace" text-anchor="middle">LED</text>
 
-                <!-- Left Pin Breakout Pads -->
-                <rect x="0" y="100" width="18" height="15" fill="#7e22ce" rx="2" /><text x="22" y="111" fill="#f3e8ff" font-size="7" font-weight="bold" font-family="monospace">GP6-9</text>
-                <rect x="0" y="175" width="18" height="15" fill="#0891b2" rx="2" /><text x="22" y="186" fill="#cffafe" font-size="7" font-weight="bold" font-family="monospace">GP10-13</text>
-                <rect id="pinGnd18" x="0" y="245" width="18" height="14" fill="#475569" rx="2" /><text x="22" y="256" fill="#cbd5e1" font-size="7" font-family="monospace">GND(18)</text>
-                <rect id="pinGp15" x="0" y="275" width="18" height="14" fill="#ca8a04" rx="2" /><text x="22" y="286" fill="#fef08a" font-size="7.5" font-weight="bold" font-family="monospace">GP15(RX)</text>
+                <!-- Left Pin Breakout Pads (Inverted: Pins 21..40) -->
+                <rect id="pinGp16" x="0" y="25" width="18" height="14" fill="#ea580c" rx="2" /><text x="22" y="36" fill="#ffedd5" font-size="7.5" font-weight="bold" font-family="monospace">GP16(TX)</text>
+                <rect id="pin3v3" x="0" y="195" width="18" height="14" fill="#db2777" rx="2" /><text x="22" y="206" fill="#f472b6" font-size="7" font-family="monospace">3V3(36)</text>
+                <rect id="pinGnd38" x="0" y="235" width="18" height="14" fill="#475569" rx="2" /><text x="22" y="246" fill="#cbd5e1" font-size="7" font-family="monospace">GND(38)</text>
+                <rect id="pinVsys" x="0" y="265" width="18" height="14" fill="#e11d48" rx="2" /><text x="22" y="276" fill="#fda4af" font-size="7.5" font-weight="bold" font-family="monospace">VSYS(39)</text>
 
-                <!-- Right Pin Breakout Pads -->
-                <rect id="pinVsys" x="117" y="25" width="18" height="14" fill="#e11d48" rx="2" /><text x="112" y="36" fill="#fda4af" font-size="7.5" font-weight="bold" font-family="monospace" text-anchor="end">VSYS(39)</text>
-                <rect id="pinGnd38" x="117" y="45" width="18" height="14" fill="#475569" rx="2" /><text x="112" y="56" fill="#cbd5e1" font-size="7" font-family="monospace" text-anchor="end">GND(38)</text>
-                <rect id="pin3v3" x="117" y="85" width="18" height="14" fill="#db2777" rx="2" /><text x="112" y="96" fill="#f472b6" font-size="7" font-family="monospace" text-anchor="end">3V3(36)</text>
-                <rect id="pinGp16" x="117" y="275" width="18" height="14" fill="#ea580c" rx="2" /><text x="112" y="286" fill="#ffedd5" font-size="7.5" font-weight="bold" font-family="monospace" text-anchor="end">GP16(TX)</text>
+                <!-- Right Pin Breakout Pads (Inverted: Pins 1..20) -->
+                <rect id="pinGp15" x="117" y="25" width="18" height="14" fill="#ca8a04" rx="2" /><text x="112" y="36" fill="#fef08a" font-size="7.5" font-weight="bold" font-family="monospace" text-anchor="end">GP15(RX)</text>
+                <rect id="pinGnd18" x="117" y="55" width="18" height="14" fill="#475569" rx="2" /><text x="112" y="66" fill="#cbd5e1" font-size="7" font-family="monospace" text-anchor="end">GND(18)</text>
+                <rect x="117" y="110" width="18" height="48" fill="#0891b2" rx="2" /><text x="112" y="138" fill="#cffafe" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">GP10-13</text>
+                <rect x="117" y="175" width="18" height="48" fill="#7e22ce" rx="2" /><text x="112" y="203" fill="#f3e8ff" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">GP6-9</text>
               </g>
 
               <!-- B. 3x AAA BATTERY PACK (RIGHT: 38mm x 52mm real proportions) -->
@@ -877,56 +880,60 @@
               </g>
             </g>
 
+            <!-- Bottom Casing USB Port Cutout (External Access) -->
+            <rect x="75" y="830" width="60" height="10" rx="3" fill="#020617" stroke="#38bdf8" stroke-width="1.4" />
+            <text x="105" y="826" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="6" font-weight="bold" text-anchor="middle">EXTERNAL USB FLASHER</text>
+
             <!-- ============================================================= -->
             <!-- 2. HIGH-PRECISION MANHATTAN WIRING WITH REAL SOLDER JOINTS    -->
             <!-- ============================================================= -->
             <g id="wiresLayer">
-              <!-- Keypad Row Lines (Purple) ➜ Flex Header to Pico GP6–GP9 -->
-              <!-- R0: (88, 452) ➜ (57, 590) -->
-              <path class="wire-line net-rows" d="M 88 452 L 88 565 L 42 565 L 42 590 L 57 590" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
-              <!-- R1: (100, 452) ➜ (57, 607) -->
-              <path class="wire-line net-rows" d="M 100 452 L 100 555 L 39 555 L 39 607 L 57 607" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
-              <!-- R2: (112, 452) ➜ (57, 624) -->
-              <path class="wire-line net-rows" d="M 112 452 L 112 545 L 36 545 L 36 624 L 57 624" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
-              <!-- R3: (124, 452) ➜ (57, 641) -->
-              <path class="wire-line net-rows" d="M 124 452 L 124 535 L 33 535 L 33 641 L 57 641" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+              <!-- Keypad Column Lines (Cyan) ➜ Flex Header to Pico GP10–GP13 (on Pico right side) -->
+              <!-- C0: (142, 452) ➜ (192, 646) -->
+              <path class="wire-line net-cols" d="M 142 452 L 142 646 L 192 646" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+              <!-- C1: (154, 452) ➜ (192, 629) -->
+              <path class="wire-line net-cols" d="M 154 452 L 154 629 L 192 629" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+              <!-- C2: (166, 452) ➜ (192, 612) -->
+              <path class="wire-line net-cols" d="M 166 452 L 166 612 L 192 612" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+              <!-- C3: (178, 452) ➜ (192, 595) -->
+              <path class="wire-line net-cols" d="M 178 452 L 178 595 L 192 595" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
 
-              <!-- Keypad Col Lines (Cyan) ➜ Flex Header to Pico GP10–GP13 -->
-              <!-- C0: (142, 452) ➜ (57, 665) -->
-              <path class="wire-line net-cols" d="M 142 452 L 142 665 L 57 665" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
-              <!-- C1: (154, 452) ➜ (57, 682) -->
-              <path class="wire-line net-cols" d="M 154 452 L 154 682 L 57 682" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
-              <!-- C2: (166, 452) ➜ (57, 699) -->
-              <path class="wire-line net-cols" d="M 166 452 L 166 699 L 57 699" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
-              <!-- C3: (178, 452) ➜ (57, 716) -->
-              <path class="wire-line net-cols" d="M 178 452 L 178 716 L 57 716" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+              <!-- Keypad Row Lines (Purple) ➜ Flex Header to Pico GP6–GP9 (on Pico right side) -->
+              <!-- R0: (88, 452) ➜ (192, 726) -->
+              <path class="wire-line net-rows" d="M 88 452 L 88 475 L 208 475 L 208 726 L 192 726" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+              <!-- R1: (100, 452) ➜ (192, 709) -->
+              <path class="wire-line net-rows" d="M 100 452 L 100 470 L 212 470 L 212 709 L 192 709" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+              <!-- R2: (112, 452) ➜ (192, 692) -->
+              <path class="wire-line net-rows" d="M 112 452 L 112 465 L 216 465 L 216 692 L 192 692" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+              <!-- R3: (124, 452) ➜ (192, 675) -->
+              <path class="wire-line net-rows" d="M 124 452 L 124 460 L 220 460 L 220 675 L 192 675" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
 
               <!-- Battery (+) (Red) ➜ Battery (245, 520) to Switch IN (25, 622) -->
               <path class="wire-line net-vsys" d="M 245 520 L 245 470 L 25 470 L 25 622" fill="none" stroke="var(--wire-red)" stroke-width="3" />
 
-              <!-- Switched 4.5V (Red) ➜ Switch OUT (25, 648) to Pico VSYS (192, 525) -->
-              <path class="wire-line net-vsys" d="M 25 648 L 25 820 L 204 820 L 204 525 L 192 525" fill="none" stroke="var(--wire-red)" stroke-width="3.2" />
+              <!-- Switched 4.5V (Red) ➜ Switch OUT (25, 648) to Pico VSYS (57, 765) -->
+              <path class="wire-line net-vsys" d="M 25 648 L 25 765 L 57 765" fill="none" stroke="var(--wire-red)" stroke-width="3.2" />
 
               <!-- Switched 4.5V Emitter Branch (Red) ➜ To 100Ω Resistor (325, 120) -->
-              <path class="wire-line net-vsys" d="M 204 525 L 204 136 L 325 136 L 325 120" fill="none" stroke="var(--wire-red)" stroke-width="2.5" stroke-dasharray="6,3" />
+              <path class="wire-line net-vsys" d="M 25 648 L 25 140 L 325 140 L 325 120" fill="none" stroke="var(--wire-red)" stroke-width="2.5" stroke-dasharray="6,3" />
 
-              <!-- Battery (-) Ground (Slate/Black) ➜ Battery (355, 755) to Pico Pin 38 GND (192, 545) -->
-              <path class="wire-line net-gnd" d="M 355 755 L 355 810 L 212 810 L 212 545 L 192 545" fill="none" stroke="var(--wire-black)" stroke-width="2.8" />
+              <!-- Battery (-) Ground (Slate/Black) ➜ Battery (355, 755) to Pico Pin 38 GND (57, 735) -->
+              <path class="wire-line net-gnd" d="M 355 755 L 355 805 L 45 805 L 45 735 L 57 735" fill="none" stroke="var(--wire-black)" stroke-width="2.8" />
 
               <!-- Ground Branch (Slate/Black) ➜ To 2N2222 Emitter (380, 120) -->
-              <path class="wire-line net-gnd" d="M 212 545 L 212 144 L 380 144 L 380 120" fill="none" stroke="var(--wire-black)" stroke-width="2" />
+              <path class="wire-line net-gnd" d="M 45 735 L 45 146 L 380 146 L 380 120" fill="none" stroke="var(--wire-black)" stroke-width="2" />
 
-              <!-- VS1838B OUT (Yellow) ➜ Sensor OUT (82, 120) to Pico Pin 20 GP15 (57, 775) -->
-              <path class="wire-line net-rx" d="M 82 120 L 82 135 L 20 135 L 20 775 L 57 775" fill="none" stroke="var(--wire-yellow)" stroke-width="3" />
+              <!-- Pico GP16 IR TX (Orange) ➜ Pin 21 GP16 (57, 525) to 2N2222 Base via 1kΩ (355, 120) -->
+              <path class="wire-line net-tx" d="M 57 525 L 35 525 L 35 152 L 355 152 L 355 120" fill="none" stroke="var(--wire-orange)" stroke-width="3" />
 
-              <!-- VS1838B GND (Slate/Black) ➜ Sensor GND (95, 120) to Pico Pin 18 GND (57, 745) -->
-              <path class="wire-line net-gnd" d="M 95 120 L 95 142 L 27 142 L 27 745 L 57 745" fill="none" stroke="var(--wire-black)" stroke-width="2.2" />
+              <!-- VS1838B OUT (Yellow) ➜ Sensor OUT (82, 120) to Pico Pin 20 GP15 (192, 525) -->
+              <path class="wire-line net-rx" d="M 82 120 L 82 135 L 204 135 L 204 525 L 192 525" fill="none" stroke="var(--wire-yellow)" stroke-width="3" />
 
-              <!-- VS1838B 3V3 (Pink) ➜ Pico Pin 36 3V3 (192, 585) to Sensor 3V3 (108, 120) -->
-              <path class="wire-line net-vsys" d="M 192 585 L 196 585 L 196 142 L 108 142 L 108 120" fill="none" stroke="var(--wire-3v3)" stroke-width="2.4" />
+              <!-- VS1838B GND (Slate/Black) ➜ Sensor GND (95, 120) to Pico Pin 18 GND (192, 555) -->
+              <path class="wire-line net-gnd" d="M 95 120 L 95 142 L 198 142 L 198 555 L 192 555" fill="none" stroke="var(--wire-black)" stroke-width="2.2" />
 
-              <!-- Pico GP16 IR TX (Orange) ➜ Pin 21 GP16 (192, 775) to 2N2222 Base via 1kΩ (355, 120) -->
-              <path class="wire-line net-tx" d="M 192 775 L 208 775 L 208 138 L 355 138 L 355 120" fill="none" stroke="var(--wire-orange)" stroke-width="3" />
+              <!-- VS1838B 3V3 (Pink) ➜ Pico Pin 36 3V3 (57, 695) to Sensor 3V3 (108, 120) -->
+              <path class="wire-line net-vsys" d="M 57 695 L 18 695 L 18 130 L 108 130 L 108 120" fill="none" stroke="var(--wire-3v3)" stroke-width="2.4" />
 
               <!-- SOLDER JOINT PADS (Precise Circular Gold Connection Points) -->
               <!-- Top Sensor Module Joints -->
@@ -947,22 +954,22 @@
               <circle cx="166" cy="452" r="2.8" class="solder-joint" title="Keypad Col 2 (GP12)" />
               <circle cx="178" cy="452" r="2.8" class="solder-joint" title="Keypad Col 3 (GP13)" />
 
-              <!-- Pico Microcontroller Solder Joints -->
-              <circle cx="57" cy="590" r="3.2" class="solder-joint" title="Pico Pin 9 (GP6 - Row 0)" />
-              <circle cx="57" cy="607" r="3.2" class="solder-joint" title="Pico Pin 10 (GP7 - Row 1)" />
-              <circle cx="57" cy="624" r="3.2" class="solder-joint" title="Pico Pin 11 (GP8 - Row 2)" />
-              <circle cx="57" cy="641" r="3.2" class="solder-joint" title="Pico Pin 12 (GP9 - Row 3)" />
-              <circle cx="57" cy="665" r="3.2" class="solder-joint" title="Pico Pin 14 (GP10 - Col 0)" />
-              <circle cx="57" cy="682" r="3.2" class="solder-joint" title="Pico Pin 15 (GP11 - Col 1)" />
-              <circle cx="57" cy="699" r="3.2" class="solder-joint" title="Pico Pin 16 (GP12 - Col 2)" />
-              <circle cx="57" cy="716" r="3.2" class="solder-joint" title="Pico Pin 17 (GP13 - Col 3)" />
-              <circle cx="57" cy="745" r="3.2" class="solder-joint" title="Pico Pin 18 (GND)" />
-              <circle cx="57" cy="775" r="3.2" class="solder-joint" title="Pico Pin 20 (GP15 - IR RX)" />
+              <!-- Pico Microcontroller Solder Joints (Rotated Layout) -->
+              <circle cx="57" cy="525" r="3.2" class="solder-joint" title="Pico Pin 21 (GP16 - IR TX PWM)" />
+              <circle cx="57" cy="695" r="3.2" class="solder-joint" title="Pico Pin 36 (3V3 Regulated OUT)" />
+              <circle cx="57" cy="735" r="3.2" class="solder-joint" title="Pico Pin 38 (GND)" />
+              <circle cx="57" cy="765" r="3.2" class="solder-joint" title="Pico Pin 39 (VSYS 4.5V IN)" />
 
-              <circle cx="192" cy="525" r="3.2" class="solder-joint" title="Pico Pin 39 (VSYS 4.5V IN)" />
-              <circle cx="192" cy="545" r="3.2" class="solder-joint" title="Pico Pin 38 (GND)" />
-              <circle cx="192" cy="585" r="3.2" class="solder-joint" title="Pico Pin 36 (3V3 Regulated OUT)" />
-              <circle cx="192" cy="775" r="3.2" class="solder-joint" title="Pico Pin 21 (GP16 - IR TX PWM)" />
+              <circle cx="192" cy="525" r="3.2" class="solder-joint" title="Pico Pin 20 (GP15 - IR RX)" />
+              <circle cx="192" cy="555" r="3.2" class="solder-joint" title="Pico Pin 18 (GND)" />
+              <circle cx="192" cy="595" r="3.2" class="solder-joint" title="Pico Pin 17 (GP13 - Col 3)" />
+              <circle cx="192" cy="612" r="3.2" class="solder-joint" title="Pico Pin 16 (GP12 - Col 2)" />
+              <circle cx="192" cy="629" r="3.2" class="solder-joint" title="Pico Pin 15 (GP11 - Col 1)" />
+              <circle cx="192" cy="646" r="3.2" class="solder-joint" title="Pico Pin 14 (GP10 - Col 0)" />
+              <circle cx="192" cy="675" r="3.2" class="solder-joint" title="Pico Pin 12 (GP9 - Row 3)" />
+              <circle cx="192" cy="692" r="3.2" class="solder-joint" title="Pico Pin 11 (GP8 - Row 2)" />
+              <circle cx="192" cy="709" r="3.2" class="solder-joint" title="Pico Pin 10 (GP7 - Row 1)" />
+              <circle cx="192" cy="726" r="3.2" class="solder-joint" title="Pico Pin 9 (GP6 - Row 0)" />
 
               <!-- Battery & Slide Switch Solder Joints -->
               <circle cx="245" cy="520" r="3.8" class="solder-joint" title="3x AAA Positive (+) Terminal (4.5V)" />

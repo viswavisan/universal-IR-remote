@@ -100,6 +100,7 @@ To make the remote completely wireless and handheld:
   - **Battery (-) (Black Wire)** $\rightarrow$ **Pico GND (Pin 38)**
 - **Why Pico VSYS (Pin 39)?**: The Raspberry Pi Pico has a built-in RT6154 buck-boost switching regulator that accepts **1.8V to 5.5V** on VSYS. It easily handles the full discharge curve of 3 AAA batteries (4.5V down to 2.0V) while outputting a stable 3.3V for the RP2040 and IR receiver.
 - **Power Switch**: Sliding the switch to OFF cuts all power, eliminating standby battery drain.
+- **External USB Access**: The Raspberry Pi Pico is mounted in the lower grip with its micro-USB port facing outward at the bottom of the remote casing. This allows convenient firmware flashing, code updating, and serial monitoring directly via USB without opening the case.
 - **Transmission Range**: Powered from 4.5V via the 100Ω current limiter, the 940nm IR LED receives ~30–35mA pulse current for effective 5–8 meter line-of-sight range.
 
 #### 4x4 Matrix Keypad (16 Buttons - 8 GPIOs)
