@@ -603,7 +603,7 @@
             <button class="zoom-btn" id="btnZoomFit" title="Fit to Screen">⟲ Fit</button>
           </div>
           <span style="font-size: 0.8rem; color: #94a3b8;">
-            Handheld TV Remote &bull; Architecture &amp; Pin Connections in Sidebar ➜
+            Handheld TV Remote &bull; Dual Series IR LEDs (Zero Resistors / Diodes) &bull; Architecture in Sidebar ➜
           </span>
         </div>
         <div class="net-filters">
@@ -742,21 +742,31 @@
                 <circle id="keypadTxLed" cx="72" cy="45" r="4" fill="#334155" stroke="#475569" stroke-width="1" />
               </g>
 
-              <!-- C. 940nm IR Emitter + 2N2222 Transistor Driver Stage -->
-              <g class="interactive-part" transform="translate(268, 8)" data-name="940nm IR LED &amp; 2N2222 Driver">
-                <rect x="0" y="0" width="90" height="58" rx="6" fill="#131e31" stroke="#c084fc" stroke-width="1.2" />
+              <!-- C. Dual 940nm IR Emitter LEDs in Series (Direct GPIO Drive - No Resistors / No Transistors) -->
+              <g class="interactive-part" transform="translate(255, 8)" data-name="Dual 940nm IR LEDs (Series Direct Drive)">
+                <rect x="0" y="0" width="105" height="58" rx="6" fill="#131e31" stroke="#c084fc" stroke-width="1.2" />
 
-                <!-- 940nm IR LED bulb -->
-                <circle cx="28" cy="18" r="8.5" fill="#581c87" stroke="#c084fc" stroke-width="1.5" />
-                <circle cx="28" cy="18" r="4.5" fill="#a855f7" />
-                <text x="28" y="36" fill="#e9d5ff" font-size="6.5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">940nm LED</text>
+                <!-- LED 1: Straight Ahead Beam -->
+                <circle cx="28" cy="18" r="8" fill="#581c87" stroke="#c084fc" stroke-width="1.5" />
+                <circle cx="28" cy="18" r="4" fill="#a855f7" />
+                <text x="28" y="34" fill="#e9d5ff" font-size="6.5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">LED 1</text>
+                <text x="28" y="42" fill="#cbd5e1" font-size="5.5" font-family="'Fira Code', monospace" text-anchor="middle">Forward</text>
 
-                <!-- 2N2222 Transistor (TO-92) -->
-                <path d="M 58 10 A 10 10 0 0 1 78 10 Z" fill="#090d16" stroke="#94a3b8" stroke-width="1.2" />
-                <text x="68" y="36" fill="#cbd5e1" font-size="6" font-family="'Fira Code', monospace" text-anchor="middle">2N2222</text>
-                <text x="18" y="53" fill="#fda4af" font-size="6" font-family="monospace">100Ω</text>
-                <text x="48" y="53" fill="#fdba74" font-size="6" font-family="monospace">1kΩ</text>
-                <text x="75" y="53" fill="#94a3b8" font-size="6" font-family="monospace">GND</text>
+                <!-- Series Interconnect Link -->
+                <path d="M 36 18 L 65 18" stroke="#38bdf8" stroke-width="2" stroke-dasharray="2,2" />
+                <circle cx="50.5" cy="18" r="2.5" fill="#38bdf8" />
+                <text x="50.5" y="27" fill="#38bdf8" font-size="5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">SERIES</text>
+
+                <!-- LED 2: Angled Wide Beam -->
+                <circle cx="73" cy="18" r="8" fill="#581c87" stroke="#c084fc" stroke-width="1.5" />
+                <circle cx="73" cy="18" r="4" fill="#a855f7" />
+                <text x="73" y="34" fill="#e9d5ff" font-size="6.5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">LED 2</text>
+                <text x="73" y="42" fill="#cbd5e1" font-size="5.5" font-family="'Fira Code', monospace" text-anchor="middle">Wide Angle</text>
+
+                <!-- 3 Terminal Labels -->
+                <text x="20" y="53" fill="#fdba74" font-size="6" font-family="monospace">GP16 (+)</text>
+                <text x="50.5" y="53" fill="#34d399" font-size="5.5" font-family="monospace" text-anchor="middle">2.7V Drop</text>
+                <text x="82" y="53" fill="#94a3b8" font-size="6" font-family="monospace">GND (-)</text>
               </g>
             </g>
 
@@ -971,17 +981,14 @@
               <!-- Switched 4.5V (Red) ➜ Switch OUT (25, 648) to Pico VSYS (57, 765) -->
               <path class="wire-line net-vsys" d="M 25 648 L 25 765 L 57 765" fill="none" stroke="var(--wire-red)" stroke-width="3.2" />
 
-              <!-- Switched 4.5V Emitter Branch (Red) ➜ To 100Ω Resistor (325, 120) -->
-              <path class="wire-line net-vsys" d="M 25 648 L 25 140 L 325 140 L 325 120" fill="none" stroke="var(--wire-red)" stroke-width="2.5" stroke-dasharray="6,3" />
-
               <!-- Battery (-) Ground (Slate/Black) ➜ Battery (355, 755) to Pico Pin 38 GND (57, 735) -->
               <path class="wire-line net-gnd" d="M 355 755 L 355 805 L 45 805 L 45 735 L 57 735" fill="none" stroke="var(--wire-black)" stroke-width="2.8" />
 
-              <!-- Ground Branch (Slate/Black) ➜ To 2N2222 Emitter (380, 120) -->
-              <path class="wire-line net-gnd" d="M 45 735 L 45 146 L 380 146 L 380 120" fill="none" stroke="var(--wire-black)" stroke-width="2" />
+              <!-- Ground Return (Slate/Black) ➜ To Dual IR LED 2 Cathode (-) (373, 120) -->
+              <path class="wire-line net-gnd" d="M 45 735 L 45 146 L 373 146 L 373 120" fill="none" stroke="var(--wire-black)" stroke-width="2.2" />
 
-              <!-- Pico GP16 IR TX (Orange) ➜ Pin 21 GP16 (57, 525) to 2N2222 Base via 1kΩ (355, 120) -->
-              <path class="wire-line net-tx" d="M 57 525 L 35 525 L 35 152 L 355 152 L 355 120" fill="none" stroke="var(--wire-orange)" stroke-width="3" />
+              <!-- Pico GP16 IR TX Direct Drive (Orange) ➜ Pin 21 GP16 (57, 525) to Dual IR LED 1 Anode (+) (328, 120) -->
+              <path class="wire-line net-tx" d="M 57 525 L 35 525 L 35 152 L 328 152 L 328 120" fill="none" stroke="var(--wire-orange)" stroke-width="3" />
 
               <!-- VS1838B OUT (Yellow) ➜ Sensor OUT (82, 120) to Pico Pin 20 GP15 (192, 525) -->
               <path class="wire-line net-rx" d="M 82 120 L 82 135 L 204 135 L 204 525 L 192 525" fill="none" stroke="var(--wire-yellow)" stroke-width="3" />
@@ -993,13 +1000,13 @@
               <path class="wire-line net-vsys" d="M 57 695 L 18 695 L 18 130 L 108 130 L 108 120" fill="none" stroke="var(--wire-3v3)" stroke-width="2.4" />
 
               <!-- SOLDER JOINT PADS (Precise Circular Gold Connection Points) -->
-              <!-- Top Sensor Module Joints -->
-              <circle cx="82" cy="120" r="3.2" class="solder-joint" title="VS1838B OUT (Pin 1)" />
-              <circle cx="95" cy="120" r="3.2" class="solder-joint" title="VS1838B GND (Pin 2)" />
-              <circle cx="108" cy="120" r="3.2" class="solder-joint" title="VS1838B VCC 3.3V (Pin 3)" />
-              <circle cx="325" cy="120" r="3.2" class="solder-joint" title="100Ω Resistor / 4.5V Anode Rail" />
-              <circle cx="355" cy="120" r="3.2" class="solder-joint" title="1kΩ Resistor / 2N2222 Base Driver" />
-              <circle cx="380" cy="120" r="3.2" class="solder-joint" title="2N2222 Emitter Ground" />
+              <!-- Top Optical Module Joints -->
+              <circle cx="82" cy="120" r="3.2" class="solder-joint" title="VS1838B OUT (Pin 1) ➜ Pico GP15 (Pin 20)" />
+              <circle cx="95" cy="120" r="3.2" class="solder-joint" title="VS1838B GND (Pin 2) ➜ Pico Pin 18 GND" />
+              <circle cx="108" cy="120" r="3.2" class="solder-joint" title="VS1838B VCC 3.3V (Pin 3) ➜ Pico Pin 36 3V3" />
+              <circle cx="328" cy="120" r="3.2" class="solder-joint" title="Dual IR LED 1 Anode (+) ➜ Pico GP16 (Pin 21 PWM)" />
+              <circle cx="350.5" cy="80" r="2.8" class="solder-joint" title="Direct Series Jumper: LED 1 Cathode (-) ➜ LED 2 Anode (+)" />
+              <circle cx="373" cy="120" r="3.2" class="solder-joint" title="Dual IR LED 2 Cathode (-) ➜ System GND" />
 
               <!-- Keypad Ribbon Header Joints -->
               <circle cx="88" cy="452" r="2.8" class="solder-joint" title="Keypad Row 0 (GP6)" />
@@ -1107,12 +1114,11 @@
             <div class="pin-row">&bull; Pin 3 (VCC) ➜ <span class="pin-highlight">Pico Pin 36 (3V3 Regulated)</span></div>
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.5rem;">
-            <strong style="color:#c084fc; font-size:0.78rem;">940nm IR Emitter + 2N2222 Driver</strong>
-            <div class="pin-row">&bull; GP16 (Pin 21) ➜ <span class="pin-highlight">1kΩ Base Resistor</span> ➜ 2N2222 Base (B)</div>
-            <div class="pin-row">&bull; Switched 4.5V Rail ➜ <span class="pin-highlight">100Ω Resistor</span> ➜ IR LED Anode (+)</div>
-            <div class="pin-row">&bull; 2N2222 Collector (C) ➜ <span class="pin-highlight">IR LED Cathode (-)</span></div>
-            <div class="pin-row">&bull; 2N2222 Emitter (E) ➜ <span class="pin-highlight">System GND</span></div>
-            <div style="font-size:0.68rem; color:#38bdf8; margin-top:0.25rem;">38kHz PWM slice modulation (~35mA peak current for 5–8m range)</div>
+            <strong style="color:#c084fc; font-size:0.78rem;">Dual 940nm IR Emitter LEDs (Series Direct Drive)</strong>
+            <div class="pin-row">&bull; GP16 (Pin 21) ➜ <span class="pin-highlight">LED 1 Anode (+)</span> (Long leg)</div>
+            <div class="pin-row">&bull; LED 1 Cathode (-) ➜ <span class="pin-highlight">LED 2 Anode (+)</span> (Series Link)</div>
+            <div class="pin-row">&bull; LED 2 Cathode (-) ➜ <span class="pin-highlight">System GND (Pin 23)</span> (Short leg)</div>
+            <div style="font-size:0.68rem; color:#34d399; margin-top:0.25rem;">⚡ 2.70V forward drop matches 3.3V GPIO naturally. Zero resistors &amp; zero transistors needed!</div>
           </div>
         </div>
 
@@ -1347,21 +1353,39 @@
     const COMPONENT_INFO = {
       "Raspberry Pi Pico": {
         badge: "21mm × 51mm PHYSICAL SIZE",
-        desc: "Dual-core RP2040 MCU running MicroPython. Housed in the lower-left grip of the remote. Connects to 3x AAA battery power on Pin 39 (VSYS).",
+        desc: "Dual-core RP2040 MCU running MicroPython. Housed in the lower-left grip with bottom-facing USB flasher port. Connects directly to 3x AAA battery power on Pin 39 (VSYS).",
         pins: [
-          ["Pin 39 (VSYS)", "Battery Switch Output", "Main battery supply (1.8V - 5.5V)"],
-          ["Pin 38 (GND)", "Battery Ground (-)", "Common system ground"],
+          ["Pin 39 (VSYS)", "3x AAA Battery Pack (+)", "Main battery supply (1.8V - 5.5V)"],
+          ["Pin 38 (GND)", "3x AAA Battery Pack (-)", "Common system ground"],
           ["Pin 20 (GP15)", "VS1838B OUT", "Active-LOW raw IR demodulated signal"],
-          ["Pin 21 (GP16)", "1kΩ Resistor", "38kHz Hardware PWM modulation"],
+          ["Pin 21 (GP16)", "Dual IR LEDs (Anode +)", "Direct 38kHz Hardware PWM drive"],
           ["GP6 - GP9", "Keypad Rows R0-R3", "Sequential LOW scanning outputs"],
           ["GP10 - GP13", "Keypad Cols C0-C3", "Input pull-up sensing pins"]
+        ]
+      },
+      "VS1838B IR Receiver (38kHz)": {
+        badge: "3-PIN ACTIVE DEMODULATOR",
+        desc: "Integrated photodiode, AGC, and 38kHz bandpass filter. Demodulates raw infrared pulse trains directly to Active-LOW signal on GP15 without any external components.",
+        pins: [
+          ["Pin 1 (OUT)", "Pico GP15 (Pin 20)", "Demodulated Active-LOW input"],
+          ["Pin 2 (GND)", "Pico Pin 18 (GND)", "System Ground return"],
+          ["Pin 3 (VCC)", "Pico Pin 36 (3V3)", "Clean 3.3V power from Pico SMPS"]
+        ]
+      },
+      "Dual 940nm IR LEDs (Series Direct Drive)": {
+        badge: "DIRECT GPIO DRIVE (NO RESISTOR / NO TRANSISTOR)",
+        desc: "Two 940nm high-power IR LEDs wired in series directly between GP16 and GND. With dual ~1.35V forward drops (2.70V total), the 3.3V GPIO naturally self-limits the drive current to a safe ~12-15mA at 33% carrier PWM duty cycle, while providing wide optical beam coverage.",
+        pins: [
+          ["LED 1 Anode (+)", "Pico GP16 (Pin 21)", "38kHz Hardware PWM modulation"],
+          ["LED 1 Cathode (-)", "LED 2 Anode (+)", "Direct series jumper link"],
+          ["LED 2 Cathode (-)", "Pico Pin 23 (GND)", "Return loop to system ground"]
         ]
       },
       "3x AAA Battery Pack (4.5V)": {
         badge: "38mm × 52mm PHYSICAL SIZE",
         desc: "Holds 3 standard AAA alkaline (or rechargeable NiMH) cells in series producing 4.5V DC. Positioned in the lower-right grip for comfortable palm balance.",
         pins: [
-          ["Red Wire (+)", "Slide Switch IN", "4.5V Battery supply lead"],
+          ["Red Wire (+)", "Slide Switch IN / VSYS", "4.5V Battery supply lead"],
           ["Black Wire (-)", "Pico Pin 38 (GND)", "System Ground return"]
         ]
       },
@@ -1370,7 +1394,7 @@
         desc: "Mounted directly on the remote's left side bezel under the thumb. Cuts off all power for zero idle battery drain.",
         pins: [
           ["Terminal 1 (IN)", "Battery (+) Red", "Input lead from 4.5V battery pack"],
-          ["Terminal 2 (OUT)", "Pico VSYS & 100Ω", "Switched 4.5V supply rail"]
+          ["Terminal 2 (OUT)", "Pico VSYS (Pin 39)", "Switched 4.5V power rail"]
         ]
       }
     };

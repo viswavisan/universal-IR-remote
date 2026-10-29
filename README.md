@@ -51,31 +51,44 @@ It can **learn** any IR remote signal from your existing remotes (TV, AC, Soundb
                  Raspberry Pi Pico (RP2040)
                +---------------------------+
                |                           |
-    3.3V (OUT) | [Pin 36]                  |
-               |                           |
-       GPIO 15 | [Pin 20] <-------+        |
-               |                  |        |
-       GPIO 16 | [Pin 21] ----+   |        |
-               |              |   |        |
-           GND | [Pin 18]     |   |        |
-               +--------------|---|--------+
-                              |   |
-      +-----------------------+   |
-      |                           |
-      v                           v
-  [IR Transmitter Circuit]     [IR Receiver: VS1838B]
-                              +--------------------+
-   GPIO 16                    | Pin 1 (OUT) ------> GPIO 15
-      |                       | Pin 2 (GND) ------> Pico GND
-    [1kΩ]                     | Pin 3 (VCC) ------> Pico 3.3V
-      |                       +--------------------+
-      +---> Base (2N2222)
-            Collector ---> [100Ω] ---> [IR LED Anode (+)]
-                                       [IR LED Cathode (-)] ---> 3.3V or VBUS (5V)*
-            Emitter   ---> GND
-
-  * Note: Powering the IR LED through the 100Ω resistor from VBUS (Pin 40, 5V) gives
-    longer transmission range (up to 5-10 meters).
+    3.3V (OUT) | [Pin 36] ----------------------------+
+               |                           |           |
+       GPIO 15 | [Pin 20] <-------+        |           |
+               |                  |        |           |
+       GPIO 16 | [Pin 21] ----+   |        |           |
+               |              |   |        |           |
+           GND | [Pin 18] ----|---|--------|----+      |
+               |              |   |        |    |      |
+           GND | [Pin 23] ----|---|----+   |    |      |
+               +--------------|---|----|---|----+      |
+                              |   |    |   |    |      |
+                              |   |    |   |    v      v
+                              |   |    |   |  [IR Receiver: VS1838B]
+                              |   |    |   |  +---------------------+
+                              |   |    |   |  | Pin 1 (OUT) ➜ GP15  |
+                              |   |    |   |  | Pin 2 (GND) ➜ GND   |
+                              |   |    |   |  | Pin 3 (VCC) ➜ 3.3V  |
+                              |   |    |   |  +---------------------+
+                              v   v    |   |
+    [Dual Series 940nm IR Emitters]    |   |
+    +----------------------------------+   |
+    |                                      |
+    |  GPIO 16 (Pin 21)                    |
+    |     │                                |
+    |     ▼                                |
+    |  [LED 1: 940nm IR] (Anode +)         |
+    |  [LED 1: 940nm IR] (Cathode -)       |
+    |     │                                |
+    |     ▼ (Direct Series Jumper)         |
+    |  [LED 2: 940nm IR] (Anode +)         |
+    |  [LED 2: 940nm IR] (Cathode -)       |
+    |     │                                |
+    |     ▼                                |
+    |  Pico GND (Pin 23) <-----------------+
+    +--------------------------------------
+    * Dual 1.35V drops = 2.70V total forward drop across 3.3V GPIO.
+      Naturally limits current to ~12-15mA at 33% PWM duty cycle.
+      ZERO external resistors, diodes, or transistors needed!
 ```
 
 #### Receiver (VS1838B / TSOP38238)
@@ -83,11 +96,14 @@ It can **learn** any IR remote signal from your existing remotes (TV, AC, Soundb
 - **GND** $\rightarrow$ **GND** (Pin 18 or 38)
 - **VCC** $\rightarrow$ **3.3V (OUT)** (Pin 36)
 
-#### Transmitter (Driver with NPN Transistor)
-- **GPIO 16** $\rightarrow$ **1 kΩ Resistor** $\rightarrow$ **Transistor Base**
-- **Transistor Emitter** $\rightarrow$ **Pico GND**
-- **Transistor Collector** $\rightarrow$ **IR LED Cathode (short leg / flat edge)**
-- **IR LED Anode (long leg)** $\rightarrow$ **100 Ω Resistor** $\rightarrow$ **Battery (+) 4.5V / VSYS (Pin 39)**
+#### Transmitter: Dual 940nm IR LEDs in Series (Direct GPIO Drive - No Resistors/Transistors)
+- **GPIO 16 (Pin 21)** $\rightarrow$ **LED 1 Anode (+)** *(longer leg)*
+- **LED 1 Cathode (-)** *(shorter leg)* $\rightarrow$ **LED 2 Anode (+)** *(longer leg)* *(direct series jumper)*
+- **LED 2 Cathode (-)** *(shorter leg)* $\rightarrow$ **Pico GND (Pin 23)**
+- **Why it works without resistors:** Each 940nm LED drops ~1.35V. Two in series drop 2.70V. With Pico GPIO outputting 3.3V, only ~0.6V remains, which the internal RP2040 output pad resistance safely limits to ~12–15mA at 33% PWM duty cycle.
+- **Beam Angle:** Point LED 1 straight ahead and bend LED 2 outward by ~25° for a wide-angle TV remote beam!
+
+*(Optional High-Power Alternative: If an NPN transistor like 2N2222 and 100Ω/1kΩ resistors are available, they can be added to drive a single LED at 35–50mA from the 4.5V rail for 8–10m range).*
 
 #### Power Supply: 3x AAA Battery Pack (4.5V Alkaline / 3.6V NiMH)
 To make the remote completely wireless and handheld:
