@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raspberry Pi Pico Universal IR Remote - Handheld TV Remote Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #060912;
+      --bg-card: rgba(15, 23, 42, 0.94);
+      --bg-glass: rgba(17, 24, 39, 0.88);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-purple: #c084fc;
+      --accent-emerald: #34d399;
+      --wire-red: #f43f5e;
+      --wire-black: #94a3b8;
+      --wire-yellow: #facc15;
+      --wire-orange: #fb923c;
+      --wire-row: #c084fc;
+      --wire-col: #22d3ee;
+      --wire-3v3: #ec4899;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(192, 132, 252, 0.08) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--bg-glass);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #0284c7, #7c3aed);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+    }
+
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.48rem 0.95rem;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-ir {
+      background: linear-gradient(135deg, #9333ea, #c026d3);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(192, 38, 211, 0.35);
+    }
+
+    .device-badge-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 20px;
+      background: rgba(168, 85, 247, 0.18);
+      border: 1px solid #a855f7;
+      color: #f3e8ff;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+      padding: 1.25rem 2rem;
+      flex: 1;
+      max-width: 1920px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .circuit-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.4);
+    }
+
+    .circuit-header {
+      padding: 0.85rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.6);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .scale-tag {
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .net-filters {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .net-pill {
+      font-size: 0.72rem;
+      font-family: 'Fira Code', monospace;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+    }
+
+    .net-pill:hover, .net-pill.active {
+      color: #fff;
+      border-color: currentColor;
+    }
+
+    .net-pill[data-net="all"].active   { background: rgba(255, 255, 255, 0.15); color: #fff; }
+    .net-pill[data-net="vsys"].active  { background: rgba(244, 63, 94, 0.25); color: #fda4af; border-color: #f43f5e; }
+    .net-pill[data-net="rows"].active  { background: rgba(192, 132, 252, 0.25); color: #e9d5ff; border-color: #c084fc; }
+    .net-pill[data-net="cols"].active  { background: rgba(34, 211, 238, 0.25); color: #a5f3fc; border-color: #22d3ee; }
+    .net-pill[data-net="tx"].active    { background: rgba(249, 115, 22, 0.25); color: #fdba74; border-color: #f97316; }
+    .net-pill[data-net="rx"].active    { background: rgba(234, 179, 8, 0.25); color: #fef08a; border-color: #eab308; }
+    .net-pill[data-net="gnd"].active   { background: rgba(148, 163, 184, 0.25); color: #cbd5e1; border-color: #94a3b8; }
+
+    .zoom-toolbar {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.22rem 0.5rem;
+    }
+
+    .zoom-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.76rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    .solder-joint {
+      fill: #facc15;
+      stroke: #ca8a04;
+      stroke-width: 1.2;
+      filter: drop-shadow(0 0 3px rgba(250, 204, 21, 0.9));
+      transition: all 0.2s;
+    }
+
+    .solder-joint:hover {
+      fill: #ffffff;
+      stroke: #38bdf8;
+      r: 4.8;
+    }
+
+    .wire-line {
+      transition: stroke-width 0.2s, stroke-opacity 0.2s;
+    }
+
+    .wire-line:hover {
+      stroke-width: 4.5 !important;
+      stroke-opacity: 1 !important;
+      filter: drop-shadow(0 0 5px currentColor);
+    }
+
+    .canvas-container {
+      flex: 1;
+      min-height: 600px;
+      height: calc(100vh - 165px);
+      max-height: 880px;
+      position: relative;
+      background: radial-gradient(circle at 30% 40%, #090f1d 0%, #030611 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 0.5rem;
+      cursor: grab;
+    }
+
+    .canvas-container:active {
+      cursor: grabbing;
+    }
+
+    svg#circuitSvg {
+      width: 100%;
+      height: 100%;
+      max-width: 1560px;
+      max-height: 100%;
+      display: block;
+      user-select: none;
+    }
+
+    .simulation-bar {
+      padding: 0.65rem 1.25rem;
+      background: rgba(15, 23, 42, 0.9);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 10px var(--accent-emerald);
+      transition: all 0.3s ease;
+    }
+
+    .status-dot.active-tx { background: #f43f5e; box-shadow: 0 0 12px #f43f5e; }
+    .status-dot.active-rx { background: #facc15; box-shadow: 0 0 12px #facc15; }
+    .status-dot.power-off { background: #475569; box-shadow: none; }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.45rem;
+    }
+
+    .waveform-card {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.4rem;
+      height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Key Interactions */
+    .tactile-key {
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.08s ease;
+    }
+
+    .tactile-key:hover rect.key-cap {
+      filter: brightness(1.25);
+    }
+
+    .tactile-key:active {
+      transform: translateY(2px) scale(0.96);
+    }
+
+    .interactive-part {
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+
+    .interactive-part:hover {
+      filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.75));
+    }
+
+    /* Animations */
+    @keyframes pulseBeam {
+      0% { opacity: 0; transform: scale(0.6) translateY(0); }
+      50% { opacity: 0.95; }
+      100% { opacity: 0; transform: scale(1.6) translateY(-40px); }
+    }
+
+    .ir-beam {
+      display: none;
+      transform-origin: 230px 20px;
+    }
+
+    .ir-beam.firing {
+      display: block;
+      animation: pulseBeam 0.24s ease-out infinite;
+    }
+
+    @keyframes rxPulse {
+      0% { opacity: 0; transform: scale(0.7); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: scale(1.3); }
+    }
+
+    .rx-detect {
+      display: none;
+      transform-origin: 230px 20px;
+    }
+
+    .rx-detect.receiving {
+      display: block;
+      animation: rxPulse 0.35s ease-out infinite;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-content {
+      background: #0b1120;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      max-width: 880px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .modal-body {
+      padding: 1.25rem 1.5rem;
+      overflow-y: auto;
+    }
+
+    .bom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .bom-table th {
+      background: rgba(30, 41, 59, 0.7);
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      color: #94a3b8;
+      font-family: 'Fira Code', monospace;
+      border-bottom: 2px solid var(--border-color);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    .bom-table td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: top;
+    }
+
+    .bom-table tr:hover td { background: rgba(56, 189, 248, 0.04); }
+
+    @media (max-width: 1250px) {
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: 1fr 1fr; display: grid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🎮</div>
+      <div class="brand-title">
+        <h1>Handheld TV Remote - Universal IR Controller</h1>
+        <p>Ergonomic TV Remote Layout &bull; <span style="color:#34d399; font-weight:600;">1:1 REAL SIZE RATIOS (1mm = 6.0px)</span></p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="device-badge-active" id="currentDevBadge">
+        <span>📺</span> Mode: <strong id="currentDevName" style="color: #38bdf8; margin-left:4px;">TV</strong>
+      </div>
+      <button class="btn" id="btnOpenBom" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
+        <span>📋</span> BOM &amp; Pricing
+      </button>
+      <button class="btn btn-ir" id="btnSimulateRx" title="Aim original remote to capture raw pulses">
+        <span>📶</span> Learn IR (RX)
+      </button>
+      <button class="btn btn-primary" id="btnSimulateTx" title="Simulate 38kHz IR transmission">
+        <span>⚡</span> Test Transmit (TX)
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="workspace">
+    <!-- Visualizer Canvas Card -->
+    <div class="circuit-card">
+      <div class="circuit-header">
+        <div style="display:flex; align-items:center; gap: 0.75rem; flex-wrap: wrap;">
+          <div class="scale-tag">
+            <span>📏</span> Scale: 1 mm = 6.0 px (1:1 Physical Ratios)
+          </div>
+          <div class="zoom-toolbar">
+            <button class="zoom-btn" id="btnZoomOut" title="Zoom Out (or mouse scroll down)">🔍−</button>
+            <span id="zoomLevelText" style="font-family:'Fira Code', monospace; font-size: 0.75rem; color:#38bdf8; min-width: 44px; text-align: center;">115%</span>
+            <button class="zoom-btn" id="btnZoomIn" title="Zoom In (or mouse scroll up)">🔍+</button>
+            <button class="zoom-btn" id="btnZoomFit" title="Fit to Screen">⟲ Fit</button>
+          </div>
+          <span style="font-size: 0.8rem; color: #94a3b8;">
+            TV Remote on Left (Optics ➜ Keypad ➜ Brain &amp; Battery) &bull; Circuit Architecture on Right
+          </span>
+        </div>
+        <div class="net-filters">
+          <button class="net-pill active" data-net="all">All Wires</button>
+          <button class="net-pill" data-net="vsys" style="color:#fda4af;">Battery 4.5V (VSYS)</button>
+          <button class="net-pill" data-net="rows" style="color:#e9d5ff;">Keypad Rows (GP6–9)</button>
+          <button class="net-pill" data-net="cols" style="color:#a5f3fc;">Keypad Cols (GP10–13)</button>
+          <button class="net-pill" data-net="tx" style="color:#fdba74;">IR TX (GP16)</button>
+          <button class="net-pill" data-net="rx" style="color:#fef08a;">IR RX (GP15)</button>
+          <button class="net-pill" data-net="gnd" style="color:#cbd5e1;">GND Rail</button>
+        </div>
+      </div>
+
+      <div class="canvas-container" id="canvasContainer">
+        <!-- SVG Interactive Workbench: PERFECT BALANCED LAYOUT & PIN-ACCURATE CONNECTIONS -->
+        <svg id="circuitSvg" viewBox="20 10 1515 860" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="chassisShadow" x="-15%" y="-10%" width="130%" height="130%">
+              <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000000" flood-opacity="0.85"/>
+            </filter>
+            <filter id="buttonShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.75"/>
+            </filter>
+            <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+
+            <!-- Gradients -->
+            <linearGradient id="chassisGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#090d16" />
+              <stop offset="10%" stop-color="#1e293b" />
+              <stop offset="50%" stop-color="#0f172a" />
+              <stop offset="90%" stop-color="#1e293b" />
+              <stop offset="100%" stop-color="#090d16" />
+            </linearGradient>
+
+            <linearGradient id="irLensGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#581c87" />
+              <stop offset="50%" stop-color="#3b0764" />
+              <stop offset="100%" stop-color="#1e1b4b" />
+            </linearGradient>
+
+            <linearGradient id="picoGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#16a34a" />
+              <stop offset="100%" stop-color="#0f766e" />
+            </linearGradient>
+
+            <linearGradient id="batteryDuracell" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#d97706" />
+              <stop offset="22%" stop-color="#f59e0b" />
+              <stop offset="38%" stop-color="#b45309" />
+              <stop offset="39%" stop-color="#1e293b" />
+              <stop offset="92%" stop-color="#090d16" />
+              <stop offset="100%" stop-color="#1e293b" />
+            </linearGradient>
+          </defs>
+
+          <!-- ============================================================= -->
+          <!-- 1. LEFT SIDE: AUTHENTIC TV REMOTE (100% UNCLIPPED & ZOOMED)   -->
+          <!-- Position: Centered at X=30, y=20 (width 460px, height 840px) -->
+          <!-- ============================================================= -->
+          <g id="tvRemoteBody" transform="translate(30, 20)">
+            
+            <!-- REMOTE SHADOW & OUTER CASING (460px Wide x 840px Tall) -->
+            <path d="
+              M 130 45 
+              C 130 18, 190 8, 230 8 
+              C 270 8, 330 18, 330 45 
+              L 430 170 
+              C 445 220, 445 580, 435 640 
+              L 425 800 
+              C 420 835, 370 845, 230 845 
+              C 90 845, 40 835, 35 800 
+              L 25 640 
+              C 15 580, 15 220, 30 170 
+              Z" 
+              fill="url(#chassisGrad)" 
+              stroke="#475569" 
+              stroke-width="3" 
+              filter="url(#chassisShadow)" 
+            />
+
+            <!-- Top Bezel Infrared Lens Window -->
+            <path d="M 150 38 C 160 18, 190 14, 230 14 C 270 14, 300 18, 310 38 L 300 52 L 160 52 Z" 
+                  fill="url(#irLensGrad)" stroke="#a855f7" stroke-width="2.5" />
+            <text x="230" y="44" fill="#e9d5ff" font-family="'Fira Code', monospace" font-size="8" font-weight="bold" text-anchor="middle">940nm OPTICAL WINDOW</text>
+
+            <!-- Animated IR Beam -->
+            <g id="irBeamAnim" class="ir-beam">
+              <circle cx="230" cy="20" r="24" fill="#c084fc" opacity="0.35" filter="url(#neonGlow)" />
+              <circle cx="230" cy="20" r="48" fill="none" stroke="#e879f9" stroke-width="3" opacity="0.8" />
+              <circle cx="230" cy="20" r="75" fill="none" stroke="#c084fc" stroke-width="2" opacity="0.5" />
+            </g>
+
+            <!-- Learning RX Waves -->
+            <g id="rxWaves" class="rx-detect">
+              <path d="M 180 20 Q 230 -12 280 20" fill="none" stroke="#facc15" stroke-width="3.5" stroke-linecap="round" />
+              <path d="M 165 10 Q 230 -28 295 10" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" opacity="0.7" />
+            </g>
+
+            <!-- Top Stage: OPTICAL TRANSCEIVER CIRCUIT MODULE -->
+            <g id="topTransceiverStage" transform="translate(45, 62)">
+              <rect x="0" y="0" width="370" height="74" rx="8" fill="#090d16" stroke="#334155" stroke-width="1.5" />
+
+              <!-- A. VS1838B IR Demodulating Receiver (38kHz) -->
+              <g class="interactive-part" transform="translate(15, 8)" data-name="VS1838B IR Receiver (38kHz)">
+                <rect x="0" y="0" width="85" height="58" rx="6" fill="#131e31" stroke="#ca8a04" stroke-width="1.2" />
+                <rect x="18" y="6" width="48" height="26" rx="4" fill="#334155" stroke="#64748b" />
+                <!-- Photodiode Lens Dome -->
+                <circle cx="42" cy="19" r="9" fill="#0f172a" stroke="#ca8a04" stroke-width="1.5" />
+                <circle cx="42" cy="19" r="4" fill="#facc15" opacity="0.7" />
+                <text x="42" y="42" fill="#facc15" font-family="'Fira Code', monospace" font-size="7" font-weight="bold" text-anchor="middle">VS1838B</text>
+                
+                <!-- 3 Terminal Labels -->
+                <text x="18" y="53" fill="#94a3b8" font-size="6" font-family="monospace">OUT</text>
+                <text x="42" y="53" fill="#94a3b8" font-size="6" font-family="monospace" text-anchor="middle">GND</text>
+                <text x="68" y="53" fill="#94a3b8" font-size="6" font-family="monospace" text-anchor="end">3V3</text>
+              </g>
+
+              <!-- B. Central Status & Appliance Indicator -->
+              <g transform="translate(112, 10)">
+                <rect x="0" y="0" width="144" height="54" rx="6" fill="#0b1120" stroke="#1e293b" />
+                <text x="72" y="16" fill="#64748b" font-family="'Outfit', sans-serif" font-size="8.5" font-weight="800" letter-spacing="1" text-anchor="middle">PICO REMOTE</text>
+                
+                <rect x="12" y="22" width="56" height="15" rx="3" fill="#1e293b" />
+                <text x="40" y="33" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="7" font-weight="bold" text-anchor="middle">38.0 kHz</text>
+
+                <rect x="74" y="22" width="58" height="24" rx="4" fill="#1e1b4b" stroke="#7c3aed" stroke-width="1" />
+                <text x="103" y="32" fill="#a855f7" font-size="6" font-family="'Fira Code', monospace" text-anchor="middle">TARGET</text>
+                <text id="remoteDevDisplay" x="103" y="43" fill="#ffffff" font-size="9.5" font-weight="bold" font-family="'Fira Code', monospace" text-anchor="middle">TV</text>
+
+                <circle id="keypadTxLed" cx="72" cy="45" r="4" fill="#334155" stroke="#475569" stroke-width="1" />
+              </g>
+
+              <!-- C. 940nm IR Emitter + 2N2222 Transistor Driver Stage -->
+              <g class="interactive-part" transform="translate(268, 8)" data-name="940nm IR LED &amp; 2N2222 Driver">
+                <rect x="0" y="0" width="90" height="58" rx="6" fill="#131e31" stroke="#c084fc" stroke-width="1.2" />
+
+                <!-- 940nm IR LED bulb -->
+                <circle cx="28" cy="18" r="8.5" fill="#581c87" stroke="#c084fc" stroke-width="1.5" />
+                <circle cx="28" cy="18" r="4.5" fill="#a855f7" />
+                <text x="28" y="36" fill="#e9d5ff" font-size="6.5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">940nm LED</text>
+
+                <!-- 2N2222 Transistor (TO-92) -->
+                <path d="M 58 10 A 10 10 0 0 1 78 10 Z" fill="#090d16" stroke="#94a3b8" stroke-width="1.2" />
+                <text x="68" y="36" fill="#cbd5e1" font-size="6" font-family="'Fira Code', monospace" text-anchor="middle">2N2222</text>
+                <text x="18" y="53" fill="#fda4af" font-size="6" font-family="monospace">100Ω</text>
+                <text x="48" y="53" fill="#fdba74" font-size="6" font-family="monospace">1kΩ</text>
+                <text x="75" y="53" fill="#94a3b8" font-size="6" font-family="monospace">GND</text>
+              </g>
+            </g>
+
+            <!-- 4x4 KEYPAD BUTTON MATRIX (16 TACTILE BUTTONS) -->
+            <!-- Position: x=45, y=145. Each button 78px x 60px -->
+            <g id="tactileKeypadMatrix" transform="translate(45, 145)">
+              <rect x="-6" y="-6" width="382" height="315" rx="12" fill="#131b2e" stroke="#1e293b" stroke-width="1.5" />
+
+              <!-- ROW 0: [1] [2] [3] [A: MODE] -->
+              <g class="tactile-key matrix-key" data-key="1" transform="translate(0, 0)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">1</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="2" transform="translate(96, 0)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">2</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="3" transform="translate(192, 0)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">3</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="A" transform="translate(288, 0)">
+                <rect class="key-cap" x="0" y="0" width="82" height="60" rx="9" fill="#7e22ce" stroke="#c084fc" stroke-width="1.8" filter="url(#buttonShadow)" />
+                <text x="41" y="30" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">A</text>
+                <text x="41" y="46" fill="#e9d5ff" font-size="8.5" font-weight="700" text-anchor="middle">MODE</text>
+              </g>
+
+              <!-- ROW 1: [4] [5] [6] [B: VOL +] -->
+              <g class="tactile-key matrix-key" data-key="4" transform="translate(0, 74)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">4</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="5" transform="translate(96, 74)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">5</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="6" transform="translate(192, 74)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">6</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="B" transform="translate(288, 74)">
+                <rect class="key-cap" x="0" y="0" width="82" height="60" rx="9" fill="#0284c7" stroke="#38bdf8" stroke-width="1.8" filter="url(#buttonShadow)" />
+                <text x="41" y="30" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">B</text>
+                <text x="41" y="46" fill="#bae6fd" font-size="8.5" font-weight="700" text-anchor="middle">VOL ▲</text>
+              </g>
+
+              <!-- ROW 2: [7] [8] [9] [C: VOL -] -->
+              <g class="tactile-key matrix-key" data-key="7" transform="translate(0, 148)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">7</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="8" transform="translate(96, 148)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">8</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="9" transform="translate(192, 148)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">9</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="C" transform="translate(288, 148)">
+                <rect class="key-cap" x="0" y="0" width="82" height="60" rx="9" fill="#0284c7" stroke="#38bdf8" stroke-width="1.8" filter="url(#buttonShadow)" />
+                <text x="41" y="30" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">C</text>
+                <text x="41" y="46" fill="#bae6fd" font-size="8.5" font-weight="700" text-anchor="middle">VOL ▼</text>
+              </g>
+
+              <!-- ROW 3: [* : MUTE] [0] [# : ENTER] [D: POWER] -->
+              <g class="tactile-key matrix-key" data-key="*" transform="translate(0, 222)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#b45309" stroke="#facc15" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="33" fill="#ffffff" font-size="22" font-weight="800" text-anchor="middle">*</text>
+                <text x="39" y="47" fill="#fef08a" font-size="8.5" font-weight="700" text-anchor="middle">MUTE</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="0" transform="translate(96, 222)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">0</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="#" transform="translate(192, 222)">
+                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#047857" stroke="#34d399" stroke-width="1.5" filter="url(#buttonShadow)" />
+                <text x="39" y="33" fill="#ffffff" font-size="18" font-weight="800" text-anchor="middle">#</text>
+                <text x="39" y="47" fill="#a7f3d0" font-size="8.5" font-weight="700" text-anchor="middle">ENTER</text>
+              </g>
+              <g class="tactile-key matrix-key" data-key="D" transform="translate(288, 222)">
+                <rect class="key-cap" x="0" y="0" width="82" height="60" rx="9" fill="#b91c1c" stroke="#f87171" stroke-width="2" filter="url(#buttonShadow)" />
+                <text x="41" y="30" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">D</text>
+                <text x="41" y="47" fill="#fecaca" font-size="8.5" font-weight="800" text-anchor="middle">POWER</text>
+              </g>
+
+              <!-- Keypad 8-Pin Flex Header Breakout at base of keypad -->
+              <rect x="35" y="295" width="135" height="14" rx="3" fill="#090d16" stroke="#334155" />
+              <text x="40" y="305" fill="#c084fc" font-size="6.5" font-family="'Fira Code', monospace">R0 R1 R2 R3</text>
+              <text x="110" y="305" fill="#22d3ee" font-size="6.5" font-family="'Fira Code', monospace">C0 C1 C2 C3</text>
+            </g>
+
+            <!-- LOWER GRIP: PICO MCU (LEFT) & 3x AAA BATTERY BAY (RIGHT) -->
+            <!-- Position: x=45, y=485, height=335 -->
+            <g transform="translate(45, 485)">
+              <rect x="-6" y="-6" width="382" height="335" rx="12" fill="#0b1120" stroke="#1e293b" stroke-width="1.5" />
+
+              <!-- A. RASPBERRY PI PICO (LEFT: 21mm x 51mm real proportions) -->
+              <!-- Position: x=12, y=15, width=135, height=305 -->
+              <g class="interactive-part" transform="translate(12, 15)" data-name="Raspberry Pi Pico">
+                <rect x="0" y="0" width="135" height="305" rx="7" fill="url(#picoGreen)" stroke="#15803d" stroke-width="2" filter="url(#buttonShadow)" />
+                <rect x="6" y="6" width="123" height="293" rx="4" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-dasharray="3,3" />
+
+                <!-- USB Port -->
+                <rect x="42" y="-10" width="50" height="20" rx="3" fill="#cbd5e1" stroke="#475569" />
+                <!-- RP2040 Chip -->
+                <rect x="45" y="120" width="45" height="45" rx="3" fill="#1e293b" stroke="#334155" />
+                <text x="68" y="145" fill="#e2e8f0" font-family="'Fira Code', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">RP2040</text>
+                
+                <!-- BOOTSEL -->
+                <circle cx="68" cy="65" r="9" fill="#cbd5e1" />
+                <text x="68" y="83" fill="#f8fafc" font-size="6.5" font-weight="bold" text-anchor="middle">BOOTSEL</text>
+
+                <!-- Onboard LED -->
+                <circle id="picoOnboardLed" cx="48" cy="35" r="3.5" fill="#22c55e" opacity="0.6" />
+                <text x="48" y="47" fill="#86efac" font-size="6" font-family="monospace" text-anchor="middle">LED</text>
+
+                <!-- Left Pin Breakout Pads -->
+                <rect x="0" y="100" width="18" height="15" fill="#7e22ce" rx="2" /><text x="22" y="111" fill="#f3e8ff" font-size="7" font-weight="bold" font-family="monospace">GP6-9</text>
+                <rect x="0" y="175" width="18" height="15" fill="#0891b2" rx="2" /><text x="22" y="186" fill="#cffafe" font-size="7" font-weight="bold" font-family="monospace">GP10-13</text>
+                <rect id="pinGnd18" x="0" y="245" width="18" height="14" fill="#475569" rx="2" /><text x="22" y="256" fill="#cbd5e1" font-size="7" font-family="monospace">GND(18)</text>
+                <rect id="pinGp15" x="0" y="275" width="18" height="14" fill="#ca8a04" rx="2" /><text x="22" y="286" fill="#fef08a" font-size="7.5" font-weight="bold" font-family="monospace">GP15(RX)</text>
+
+                <!-- Right Pin Breakout Pads -->
+                <rect id="pinVsys" x="117" y="25" width="18" height="14" fill="#e11d48" rx="2" /><text x="112" y="36" fill="#fda4af" font-size="7.5" font-weight="bold" font-family="monospace" text-anchor="end">VSYS(39)</text>
+                <rect id="pinGnd38" x="117" y="45" width="18" height="14" fill="#475569" rx="2" /><text x="112" y="56" fill="#cbd5e1" font-size="7" font-family="monospace" text-anchor="end">GND(38)</text>
+                <rect id="pin3v3" x="117" y="85" width="18" height="14" fill="#db2777" rx="2" /><text x="112" y="96" fill="#f472b6" font-size="7" font-family="monospace" text-anchor="end">3V3(36)</text>
+                <rect id="pinGp16" x="117" y="275" width="18" height="14" fill="#ea580c" rx="2" /><text x="112" y="286" fill="#ffedd5" font-size="7.5" font-weight="bold" font-family="monospace" text-anchor="end">GP16(TX)</text>
+              </g>
+
+              <!-- B. 3x AAA BATTERY PACK (RIGHT: 38mm x 52mm real proportions) -->
+              <!-- Position: x=165, y=15, width=195, height=305 -->
+              <g class="interactive-part" transform="translate(165, 15)" data-name="3x AAA Battery Pack (4.5V)">
+                <rect x="0" y="0" width="195" height="305" rx="10" fill="#131e31" stroke="#475569" stroke-width="1.8" filter="url(#buttonShadow)" />
+                <rect x="8" y="8" width="179" height="289" rx="6" fill="#090d16" stroke="#334155" stroke-width="1" />
+
+                <!-- 3 AAA Cells -->
+                <!-- Cell 1 -->
+                <g transform="translate(14, 25)">
+                  <rect x="0" y="0" width="46" height="235" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
+                  <rect x="16" y="-6" width="14" height="6" rx="2" fill="#f1f5f9" />
+                  <text x="23" y="120" fill="#ffffff" font-weight="bold" font-size="8" text-anchor="middle" transform="rotate(-90 23 120)">AAA 1.5V</text>
+                  <text x="23" y="20" fill="#f87171" font-weight="bold" font-size="11" text-anchor="middle">+</text>
+                  <text x="23" y="224" fill="#cbd5e1" font-weight="bold" font-size="13" text-anchor="middle">-</text>
+                </g>
+                <!-- Cell 2 -->
+                <g transform="translate(68, 25)">
+                  <rect x="0" y="0" width="46" height="235" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
+                  <rect x="16" y="-6" width="14" height="6" rx="2" fill="#f1f5f9" />
+                  <text x="23" y="120" fill="#ffffff" font-weight="bold" font-size="8" text-anchor="middle" transform="rotate(-90 23 120)">AAA 1.5V</text>
+                  <text x="23" y="20" fill="#f87171" font-weight="bold" font-size="11" text-anchor="middle">+</text>
+                  <text x="23" y="224" fill="#cbd5e1" font-weight="bold" font-size="13" text-anchor="middle">-</text>
+                </g>
+                <!-- Cell 3 -->
+                <g transform="translate(122, 25)">
+                  <rect x="0" y="0" width="46" height="235" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
+                  <rect x="16" y="-6" width="14" height="6" rx="2" fill="#f1f5f9" />
+                  <text x="23" y="120" fill="#ffffff" font-weight="bold" font-size="8" text-anchor="middle" transform="rotate(-90 23 120)">AAA 1.5V</text>
+                  <text x="23" y="20" fill="#f87171" font-weight="bold" font-size="11" text-anchor="middle">+</text>
+                  <text x="23" y="224" fill="#cbd5e1" font-weight="bold" font-size="13" text-anchor="middle">-</text>
+                </g>
+
+                <text x="98" y="280" fill="#34d399" font-family="'Fira Code', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">Series Total: 4.5V DC</text>
+              </g>
+
+              <!-- SPST Side Bezel Slide Switch -->
+              <g id="powerSwitchGroup" class="interactive-part" transform="translate(-38, 120)" data-name="SPST Miniature Slide Switch">
+                <rect x="0" y="0" width="32" height="60" rx="5" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5" />
+                <rect x="10" y="8" width="12" height="44" rx="4" fill="#090d16" />
+                <g id="switchHandle" transform="translate(8, 10)">
+                  <rect id="switchKnob" x="0" y="0" width="16" height="20" rx="3" fill="#34d399" stroke="#059669" stroke-width="1" />
+                </g>
+                <text x="16" y="-6" fill="#38bdf8" font-size="7" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">SWITCH</text>
+                <text id="switchLabelText" x="16" y="74" fill="#34d399" font-size="7" font-weight="bold" font-family="monospace" text-anchor="middle">ON</text>
+              </g>
+            </g>
+
+            <!-- ============================================================= -->
+            <!-- 2. HIGH-PRECISION MANHATTAN WIRING WITH REAL SOLDER JOINTS    -->
+            <!-- ============================================================= -->
+            <g id="wiresLayer">
+              <!-- Keypad Row Lines (Purple) ➜ Flex Header to Pico GP6–GP9 -->
+              <!-- R0: (88, 452) ➜ (57, 590) -->
+              <path class="wire-line net-rows" d="M 88 452 L 88 565 L 42 565 L 42 590 L 57 590" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+              <!-- R1: (100, 452) ➜ (57, 607) -->
+              <path class="wire-line net-rows" d="M 100 452 L 100 555 L 39 555 L 39 607 L 57 607" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+              <!-- R2: (112, 452) ➜ (57, 624) -->
+              <path class="wire-line net-rows" d="M 112 452 L 112 545 L 36 545 L 36 624 L 57 624" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+              <!-- R3: (124, 452) ➜ (57, 641) -->
+              <path class="wire-line net-rows" d="M 124 452 L 124 535 L 33 535 L 33 641 L 57 641" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+
+              <!-- Keypad Col Lines (Cyan) ➜ Flex Header to Pico GP10–GP13 -->
+              <!-- C0: (142, 452) ➜ (57, 665) -->
+              <path class="wire-line net-cols" d="M 142 452 L 142 665 L 57 665" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+              <!-- C1: (154, 452) ➜ (57, 682) -->
+              <path class="wire-line net-cols" d="M 154 452 L 154 682 L 57 682" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+              <!-- C2: (166, 452) ➜ (57, 699) -->
+              <path class="wire-line net-cols" d="M 166 452 L 166 699 L 57 699" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+              <!-- C3: (178, 452) ➜ (57, 716) -->
+              <path class="wire-line net-cols" d="M 178 452 L 178 716 L 57 716" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+
+              <!-- Battery (+) (Red) ➜ Battery (245, 520) to Switch IN (25, 622) -->
+              <path class="wire-line net-vsys" d="M 245 520 L 245 470 L 25 470 L 25 622" fill="none" stroke="var(--wire-red)" stroke-width="3" />
+
+              <!-- Switched 4.5V (Red) ➜ Switch OUT (25, 648) to Pico VSYS (192, 525) -->
+              <path class="wire-line net-vsys" d="M 25 648 L 25 820 L 204 820 L 204 525 L 192 525" fill="none" stroke="var(--wire-red)" stroke-width="3.2" />
+
+              <!-- Switched 4.5V Emitter Branch (Red) ➜ To 100Ω Resistor (325, 120) -->
+              <path class="wire-line net-vsys" d="M 204 525 L 204 136 L 325 136 L 325 120" fill="none" stroke="var(--wire-red)" stroke-width="2.5" stroke-dasharray="6,3" />
+
+              <!-- Battery (-) Ground (Slate/Black) ➜ Battery (355, 755) to Pico Pin 38 GND (192, 545) -->
+              <path class="wire-line net-gnd" d="M 355 755 L 355 810 L 212 810 L 212 545 L 192 545" fill="none" stroke="var(--wire-black)" stroke-width="2.8" />
+
+              <!-- Ground Branch (Slate/Black) ➜ To 2N2222 Emitter (380, 120) -->
+              <path class="wire-line net-gnd" d="M 212 545 L 212 144 L 380 144 L 380 120" fill="none" stroke="var(--wire-black)" stroke-width="2" />
+
+              <!-- VS1838B OUT (Yellow) ➜ Sensor OUT (82, 120) to Pico Pin 20 GP15 (57, 775) -->
+              <path class="wire-line net-rx" d="M 82 120 L 82 135 L 20 135 L 20 775 L 57 775" fill="none" stroke="var(--wire-yellow)" stroke-width="3" />
+
+              <!-- VS1838B GND (Slate/Black) ➜ Sensor GND (95, 120) to Pico Pin 18 GND (57, 745) -->
+              <path class="wire-line net-gnd" d="M 95 120 L 95 142 L 27 142 L 27 745 L 57 745" fill="none" stroke="var(--wire-black)" stroke-width="2.2" />
+
+              <!-- VS1838B 3V3 (Pink) ➜ Pico Pin 36 3V3 (192, 585) to Sensor 3V3 (108, 120) -->
+              <path class="wire-line net-vsys" d="M 192 585 L 196 585 L 196 142 L 108 142 L 108 120" fill="none" stroke="var(--wire-3v3)" stroke-width="2.4" />
+
+              <!-- Pico GP16 IR TX (Orange) ➜ Pin 21 GP16 (192, 775) to 2N2222 Base via 1kΩ (355, 120) -->
+              <path class="wire-line net-tx" d="M 192 775 L 208 775 L 208 138 L 355 138 L 355 120" fill="none" stroke="var(--wire-orange)" stroke-width="3" />
+
+              <!-- SOLDER JOINT PADS (Precise Circular Gold Connection Points) -->
+              <!-- Top Sensor Module Joints -->
+              <circle cx="82" cy="120" r="3.2" class="solder-joint" title="VS1838B OUT (Pin 1)" />
+              <circle cx="95" cy="120" r="3.2" class="solder-joint" title="VS1838B GND (Pin 2)" />
+              <circle cx="108" cy="120" r="3.2" class="solder-joint" title="VS1838B VCC 3.3V (Pin 3)" />
+              <circle cx="325" cy="120" r="3.2" class="solder-joint" title="100Ω Resistor / 4.5V Anode Rail" />
+              <circle cx="355" cy="120" r="3.2" class="solder-joint" title="1kΩ Resistor / 2N2222 Base Driver" />
+              <circle cx="380" cy="120" r="3.2" class="solder-joint" title="2N2222 Emitter Ground" />
+
+              <!-- Keypad Ribbon Header Joints -->
+              <circle cx="88" cy="452" r="2.8" class="solder-joint" title="Keypad Row 0 (GP6)" />
+              <circle cx="100" cy="452" r="2.8" class="solder-joint" title="Keypad Row 1 (GP7)" />
+              <circle cx="112" cy="452" r="2.8" class="solder-joint" title="Keypad Row 2 (GP8)" />
+              <circle cx="124" cy="452" r="2.8" class="solder-joint" title="Keypad Row 3 (GP9)" />
+              <circle cx="142" cy="452" r="2.8" class="solder-joint" title="Keypad Col 0 (GP10)" />
+              <circle cx="154" cy="452" r="2.8" class="solder-joint" title="Keypad Col 1 (GP11)" />
+              <circle cx="166" cy="452" r="2.8" class="solder-joint" title="Keypad Col 2 (GP12)" />
+              <circle cx="178" cy="452" r="2.8" class="solder-joint" title="Keypad Col 3 (GP13)" />
+
+              <!-- Pico Microcontroller Solder Joints -->
+              <circle cx="57" cy="590" r="3.2" class="solder-joint" title="Pico Pin 9 (GP6 - Row 0)" />
+              <circle cx="57" cy="607" r="3.2" class="solder-joint" title="Pico Pin 10 (GP7 - Row 1)" />
+              <circle cx="57" cy="624" r="3.2" class="solder-joint" title="Pico Pin 11 (GP8 - Row 2)" />
+              <circle cx="57" cy="641" r="3.2" class="solder-joint" title="Pico Pin 12 (GP9 - Row 3)" />
+              <circle cx="57" cy="665" r="3.2" class="solder-joint" title="Pico Pin 14 (GP10 - Col 0)" />
+              <circle cx="57" cy="682" r="3.2" class="solder-joint" title="Pico Pin 15 (GP11 - Col 1)" />
+              <circle cx="57" cy="699" r="3.2" class="solder-joint" title="Pico Pin 16 (GP12 - Col 2)" />
+              <circle cx="57" cy="716" r="3.2" class="solder-joint" title="Pico Pin 17 (GP13 - Col 3)" />
+              <circle cx="57" cy="745" r="3.2" class="solder-joint" title="Pico Pin 18 (GND)" />
+              <circle cx="57" cy="775" r="3.2" class="solder-joint" title="Pico Pin 20 (GP15 - IR RX)" />
+
+              <circle cx="192" cy="525" r="3.2" class="solder-joint" title="Pico Pin 39 (VSYS 4.5V IN)" />
+              <circle cx="192" cy="545" r="3.2" class="solder-joint" title="Pico Pin 38 (GND)" />
+              <circle cx="192" cy="585" r="3.2" class="solder-joint" title="Pico Pin 36 (3V3 Regulated OUT)" />
+              <circle cx="192" cy="775" r="3.2" class="solder-joint" title="Pico Pin 21 (GP16 - IR TX PWM)" />
+
+              <!-- Battery & Slide Switch Solder Joints -->
+              <circle cx="245" cy="520" r="3.8" class="solder-joint" title="3x AAA Positive (+) Terminal (4.5V)" />
+              <circle cx="355" cy="755" r="3.8" class="solder-joint" title="3x AAA Negative (-) Ground Terminal" />
+              <circle cx="25" cy="622" r="3.2" class="solder-joint" title="Slide Switch Terminal 1 (Battery IN)" />
+              <circle cx="25" cy="648" r="3.2" class="solder-joint" title="Slide Switch Terminal 2 (Switched 4.5V OUT)" />
+            </g>
+          </g>
+
+          <!-- ============================================================= -->
+          <!-- 3. RIGHT SIDE: CIRCUIT ARCHITECTURE CARDS & PIN SCHEMATIC     -->
+          <!-- Position: x=530 to x=1520 (width 990px)                       -->
+          <!-- ============================================================= -->
+          <g id="rightArchitectureGroup" transform="translate(530, 25)">
+            
+            <!-- Header Banner -->
+            <rect x="0" y="0" width="990" height="75" rx="12" fill="#0f172a" stroke="#334155" stroke-width="1.5" />
+            <text x="25" y="30" fill="#ffffff" font-size="16" font-weight="700">Handheld TV Remote Hardware Architecture</text>
+            <text x="25" y="52" fill="#94a3b8" font-size="9">
+              Integrated 4x4 matrix keypad, dual-core RP2040 Pico MCU, 3x AAA series power bay, and 38kHz active optical transceiver.
+            </text>
+            <rect x="25" y="58" width="130" height="16" rx="4" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="0.8" />
+            <text x="90" y="69" fill="#6ee7b7" font-family="'Fira Code', monospace" font-size="7" font-weight="bold" text-anchor="middle">✓ ZERO OVERLAPPING</text>
+
+            <rect x="165" y="58" width="165" height="16" rx="4" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" stroke-width="0.8" />
+            <text x="247" y="69" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="7" font-weight="bold" text-anchor="middle">✓ 1:1 REAL PHYSICAL SCALE</text>
+
+            <rect x="340" y="58" width="150" height="16" rx="4" fill="rgba(244, 63, 94, 0.15)" stroke="#f43f5e" stroke-width="0.8" />
+            <text x="415" y="69" fill="#fda4af" font-family="'Fira Code', monospace" font-size="7" font-weight="bold" text-anchor="middle">✓ 3x AAA 4.5V (VSYS)</text>
+
+            <!-- CARD 1: 38kHz OPTICAL TRANSCEIVER STAGE (TOP HEAD) -->
+            <!-- Position: x=0, y=90, width=990, height=170 -->
+            <g transform="translate(0, 90)">
+              <rect x="0" y="0" width="990" height="170" rx="12" fill="#0b1120" stroke="#ca8a04" stroke-width="1.2" />
+              <text x="25" y="26" fill="#facc15" font-size="12" font-weight="700">ZONE 1: Front Optical Emitter &amp; Demodulating Sensor (Top Head)</text>
+              <text x="25" y="44" fill="#cbd5e1" font-size="8.5">
+                Positions at the front tip facing outward through the infrared translucent optical lens:
+              </text>
+              
+              <!-- VS1838B Box -->
+              <rect x="25" y="56" width="460" height="100" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1" />
+              <text x="40" y="78" fill="#facc15" font-weight="bold" font-size="10">VS1838B IR Receiver (38kHz Demodulator)</text>
+              <text x="40" y="96" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Pin 1 (OUT) ➜ Pico GP15 (Pin 20) Active-LOW</text>
+              <text x="40" y="114" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Pin 2 (GND) ➜ Pico Pin 18 (GND)</text>
+              <text x="40" y="132" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Pin 3 (VCC) ➜ Pico Pin 36 (3V3 Regulated)</text>
+              <text x="40" y="148" fill="#34d399" font-size="7.5">Captures original remote signals with zero distortion</text>
+
+              <!-- IR LED Box -->
+              <rect x="505" y="56" width="460" height="100" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1" />
+              <text x="520" y="78" fill="#c084fc" font-weight="bold" font-size="10">940nm IR Emitter LED + 2N2222 Transistor Driver</text>
+              <text x="520" y="96" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">GP16 (Pin 21) ➜ 1kΩ Base ➜ 2N2222 Base (B)</text>
+              <text x="520" y="114" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">4.5V Rail ➜ 100Ω ➜ IR LED Anode (+)</text>
+              <text x="520" y="132" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">2N2222 Collector (C) ➜ IR LED Cathode (-)</text>
+              <text x="520" y="148" fill="#38bdf8" font-size="7.5">Modulates 38kHz PWM pulses at ~35mA for 5–8m range</text>
+            </g>
+
+            <!-- CARD 2: 16-KEY MATRIX KEYPAD (REMOTE FACE) -->
+            <!-- Position: x=0, y=275, width=990, height=175 -->
+            <g transform="translate(0, 275)">
+              <rect x="0" y="0" width="990" height="175" rx="12" fill="#0b1120" stroke="#a855f7" stroke-width="1.2" />
+              <text x="25" y="26" fill="#c084fc" font-size="12" font-weight="700">ZONE 2: 16-Key Matrix Interface (Remote Face)</text>
+              <text x="25" y="44" fill="#cbd5e1" font-size="8.5">
+                Standard 4x4 matrix membrane keypad mounted flush on the top surface. Scanned by non-blocking GPIO loop:
+              </text>
+
+              <!-- Row Outputs -->
+              <rect x="25" y="56" width="460" height="105" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1" />
+              <text x="40" y="76" fill="#e9d5ff" font-weight="bold" font-size="10">Row Output Scanning Lines (Pico GP6–GP9)</text>
+              <text x="40" y="94" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">R0: Pin 9 (GP6)  ➜ Row 1 [ 1, 2, 3, A(Mode) ]</text>
+              <text x="40" y="110" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">R1: Pin 10 (GP7) ➜ Row 2 [ 4, 5, 6, B(Vol+) ]</text>
+              <text x="40" y="126" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">R2: Pin 11 (GP8) ➜ Row 3 [ 7, 8, 9, C(Vol-) ]</text>
+              <text x="40" y="142" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">R3: Pin 12 (GP9) ➜ Row 4 [ *, 0, #, D(Power) ]</text>
+
+              <!-- Col Inputs -->
+              <rect x="505" y="56" width="460" height="105" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1" />
+              <text x="520" y="76" fill="#a5f3fc" font-weight="bold" font-size="10">Column Input Lines (Pico GP10–GP13)</text>
+              <text x="520" y="94" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">C0: Pin 14 (GP10) ➜ Col 1 [ 1, 4, 7, * ]</text>
+              <text x="520" y="110" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">C1: Pin 15 (GP11) ➜ Col 2 [ 2, 5, 8, 0 ]</text>
+              <text x="520" y="126" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">C2: Pin 16 (GP12) ➜ Col 3 [ 3, 6, 9, # ]</text>
+              <text x="520" y="142" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">C3: Pin 17 (GP13) ➜ Col 4 [ A, B, C, D ]</text>
+            </g>
+
+            <!-- CARD 3: 4.5V POWER SUPPLY & HANDHELD ENCLOSURE -->
+            <!-- Position: x=0, y=465, width=990, height=180 -->
+            <g transform="translate(0, 465)">
+              <rect x="0" y="0" width="990" height="180" rx="12" fill="#0b1120" stroke="#f43f5e" stroke-width="1.2" />
+              <text x="25" y="26" fill="#fda4af" font-size="12" font-weight="700">ZONE 3: 4.5V Power Grid &amp; Handheld Enclosure (Base Grip)</text>
+              <text x="25" y="44" fill="#cbd5e1" font-size="8.5">
+                3x AAA battery compartment placed inside the handle grip, balancing the weight naturally in your hand:
+              </text>
+
+              <!-- Power Box -->
+              <rect x="25" y="56" width="460" height="110" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1" />
+              <text x="40" y="76" fill="#f43f5e" font-weight="bold" font-size="10">Battery Supply &amp; Slide Switch</text>
+              <text x="40" y="94" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">3x AAA Battery Pack: 4.5V DC (38×52mm)</text>
+              <text x="40" y="110" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Red Wire (+) ➜ Side Slide Switch IN</text>
+              <text x="40" y="126" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Switch OUT ➜ Pico VSYS (Pin 39) &amp; 100Ω</text>
+              <text x="40" y="142" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Black Wire (-) ➜ Pico GND (Pin 38)</text>
+              <text x="40" y="156" fill="#34d399" font-size="7.5">Zero standby power drain when switch is turned OFF</text>
+
+              <!-- 3D Print Specs -->
+              <rect x="505" y="56" width="460" height="110" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1" />
+              <text x="520" y="76" fill="#38bdf8" font-weight="bold" font-size="10">3D Printed Remote Casing Specs</text>
+              <text x="520" y="94" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Outer Dimensions: 170mm × 80mm × 24mm</text>
+              <text x="520" y="110" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Wall Thickness: 2.0 mm (PLA / ABS / PETG)</text>
+              <text x="520" y="126" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Keypad Recess: 72mm × 78mm × 1.5mm</text>
+              <text x="520" y="142" fill="#94a3b8" font-size="8" font-family="'Fira Code', monospace">Rear Battery Door: Snap-fit or M2.5 screw</text>
+              <text x="520" y="156" fill="#38bdf8" font-size="7.5">Perfect ergonomic palm grip with balanced lower weight</text>
+            </g>
+
+            <!-- CARD 4: LIVE CONTROLLER & CONSOLE -->
+            <!-- Position: x=0, y=660, width=990, height=170 -->
+            <g transform="translate(0, 660)">
+              <rect x="0" y="0" width="990" height="170" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+              <text x="25" y="26" fill="#38bdf8" font-size="12" font-weight="700">🎮 Live Handheld Controller Status</text>
+              
+              <rect x="25" y="38" width="940" height="75" rx="8" fill="#070b14" stroke="#1e293b" stroke-width="1" />
+              <text x="40" y="60" fill="#94a3b8" font-size="8.5" font-family="'Fira Code', monospace">ACTIVE TARGET DEVICE:</text>
+              <text id="liveTargetDevice" x="220" y="60" fill="#38bdf8" font-size="10" font-weight="bold" font-family="'Fira Code', monospace">TV (Device 1/4)</text>
+
+              <text x="40" y="80" fill="#94a3b8" font-size="8.5" font-family="'Fira Code', monospace">LAST COMMAND SENT:</text>
+              <text id="liveLastCmd" x="220" y="80" fill="#34d399" font-size="10" font-weight="bold" font-family="'Fira Code', monospace">Idle (Press any keypad button on the remote to transmit)</text>
+
+              <text x="40" y="100" fill="#94a3b8" font-size="8.5" font-family="'Fira Code', monospace">38kHz MODULATION:</text>
+              <text id="liveCarrier" x="220" y="100" fill="#facc15" font-size="9" font-family="'Fira Code', monospace">RP2040 Hardware PWM Slice @ 38.0 kHz (33% Duty Cycle)</text>
+
+              <text x="25" y="135" fill="#94a3b8" font-size="8">
+                💡 Tip: Click any of the 16 buttons on the TV remote to test live transmission, switch modes, or view raw timing!
+              </text>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Simulation Status Bar -->
+      <div class="simulation-bar">
+        <div class="status-indicator">
+          <div class="status-dot" id="systemStatusDot"></div>
+          <span id="systemStatusText" style="font-weight: 500;">Power: 3x AAA Batteries (4.5V) ON &bull; Handheld TV Remote Active</span>
+        </div>
+        <div style="font-family: 'Fira Code', monospace; font-size: 0.78rem; color: #94a3b8;">
+          Format: <span style="color: #38bdf8;">Handheld TV Remote</span> | Scale: <span style="color: #38bdf8;">1mm = 6px</span> | Supply: <span style="color: #fda4af;">3x AAA ➜ VSYS</span> | Signal: <span style="color: #fb923c;">GP16(TX)</span> &amp; <span style="color: #facc15;">GP15(RX)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="panel">
+        <div class="panel-title">
+          <span>🔍</span> 1:1 Physical Dimension Inspector
+        </div>
+        <div id="inspectorBox" class="inspector-content">
+          <h4 id="inspName">Hover / Click any part of the Remote!</h4>
+          <span class="badge" id="inspBadge" style="display:inline-block; font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); margin-bottom:0.75rem; font-family:'Fira Code',monospace;">100% CALIBRATED RATIOS</span>
+          <p id="inspDesc" style="font-size:0.82rem; color:var(--text-muted); line-height:1.5;">The entire assembly is aligned exactly like a real TV remote: Optical transmitter &amp; receiver at the top, 4x4 keypad on the upper face, and Pico brain + 3x AAA battery bay in the handheld grip!</p>
+          
+          <table class="bom-table" id="inspTable" style="display:none; margin-top:0.75rem;">
+            <thead>
+              <tr><th>Terminal / Spec</th><th>Connects To</th><th>Function</th></tr>
+            </thead>
+            <tbody id="inspTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>📐</span> TV Remote Physical Dimensions
+        </div>
+        <table class="bom-table" style="font-size: 0.78rem;">
+          <thead>
+            <tr><th>Component</th><th>Real (mm)</th><th>Position in Remote</th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="color:#7c3aed; font-weight:600;">Remote Shell</td><td>80 × 170 mm</td><td>Full handheld ergonomic shell</td></tr>
+            <tr><td style="color:#fb923c; font-weight:600;">IR Emitter</td><td>Ø 5.0 mm</td><td>Top Front (Firing forward)</td></tr>
+            <tr><td style="color:#facc15; font-weight:600;">VS1838B</td><td>7.5 × 6.0 mm</td><td>Top Front (Receiving window)</td></tr>
+            <tr><td style="color:#c084fc; font-weight:600;">4x4 Keypad</td><td>70 × 76 mm</td><td>Upper Face (16 buttons)</td></tr>
+            <tr><td style="color:#22c55e; font-weight:600;">Pico MCU</td><td>21 × 51 mm</td><td>Lower Left Internal Bay</td></tr>
+            <tr><td style="color:#fda4af; font-weight:600;">3x AAA Pack</td><td>38 × 52 mm</td><td>Lower Right Grip Bay (4.5V)</td></tr>
+            <tr><td style="color:#cbd5e1; font-weight:600;">Slide Switch</td><td>12 × 6.0 mm</td><td>Side Bezel Thumb Switch</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>📈</span> IR Demodulated Waveform
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem;">
+          Raw Pulse Mark/Space Timing (μs)
+        </div>
+        <div class="waveform-card">
+          <canvas id="waveCanvas" width="340" height="80"></canvas>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-family: 'Fira Code', monospace; color: #94a3b8; margin-top: 0.4rem;">
+          <span id="waveLabel">Idle (HIGH = 3.3V)</span>
+          <span id="pulseCount">0 transitions</span>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- BILL OF MATERIALS MODAL DIALOG -->
+  <div class="modal-overlay" id="bomModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap: 0.6rem;">
+          <span style="font-size: 1.3rem;">📋</span>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff;">Bill of Materials (BOM) &amp; Cost Estimation</h3>
+            <p style="font-size: 0.72rem; color: #94a3b8;">Itemized hardware components for DIY Raspberry Pi Pico Universal IR Remote</p>
+          </div>
+        </div>
+        <button class="btn" id="btnCloseBom" style="padding: 0.35rem 0.75rem;">✕ Close</button>
+      </div>
+
+      <div class="modal-body">
+        <table class="bom-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Component</th>
+              <th>Specification</th>
+              <th style="text-align: center;">Qty</th>
+              <th>Est. Unit Cost</th>
+              <th>Total Cost</th>
+              <th>Function / Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">1</td>
+              <td style="font-weight: 600; color: #f8fafc;">Microcontroller</td>
+              <td>Raspberry Pi Pico (RP2040 Dual ARM Cortex-M0+, 2MB Flash)</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹380 / $4.50</td>
+              <td style="font-weight: bold; color: #34d399;">₹380 / $4.50</td>
+              <td>Main controller, raw pulse capture, 38kHz PWM transmitter</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">2</td>
+              <td style="font-weight: 600; color: #f8fafc;">Keypad</td>
+              <td>4x4 Matrix Membrane Keypad (16 tactile keys, 8-pin 2.54mm pitch)</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹70 / $0.90</td>
+              <td style="font-weight: bold; color: #34d399;">₹70 / $0.90</td>
+              <td>User input buttons: digits 0-9, Mode, Vol+, Vol-, Mute, Power</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">3</td>
+              <td style="font-weight: 600; color: #f8fafc;">IR Receiver</td>
+              <td>VS1838B (or TSOP38238) 38kHz Demodulating Receiver</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹20 / $0.25</td>
+              <td style="font-weight: bold; color: #34d399;">₹20 / $0.25</td>
+              <td>Captures &amp; learns raw optical signals from original remotes</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">4</td>
+              <td style="font-weight: 600; color: #f8fafc;">IR Emitter</td>
+              <td>940nm High-Power Infrared LED (5mm, &plusmn;20&deg; beam angle)</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹10 / $0.15</td>
+              <td style="font-weight: bold; color: #34d399;">₹10 / $0.15</td>
+              <td>Emits modulated 38kHz infrared command pulses to appliances</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">5</td>
+              <td style="font-weight: 600; color: #f8fafc;">Transistor</td>
+              <td>2N2222 (or BC547 / 2N3904) NPN Bipolar Junction Transistor</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹5 / $0.07</td>
+              <td style="font-weight: bold; color: #34d399;">₹5 / $0.07</td>
+              <td>High-speed current amplifier driving high-power IR LED pulses</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">6</td>
+              <td style="font-weight: 600; color: #f8fafc;">Base Resistor</td>
+              <td>1 kΩ 1/4W Metal Film Resistor (&plusmn;5% tolerance)</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹2 / $0.03</td>
+              <td style="font-weight: bold; color: #34d399;">₹2 / $0.03</td>
+              <td>Limits RP2040 GP16 GPIO output current to ~2.6mA</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">7</td>
+              <td style="font-weight: 600; color: #f8fafc;">LED Limiter</td>
+              <td>100 Ω 1/4W Metal Film Resistor (&plusmn;5% tolerance)</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹2 / $0.03</td>
+              <td style="font-weight: bold; color: #34d399;">₹2 / $0.03</td>
+              <td>Sets ~35mA pulse current through the IR LED from 4.5V rail</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">8</td>
+              <td style="font-weight: 600; color: #f8fafc;">Battery Holder</td>
+              <td>3x AAA Battery Holder with lead wires &amp; cover</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹40 / $0.55</td>
+              <td style="font-weight: bold; color: #34d399;">₹40 / $0.55</td>
+              <td>Series battery case supplying 4.5V DC to Pico VSYS (Pin 39)</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">9</td>
+              <td style="font-weight: 600; color: #f8fafc;">Batteries</td>
+              <td>1.5V AAA Alkaline Cells (or 1.2V AAA NiMH Rechargeable)</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">3</td>
+              <td style="color: #94a3b8;">₹25 / $0.35</td>
+              <td style="font-weight: bold; color: #34d399;">₹75 / $1.05</td>
+              <td>Standard portable power source; Pico runs smoothly from 4.5V down to 2.0V</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">10</td>
+              <td style="font-weight: 600; color: #f8fafc;">Slide Switch</td>
+              <td>SPST Miniature Slide Switch (Panel or PCB Mount)</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
+              <td style="color: #94a3b8;">₹10 / $0.15</td>
+              <td style="font-weight: bold; color: #34d399;">₹10 / $0.15</td>
+              <td>Main power disconnect switch; provides zero standby drain when remote is idle</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top: 1.25rem; padding: 1rem 1.25rem; background: rgba(30, 41, 59, 0.5); border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.85rem; color: #94a3b8;">Complete DIY Handheld Project Budget:</div>
+            <div style="font-size: 0.75rem; color: #cbd5e1;">(Core electronics: ~₹515 / $6.50 &bull; Full kit with batteries: ~₹750 / $9.35)</div>
+          </div>
+          <div style="font-size: 1.35rem; font-weight: 800; color: #34d399; font-family: 'Fira Code', monospace;">
+            ₹750 / ~$9.35
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEVICES = ["TV", "AC", "SOUNDBAR", "STREAMER"];
+    let currentDeviceIndex = 0;
+    let isPowerOn = true;
+
+    const COMPONENT_INFO = {
+      "Raspberry Pi Pico": {
+        badge: "21mm × 51mm PHYSICAL SIZE",
+        desc: "Dual-core RP2040 MCU running MicroPython. Housed in the lower-left grip of the remote. Connects to 3x AAA battery power on Pin 39 (VSYS).",
+        pins: [
+          ["Pin 39 (VSYS)", "Battery Switch Output", "Main battery supply (1.8V - 5.5V)"],
+          ["Pin 38 (GND)", "Battery Ground (-)", "Common system ground"],
+          ["Pin 20 (GP15)", "VS1838B OUT", "Active-LOW raw IR demodulated signal"],
+          ["Pin 21 (GP16)", "1kΩ Resistor", "38kHz Hardware PWM modulation"],
+          ["GP6 - GP9", "Keypad Rows R0-R3", "Sequential LOW scanning outputs"],
+          ["GP10 - GP13", "Keypad Cols C0-C3", "Input pull-up sensing pins"]
+        ]
+      },
+      "3x AAA Battery Pack (4.5V)": {
+        badge: "38mm × 52mm PHYSICAL SIZE",
+        desc: "Holds 3 standard AAA alkaline (or rechargeable NiMH) cells in series producing 4.5V DC. Positioned in the lower-right grip for comfortable palm balance.",
+        pins: [
+          ["Red Wire (+)", "Slide Switch IN", "4.5V Battery supply lead"],
+          ["Black Wire (-)", "Pico Pin 38 (GND)", "System Ground return"]
+        ]
+      },
+      "SPST Miniature Slide Switch": {
+        badge: "12mm × 6mm PHYSICAL SIZE",
+        desc: "Mounted directly on the remote's left side bezel under the thumb. Cuts off all power for zero idle battery drain.",
+        pins: [
+          ["Terminal 1 (IN)", "Battery (+) Red", "Input lead from 4.5V battery pack"],
+          ["Terminal 2 (OUT)", "Pico VSYS & 100Ω", "Switched 4.5V supply rail"]
+        ]
+      }
+    };
+
+    // DOM Elements
+    const systemStatusDot = document.getElementById("systemStatusDot");
+    const systemStatusText = document.getElementById("systemStatusText");
+    const currentDevName = document.getElementById("currentDevName");
+    const remoteDevDisplay = document.getElementById("remoteDevDisplay");
+    const liveTargetDevice = document.getElementById("liveTargetDevice");
+    const liveLastCmd = document.getElementById("liveLastCmd");
+    const keypadTxLed = document.getElementById("keypadTxLed");
+    const picoOnboardLed = document.getElementById("picoOnboardLed");
+    const irBeamAnim = document.getElementById("irBeamAnim");
+    const rxWaves = document.getElementById("rxWaves");
+
+    const waveCanvas = document.getElementById("waveCanvas");
+    const waveCtx = waveCanvas.getContext("2d");
+    const waveLabel = document.getElementById("waveLabel");
+    const pulseCount = document.getElementById("pulseCount");
+
+    const powerSwitchGroup = document.getElementById("powerSwitchGroup");
+    const switchHandle = document.getElementById("switchHandle");
+    const switchKnob = document.getElementById("switchKnob");
+    const switchLabelText = document.getElementById("switchLabelText");
+
+    const inspName = document.getElementById("inspName");
+    const inspBadge = document.getElementById("inspBadge");
+    const inspDesc = document.getElementById("inspDesc");
+    const inspTable = document.getElementById("inspTable");
+    const inspTableBody = document.getElementById("inspTableBody");
+
+    // Interactive Zoom & Pan System
+    const circuitSvg = document.getElementById("circuitSvg");
+    const canvasContainer = document.getElementById("canvasContainer");
+    const btnZoomIn = document.getElementById("btnZoomIn");
+    const btnZoomOut = document.getElementById("btnZoomOut");
+    const btnZoomFit = document.getElementById("btnZoomFit");
+    const zoomLevelText = document.getElementById("zoomLevelText");
+
+    const BASE_VB = { x: 20, y: 10, w: 1515, h: 860 };
+    let currentScale = 1.15; // default 115% zoom
+    let panOffset = { x: 0, y: 0 };
+    let isPanning = false;
+    let startPoint = { x: 0, y: 0 };
+
+    function updateSvgViewBox() {
+      const w = BASE_VB.w / currentScale;
+      const h = BASE_VB.h / currentScale;
+      const cx = BASE_VB.x + BASE_VB.w / 2 + panOffset.x;
+      const cy = BASE_VB.y + BASE_VB.h / 2 + panOffset.y;
+      const x = cx - w / 2;
+      const y = cy - h / 2;
+      circuitSvg.setAttribute("viewBox", `${x.toFixed(1)} ${y.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
+      zoomLevelText.textContent = `${Math.round(currentScale * 100)}%`;
+    }
+
+    btnZoomIn.addEventListener("click", () => {
+      if (currentScale < 2.5) {
+        currentScale = Math.min(2.5, currentScale + 0.15);
+        updateSvgViewBox();
+      }
+    });
+
+    btnZoomOut.addEventListener("click", () => {
+      if (currentScale > 0.7) {
+        currentScale = Math.max(0.7, currentScale - 0.15);
+        updateSvgViewBox();
+      }
+    });
+
+    btnZoomFit.addEventListener("click", () => {
+      currentScale = 1.15;
+      panOffset = { x: 0, y: 0 };
+      updateSvgViewBox();
+    });
+
+    // Mouse wheel zoom
+    canvasContainer.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.08 : -0.08;
+      currentScale = Math.max(0.7, Math.min(2.5, currentScale + delta));
+      updateSvgViewBox();
+    }, { passive: false });
+
+    // Click and drag to pan
+    canvasContainer.addEventListener("mousedown", (e) => {
+      if (e.target.closest("button") || e.target.closest(".tactile-key")) return;
+      isPanning = true;
+      startPoint = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isPanning) return;
+      const dx = (e.clientX - startPoint.x) * (BASE_VB.w / (currentScale * canvasContainer.clientWidth));
+      const dy = (e.clientY - startPoint.y) * (BASE_VB.h / (currentScale * canvasContainer.clientHeight));
+      panOffset.x -= dx;
+      panOffset.y -= dy;
+      startPoint = { x: e.clientX, y: e.clientY };
+      updateSvgViewBox();
+    });
+
+    window.addEventListener("mouseup", () => {
+      isPanning = false;
+    });
+
+    // Solder joint hover inspection
+    document.querySelectorAll(".solder-joint").forEach(joint => {
+      joint.addEventListener("mouseenter", () => {
+        const title = joint.getAttribute("title");
+        inspName.textContent = `📍 Solder Terminal: ${title}`;
+        inspBadge.textContent = "CONNECTED TERMINAL PAD";
+        inspBadge.style.color = "#facc15";
+        inspBadge.style.borderColor = "#facc15";
+        inspDesc.textContent = `High-reliability mechanical solder joint connecting bus wire directly to ${title}.`;
+      });
+    });
+
+    updateSvgViewBox();
+
+    // Power Toggle
+    powerSwitchGroup.addEventListener("click", () => {
+      isPowerOn = !isPowerOn;
+      if (isPowerOn) {
+        switchHandle.setAttribute("transform", "translate(9, 10)");
+        switchKnob.setAttribute("fill", "#34d399");
+        switchLabelText.textContent = "ON";
+        switchLabelText.setAttribute("fill", "#34d399");
+
+        systemStatusDot.className = "status-dot";
+        systemStatusText.textContent = "Power: 3x AAA Batteries (4.5V) ON • Handheld TV Remote Active";
+        picoOnboardLed.style.opacity = "0.6";
+        remoteDevDisplay.textContent = DEVICES[currentDeviceIndex];
+        liveLastCmd.textContent = "Powered ON (Ready to transmit / learn)";
+        drawIdleWaveform();
+      } else {
+        switchHandle.setAttribute("transform", "translate(9, 30)");
+        switchKnob.setAttribute("fill", "#ef4444");
+        switchLabelText.textContent = "OFF";
+        switchLabelText.setAttribute("fill", "#ef4444");
+
+        systemStatusDot.className = "status-dot power-off";
+        systemStatusText.textContent = "Power: OFF (Slide switch opened - Zero battery drain)";
+        picoOnboardLed.style.opacity = "0.05";
+        remoteDevDisplay.textContent = "OFF";
+        liveLastCmd.textContent = "Remote Powered OFF (Slide switch opened)";
+        waveCtx.fillStyle = "#090d16";
+        waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+        waveLabel.textContent = "0.0V (Battery Disconnected)";
+        pulseCount.textContent = "Inactive";
+      }
+    });
+
+    // Keypad Interaction
+    document.querySelectorAll(".matrix-key").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!isPowerOn) return;
+        const key = btn.getAttribute("data-key");
+        handleKey(key);
+      });
+    });
+
+    function handleKey(key) {
+      if (key === "A") {
+        currentDeviceIndex = (currentDeviceIndex + 1) % DEVICES.length;
+        const dev = DEVICES[currentDeviceIndex];
+        currentDevName.textContent = dev;
+        remoteDevDisplay.textContent = dev;
+        liveTargetDevice.textContent = `${dev} (Device ${currentDeviceIndex + 1}/4)`;
+        liveLastCmd.textContent = `[A] Switched Mode ➜ ${dev}`;
+        triggerTx(`CYCLE_MODE [${dev}]`);
+      } else if (key === "D") {
+        liveLastCmd.textContent = `[D] Power Toggle Command ➜ ${DEVICES[currentDeviceIndex]}`;
+        triggerTx(`POWER TOGGLE [0x20DF10EF]`);
+      } else if (key === "B") {
+        liveLastCmd.textContent = `[B] Volume Up (▲) ➜ ${DEVICES[currentDeviceIndex]}`;
+        triggerTx(`VOL_UP [0x20DF40BF]`);
+      } else if (key === "C") {
+        liveLastCmd.textContent = `[C] Volume Down (▼) ➜ ${DEVICES[currentDeviceIndex]}`;
+        triggerTx(`VOL_DOWN [0x20DFC03F]`);
+      } else if (key === "*") {
+        liveLastCmd.textContent = `[*] Mute Audio ➜ ${DEVICES[currentDeviceIndex]}`;
+        triggerTx(`MUTE [0x20DF906F]`);
+      } else if (key === "#") {
+        liveLastCmd.textContent = `[#] Enter / Select ➜ ${DEVICES[currentDeviceIndex]}`;
+        triggerTx(`ENTER [0x20DF22DD]`);
+      } else {
+        liveLastCmd.textContent = `[${key}] Digit '${key}' ➜ ${DEVICES[currentDeviceIndex]}`;
+        triggerTx(`DIGIT_${key}`);
+      }
+    }
+
+    // Toolbar Buttons
+    document.getElementById("btnSimulateTx").addEventListener("click", () => {
+      if (!isPowerOn) return;
+      handleKey("D");
+    });
+
+    document.getElementById("btnSimulateRx").addEventListener("click", () => {
+      if (!isPowerOn) return;
+      triggerRx();
+    });
+
+    // Inspector Hover
+    document.querySelectorAll(".interactive-part").forEach(el => {
+      el.addEventListener("mouseenter", () => {
+        const name = el.getAttribute("data-name");
+        if (name && COMPONENT_INFO[name]) {
+          inspName.textContent = name;
+          inspBadge.textContent = COMPONENT_INFO[name].badge;
+          inspDesc.textContent = COMPONENT_INFO[name].desc;
+          if (COMPONENT_INFO[name].pins) {
+            inspTable.style.display = "table";
+            inspTableBody.innerHTML = COMPONENT_INFO[name].pins.map(p => `
+              <tr>
+                <td style="color:#38bdf8; font-weight:600;">${p[0]}</td>
+                <td style="color:#f8fafc;">${p[1]}</td>
+                <td style="color:#94a3b8;">${p[2]}</td>
+              </tr>
+            `).join("");
+          }
+        }
+      });
+    });
+
+    // Wire Filter Pills
+    document.querySelectorAll(".net-pill").forEach(pill => {
+      pill.addEventListener("click", () => {
+        document.querySelectorAll(".net-pill").forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        const net = pill.getAttribute("data-net");
+
+        document.querySelectorAll(".wire-line").forEach(wire => {
+          if (net === "all") {
+            wire.style.opacity = "1";
+            wire.style.strokeWidth = wire.getAttribute("stroke-width");
+          } else if (wire.classList.contains(`net-${net}`)) {
+            wire.style.opacity = "1";
+            wire.style.strokeWidth = "4.5";
+          } else {
+            wire.style.opacity = "0.15";
+            wire.style.strokeWidth = "1.5";
+          }
+        });
+      });
+    });
+
+    // Modal
+    const bomModal = document.getElementById("bomModal");
+    document.getElementById("btnOpenBom").addEventListener("click", () => bomModal.classList.add("open"));
+    document.getElementById("btnCloseBom").addEventListener("click", () => bomModal.classList.remove("open"));
+    bomModal.addEventListener("click", (e) => {
+      if (e.target === bomModal) bomModal.classList.remove("open");
+    });
+
+    // TX Simulation
+    function triggerTx(label) {
+      irBeamAnim.classList.add("firing");
+      keypadTxLed.setAttribute("fill", "#f43f5e");
+      keypadTxLed.setAttribute("stroke", "#fda4af");
+      systemStatusDot.className = "status-dot active-tx";
+      systemStatusText.textContent = `Transmitting 38kHz IR: ${label} ➜ ${DEVICES[currentDeviceIndex]}`;
+
+      renderWaveform(true);
+
+      setTimeout(() => {
+        irBeamAnim.classList.remove("firing");
+        keypadTxLed.setAttribute("fill", "#334155");
+        keypadTxLed.setAttribute("stroke", "#475569");
+        systemStatusDot.className = "status-dot";
+        systemStatusText.textContent = `Ready • 3x AAA Batteries (4.5V) • Mode: ${DEVICES[currentDeviceIndex]}`;
+      }, 500);
+    }
+
+    // RX Simulation
+    function triggerRx() {
+      rxWaves.classList.add("receiving");
+      systemStatusDot.className = "status-dot active-rx";
+      systemStatusText.textContent = `Learning IR: Capturing raw pulses on GP15 from original remote...`;
+      liveLastCmd.textContent = `LEARNING: 68 raw transitions captured & stored into ir_codes.json!`;
+
+      renderWaveform(false);
+
+      setTimeout(() => {
+        rxWaves.classList.remove("receiving");
+        systemStatusDot.className = "status-dot";
+        systemStatusText.textContent = `Code Stored Successfully in ir_codes.json for [${DEVICES[currentDeviceIndex]}]!`;
+      }, 700);
+    }
+
+    // Waveform
+    function drawIdleWaveform() {
+      waveCtx.fillStyle = "#090d16";
+      waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+      waveCtx.strokeStyle = "#1e293b";
+      waveCtx.lineWidth = 1;
+
+      for (let x = 0; x < waveCanvas.width; x += 30) {
+        waveCtx.beginPath();
+        waveCtx.moveTo(x, 0);
+        waveCtx.lineTo(x, waveCanvas.height);
+        waveCtx.stroke();
+      }
+
+      waveCtx.strokeStyle = "#34d399";
+      waveCtx.lineWidth = 2.5;
+      waveCtx.beginPath();
+      waveCtx.moveTo(10, 22);
+      waveCtx.lineTo(waveCanvas.width - 10, 22);
+      waveCtx.stroke();
+
+      waveLabel.textContent = "Idle (HIGH = 3.3V)";
+      pulseCount.textContent = "0 transitions";
+    }
+
+    function renderWaveform(isTx) {
+      waveCtx.fillStyle = "#090d16";
+      waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+
+      waveCtx.strokeStyle = isTx ? "#fb923c" : "#facc15";
+      waveCtx.lineWidth = 2.2;
+      waveCtx.beginPath();
+
+      let x = 10;
+      let y = 22;
+      waveCtx.moveTo(x, y);
+
+      const pulses = [
+        { state: 0, w: 32 }, { state: 1, w: 18 },
+        { state: 0, w: 10 }, { state: 1, w: 10 },
+        { state: 0, w: 10 }, { state: 1, w: 22 },
+        { state: 0, w: 10 }, { state: 1, w: 22 },
+        { state: 0, w: 10 }, { state: 1, w: 10 },
+        { state: 0, w: 10 }, { state: 1, w: 22 },
+        { state: 0, w: 10 }, { state: 1, w: 10 },
+        { state: 0, w: 10 }, { state: 1, w: 22 },
+        { state: 0, w: 12 }, { state: 1, w: 40 }
+      ];
+
+      pulses.forEach(p => {
+        const nextY = p.state === 0 ? 62 : 18;
+        waveCtx.lineTo(x, nextY);
+        x += p.w;
+        waveCtx.lineTo(x, nextY);
+        y = nextY;
+      });
+
+      waveCtx.lineTo(waveCanvas.width - 10, 18);
+      waveCtx.stroke();
+
+      waveLabel.textContent = isTx ? "TX PWM Mark/Space (NEC 38kHz)" : "RX Raw Demodulated (GP15 Pin 20)";
+      pulseCount.textContent = "68 transitions (32-bit NEC)";
+    }
+
+    drawIdleWaveform();
+  </script>
+</body>
+</html>
