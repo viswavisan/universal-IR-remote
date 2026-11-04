@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Runtime IR database generated on device
+ir_codes.json
+
+# Local editor and environment files
+.vscode/
+.idea/
+*.swp
+*.bak
+

@@ -25,85 +25,86 @@ It can **learn** any IR remote signal from your existing remotes (TV, AC, Soundb
 |:---:|---|---|:---:|:---:|:---:|:---:|---|
 | **1** | **Microcontroller Board** | Raspberry Pi Pico / Pico H (RP2040, Dual-Core 133MHz, 2MB Flash) | 1 | `U1` | ₹370 / $4.20 | **₹370 / $4.20** | Main controller: captures raw pulses, scans keypad, generates 38kHz PWM. (Robu, Silverline, Raspberry Pi direct) |
 | **2** | **4x4 Matrix Keypad** | 16-Key Membrane / Tactile Matrix (8-pin 2.54mm pitch female header) | 1 | `SW1-SW16` | ₹90 / $1.20 | **₹90 / $1.20** | Remote buttons: 0-9 digits, A (Mode cycle), B (Vol+), C (Vol-), D (Power), * (Mute), # (Enter) |
-| **3** | **IR Receiver Demodulator** | **VS1838B** (or TSOP38238 / TSOP4838), 38 kHz optical bandpass filter | 1 | `U2` | ₹25 / $0.40 | **₹25 / $0.40** | Demodulates incoming 38kHz optical signal into clean active-LOW pulse trains |
-| **4** | **Infrared Emitter LED** | 940nm High-Power IR LED (5mm, water-clear or dark purple package) | 1 | `D1` | ₹10 / $0.15 | **₹10 / $0.15** | Transmits 38kHz pulsed infrared light with 5–8 meter line-of-sight range |
-| **5** | **NPN Switching Transistor** | **2N2222** (or 2N3904 / BC547 / SS8050), TO-92 package, $I_C \ge 200\text{mA}$ | 1 | `Q1` | ₹6 / $0.10 | **₹6 / $0.10** | Low-side driver switch; amplifies GP16 PWM output to pulse IR LED to ground |
-| **6** | **Base Current Limiter** | **1 kΩ Resistor**, 1/4W, 5% (Color: Brown - Black - Red - Gold) | 1 | `R1` | ₹2 / $0.03 | **₹2 / $0.03** | Limits transistor base current to ~2.6mA to protect RP2040 GPIO pin while saturating Q1 |
-| **7** | **LED Current Limiter** | **100 Ω Resistor**, 1/4W or 1/2W, 5% (Color: Brown - Black - Brown - Gold) | 1 | `R2` | ₹2 / $0.03 | **₹2 / $0.03** | Limits IR LED peak pulse current to ~35mA from 4.5V battery rail |
-| **8** | **Battery Holder** | 3x AAA Battery Holder with 150mm lead wires (Red/Black) | 1 | `BT1` | ₹40 / $0.55 | **₹40 / $0.55** | Enclosed or open 3x AAA series compartment supplying 4.5V DC to VSYS |
-| **9** | **Batteries** | 1.5V AAA Alkaline cells (or 1.2V AAA NiMH rechargeable cells) | 3 | `BAT1-3` | ₹25 / $0.35 | **₹75 / $1.05** | Portable handheld power; Pico operates reliably from 4.5V down to 2.0V |
-| **10** | **Main Power Switch** | SPST Miniature Slide Switch (Panel or PCB Mount, 2-pin / 3-pin) | 1 | `SW_PWR` | ₹10 / $0.15 | **₹10 / $0.15** | Disconnects battery from Pico VSYS (Pin 39) for zero standby battery drain |
-| **11** | **Breadboard / Perfboard** | Half-size solderless breadboard (400 tie-points) or 5x7cm protoboard | 1 | `PCB` | ₹75 / $1.00 | **₹75 / $1.00** | Prototyping chassis or solderable perfboard for final handheld build |
-| **12** | **DuPont Jumper Wires** | Male-to-Female & Male-to-Male 10cm / 20cm flexible jumper wires | ~15 | `W1-W15` | ₹35 / $0.50 | **₹35 / $0.50** | Interconnect wiring between Pico, keypad, optics, and battery holder |
-| | **TOTAL ESTIMATED COST** | | | | | **₹750 / ~$9.35** | *(Full kit cost with batteries and prototyping breadboard)* |
+| **3** | **3-Pin 5V IR LED Module** | High-Power 940nm IR Transmitter Module (with driver transistor & 5V boost) | 1 | `MOD_TX` | ₹30 / $0.40 | **₹30 / $0.40** | High-output transmitter: onboard driver switches 5V VBUS for ~100mA peak pulses with 10–15m range |
+| **4** | **IR Receiver Sensor** | VS1838B (or TSOP38238) 38kHz Demodulating IR Receiver | 1 | `U2` | ₹15 / $0.20 | **₹15 / $0.20** | Standalone receiver unit: learns raw 38kHz signals from existing remotes; physically separated to avoid optical crosstalk |
+| **5** | **Battery Holder** | 3x AAA Battery Holder with 150mm lead wires (Red/Black) | 1 | `BT1` | ₹40 / $0.55 | **₹40 / $0.55** | Enclosed or open 3x AAA series compartment supplying 4.5V DC to VSYS |
+| **6** | **Batteries** | 1.5V AAA Alkaline cells (or 1.2V AAA NiMH rechargeable cells) | 3 | `BAT1-3` | ₹25 / $0.35 | **₹75 / $1.05** | Portable handheld power; Pico operates reliably from 4.5V down to 2.0V |
+| **7** | **Main Power Switch** | SPST Miniature Slide Switch (Panel or PCB Mount, 2-pin / 3-pin) | 1 | `SW_PWR` | ₹10 / $0.15 | **₹10 / $0.15** | Disconnects battery from Pico VSYS (Pin 39) for zero standby battery drain |
+| **8** | **Breadboard / Perfboard** | Half-size solderless breadboard (400 tie-points) or 5x7cm protoboard | 1 | `PCB` | ₹75 / $1.00 | **₹75 / $1.00** | Prototyping chassis or solderable perfboard for final handheld build |
+| **9** | **DuPont Jumper Wires** | Male-to-Female & Male-to-Male 10cm / 20cm flexible jumper wires | ~15 | `W1-W15` | ₹35 / $0.50 | **₹35 / $0.50** | Interconnect wiring between Pico, keypad, optics, and battery holder |
+| **10** | **0.96" I2C OLED Display** | 128x64 Monochrome SSD1306 (4-Pin: GND, VCC, SCL, SDA) | 1 | `DISP1` | ₹150 / $1.80 | **₹150 / $1.80** | Visual HUD: Displays target device, key pressed, IR command sent, and learning progress |
+| | **TOTAL ESTIMATED COST** | | | | | **₹850 / ~$10.50** | *(Full remote with OLED HUD, battery pack, optics, and keypad)* |
 
 > [!TIP]
 > **Cost Breakdown & Sourcing Tips:**
-> - **Core Electronics Only** (Pico + Keypad + IR Optics + Transistor + Passives): **~₹515 / $6.50**
-> - **Full Handheld Kit** (including 3x AAA batteries, battery holder, switch, breadboard, and wires): **~₹750 / $9.35**
-> - **Where to Buy**: Readily available at maker stores like Robu.in, Silverline Electronics, Amazon, AliExpress, and local electronics hobby component shops.
+> - **Core Electronics Only** (Pico + Keypad + 3-Pin IR LED Module + VS1838B + 0.96" OLED): **~₹655 / $7.80**
+> - **Direct Keypad Driving**: The 4x4 keypad matrix connects directly to 8 Pico GPIOs using RP2040 internal pull-ups (no I2C backpack needed).
+> - **OLED on Hardware I2C0**: The OLED screen connects neatly to Pico Pins 21 & 22 (`GP16` SDA & `GP17` SCL) on the right rail.
+> - **Optical Layout Advantage**: Positioned with straight horizontal wiring to Pico pins 13, 14, 15, 18, and 19 for minimal trace length and clean routing.
 
 ---
 
-### 2. Wiring Diagram
+### 2. Wiring Diagram & Optical Architecture (Top 5V Blaster & Bottom/Side Learning Eye)
 
+The transmitter (Top 5V IR LED Module) and receiver (Bottom/Side VS1838B) are placed at opposite ends of the remote for **zero optical crosstalk**:
+
+```text
+================================================================================
+ MODULE A: TOP 3-PIN 5V HIGH-POWER IR TRANSMITTER (3 WIRES)
+================================================================================
+  Pin 1: 5V (VBUS / VSYS) ────> Pico Pin 40 (VBUS 5V High-Power Rail)
+  Pin 2: GND (Ground)     ────> Pico Pin 18 (GND Return)
+  Pin 3: IN (Signal)      ────> Pico GP14 (Physical Pin 19, 38kHz PWM Slice 7A)
+  
+  * Built-in driver transistor pumps ~100mA pulses for 10–15 meter range!
+  * Located at the TOP FRONT of remote pointing toward TV/appliances.
+
+================================================================================
+ MODULE B: BOTTOM / SIDE 3-PIN VS1838B IR RECEIVER SENSOR (3 WIRES)
+================================================================================
+                    (Front Facing - Lens Bump Toward Incoming Remote)
+                           ┌─────────────────┐
+                           │   [VS1838B]     │
+                           │     ( █ )       │  <- Dedicated Learning Sensor
+                           └────┬───┬───┬────┘
+                                │   │   │
+                          Pin:  1   2   3
+                                │   │   │
+  Pin 1: OUT (Active-LOW) ──────┘   │   │  ───> Pico GP11 (Physical Pin 15)
+  Pin 2: GND (Ground Return) ───────┘   │  ───> Pico Pin 13 (GND)
+  Pin 3: VCC (3.3V Power) ──────────────┘  ───> Pico GP10 (Physical Pin 14, driven HIGH)
+
+  * Positioned at the BOTTOM (or side bezel) dedicated to learning codes.
+  * 170mm physical separation prevents transmitter blast from blinding the receiver!
+
+================================================================================
+ MODULE C: 0.96" I2C OLED DISPLAY (SSD1306 128x64 - 4 WIRES)
+================================================================================
+  Pin 1: GND (Ground)  ────> Pico Pin 23 (GND)
+  Pin 2: VCC (3.3V)    ────> Pico Pin 36 (3V3_OUT)
+  Pin 3: SCL (Clock)   ────> Pico GP17 (Physical Pin 22, I2C0 SCL)
+  Pin 4: SDA (Data)    ────> Pico GP16 (Physical Pin 21, I2C0 SDA)
+
+  * Real-time Heads-Up Display (HUD) mounted on top of the remote:
+    - Inverted top banner displaying target appliance: [TV], [AC], [SOUNDBAR], [PROJECTOR]
+    - Keypress & command telemetry: "Key: [B]" -> "Cmd: VOL_UP"
+    - Live transmission feedback & Learning Mode visual prompts ("Aim remote at RX...")
+    - Auto-detection: If the display is unplugged, system runs in headless serial mode.
 ```
-                 Raspberry Pi Pico (RP2040)
-               +---------------------------+
-               |                           |
-    3.3V (OUT) | [Pin 36] ----------------------------+
-               |                           |           |
-       GPIO 15 | [Pin 20] <-------+        |           |
-               |                  |        |           |
-       GPIO 16 | [Pin 21] ----+   |        |           |
-               |              |   |        |           |
-           GND | [Pin 18] ----|---|--------|----+      |
-               |              |   |        |    |      |
-           GND | [Pin 23] ----|---|----+   |    |      |
-               +--------------|---|----|---|----+      |
-                              |   |    |   |    |      |
-                              |   |    |   |    v      v
-                              |   |    |   |  [IR Receiver: VS1838B]
-                              |   |    |   |  +---------------------+
-                              |   |    |   |  | Pin 1 (OUT) ➜ GP15  |
-                              |   |    |   |  | Pin 2 (GND) ➜ GND   |
-                              |   |    |   |  | Pin 3 (VCC) ➜ 3.3V  |
-                              |   |    |   |  +---------------------+
-                              v   v    |   |
-    [Dual Series 940nm IR Emitters]    |   |
-    +----------------------------------+   |
-    |                                      |
-    |  GPIO 16 (Pin 21)                    |
-    |     │                                |
-    |     ▼                                |
-    |  [LED 1: 940nm IR] (Anode +)         |
-    |  [LED 1: 940nm IR] (Cathode -)       |
-    |     │                                |
-    |     ▼ (Direct Series Jumper)         |
-    |  [LED 2: 940nm IR] (Anode +)         |
-    |  [LED 2: 940nm IR] (Cathode -)       |
-    |     │                                |
-    |     ▼                                |
-    |  Pico GND (Pin 23) <-----------------+
-    +--------------------------------------
-    * Dual 1.35V drops = 2.70V total forward drop across 3.3V GPIO.
-      Naturally limits current to ~12-15mA at 33% PWM duty cycle.
-      ZERO external resistors, diodes, or transistors needed!
-```
 
-#### Receiver (VS1838B / TSOP38238)
-- **OUT (Signal)** $\rightarrow$ **GPIO 15** (Pin 20)
-- **GND** $\rightarrow$ **GND** (Pin 18 or 38)
-- **VCC** $\rightarrow$ **3.3V (OUT)** (Pin 36)
-
-#### Transmitter: Dual 940nm IR LEDs in Series (Direct GPIO Drive - No Resistors/Transistors)
-- **GPIO 16 (Pin 21)** $\rightarrow$ **LED 1 Anode (+)** *(longer leg)*
-- **LED 1 Cathode (-)** *(shorter leg)* $\rightarrow$ **LED 2 Anode (+)** *(longer leg)* *(direct series jumper)*
-- **LED 2 Cathode (-)** *(shorter leg)* $\rightarrow$ **Pico GND (Pin 23)**
-- **Why it works without resistors:** Each 940nm LED drops ~1.35V. Two in series drop 2.70V. With Pico GPIO outputting 3.3V, only ~0.6V remains, which the internal RP2040 output pad resistance safely limits to ~12–15mA at 33% PWM duty cycle.
-- **Beam Angle:** Point LED 1 straight ahead and bend LED 2 outward by ~25° for a wide-angle TV remote beam!
-
-*(Optional High-Power Alternative: If an NPN transistor like 2N2222 and 100Ω/1kΩ resistors are available, they can be added to drive a single LED at 35–50mA from the 4.5V rail for 8–10m range).*
+#### Why Separate the Top Blaster and the Bottom/Side Receiver?
+1. **Zero Optical Blinding / Crosstalk**:
+   - The top 5V IR LED fires at full 100mA power forward toward the TV.
+   - The bottom/side receiver listens in the opposite direction for original remotes during learning mode.
+   - Separated by 170mm across the remote shell, there is zero light leak or receiver saturation.
+2. **Intuitive Learning Ergonomics**:
+   - Point your old remote at the bottom bezel of the universal remote to teach it commands (standard Logitech Harmony style).
+   - Once learned, aim the top of the remote at your TV/AC to control it.
+3. **Simple 3-Wire Pinouts**:
+   - **Transmitter (Top)**: `[5V: Pin 40 (VBUS), GND: Pin 18, IN: GP14 (Pin 19)]`.
+   - **Receiver (Bottom/Side)**: `[DATA: GP11 (Pin 15), GND: Pin 13, VCC: GP10 (Pin 14)]`.
+4. **Dedicated 5V High-Power Transistor Boost**:
+   - The transmitter module carries an onboard transistor that switches 5V directly to the IR LED, delivering ~100mA peak pulses for 10–15m coverage without loading the RP2040 GPIO.
 
 #### Power Supply: 3x AAA Battery Pack (4.5V Alkaline / 3.6V NiMH)
 To make the remote completely wireless and handheld:
@@ -119,28 +120,44 @@ To make the remote completely wireless and handheld:
 - **External USB Access**: The Raspberry Pi Pico is mounted in the lower grip with its micro-USB port facing outward at the bottom of the remote casing. This allows convenient firmware flashing, code updating, and serial monitoring directly via USB without opening the case.
 - **Transmission Range**: Powered from 4.5V via the 100Ω current limiter, the 940nm IR LED receives ~30–35mA pulse current for effective 5–8 meter line-of-sight range.
 
-#### 4x4 Matrix Keypad (16 Buttons - 8 GPIOs)
-Standard 4x4 readymade membrane or tactile keypad. Uses 8 GPIOs directly without any extra I2C ICs:
-- **Rows (Outputs, Scanned LOW)**:
-  - **Row 0** $\rightarrow$ **GPIO 6** (Pin 9)
-  - **Row 1** $\rightarrow$ **GPIO 7** (Pin 10)
-  - **Row 2** $\rightarrow$ **GPIO 8** (Pin 11)
-  - **Row 3** $\rightarrow$ **GPIO 9** (Pin 12)
-- **Columns (Inputs with Internal Pull-Ups)**:
-  - **Col 0** $\rightarrow$ **GPIO 10** (Pin 14)
-  - **Col 1** $\rightarrow$ **GPIO 11** (Pin 15)
-  - **Col 2** $\rightarrow$ **GPIO 12** (Pin 16)
-  - **Col 3** $\rightarrow$ **GPIO 13** (Pin 17)
+#### 4x4 Matrix Keypad (Direct 8-Pin GPIO Matrix)
+The 4x4 matrix keypad connects directly to the Raspberry Pi Pico without requiring any external I2C expander chips, level shifters, or pull-up resistors (the RP2040 internal pull-ups handle everything):
+
+- **Keypad Ribbon Pinout (Pins 1 to 8)**:
+  - **Rows 0..3 (Outputs)**:
+    - Pin 1 (Row 0) $\rightarrow$ **Pico GP2 (Physical Pin 4)**
+    - Pin 2 (Row 1) $\rightarrow$ **Pico GP3 (Physical Pin 5)**
+    - Pin 3 (Row 2) $\rightarrow$ **Pico GP4 (Physical Pin 6)**
+    - Pin 4 (Row 3) $\rightarrow$ **Pico GP5 (Physical Pin 7)**
+  - **Cols 0..3 (Inputs with internal Pull-Up)**:
+    - Pin 5 (Col 0) $\rightarrow$ **Pico GP6 (Physical Pin 9)**
+    - Pin 6 (Col 1) $\rightarrow$ **Pico GP7 (Physical Pin 10)**
+    - Pin 7 (Col 2) $\rightarrow$ **Pico GP8 (Physical Pin 11)**
+    - Pin 8 (Col 3) $\rightarrow$ **Pico GP9 (Physical Pin 12)**
+
+> [!TIP]
+> **Clean Left-Rail Header (Physical Pins 4 to 19)**:
+> All active connections are neatly arranged along the left side of the Raspberry Pi Pico:
+> - **Pins 4–7 (GP2–GP5)**: Keypad Rows 0..3
+> - **Pin 8 (GND)**: System Ground
+> - **Pins 9–12 (GP6–GP9)**: Keypad Cols 0..3
+> - **Pin 13 (GND)**: IR Receiver Ground
+> - **Pin 14 (GP10)**: IR Receiver 3.3V Power OUT (driven HIGH)
+> - **Pin 15 (GP11)**: IR Receiver Demodulated Data IN
+> - **Pin 18 (GND)**: IR LED Ground Return
+> - **Pin 19 (GP14)**: 38 kHz Hardware PWM TX (IR Transmitter IN)
+> - **Pin 40 (VBUS)**: 5V High-Power Rail (IR Transmitter 5V)
 
 ##### 4x4 Keypad Remote Layout:
 ```text
-  [ 1 ]    [ 2 ]    [ 3 ]    [ A: MODE (Switch Device) ] <- Row 0 (GP6)
-  [ 4 ]    [ 5 ]    [ 6 ]    [ B: VOL ▲                ] <- Row 1 (GP7)
-  [ 7 ]    [ 8 ]    [ 9 ]    [ C: VOL ▼                ] <- Row 2 (GP8)
-  [ * ]    [ 0 ]    [ # ]    [ D: POWER                ] <- Row 3 (GP9)
+  [ 1 ]    [ 2 ]    [ 3 ]    [ A: MODE (Switch Device) ] <- Row 0 (GP2, Pin 4)
+  [ 4 ]    [ 5 ]    [ 6 ]    [ B: VOL ▲                ] <- Row 1 (GP3, Pin 5)
+  [ 7 ]    [ 8 ]    [ 9 ]    [ C: VOL ▼                ] <- Row 2 (GP4, Pin 6)
+  [ * ]    [ 0 ]    [ # ]    [ D: POWER                ] <- Row 3 (GP5, Pin 7)
     ^        ^        ^        ^
   Col 0    Col 1    Col 2    Col 3
-  (GP10)   (GP11)   (GP12)   (GP13)
+  (GP6)    (GP7)    (GP8)    (GP9)
+ (Pin 9)  (Pin 10) (Pin 11) (Pin 12)
 ```
 
 ##### Key Action Map:
@@ -161,9 +178,13 @@ Standard 4x4 readymade membrane or tactile keypad. Uses 8 GPIOs directly without
 ```text
 universal-IR-remote/
 ├── universal_ir.py        # Core engine: raw timing capture, 38kHz PWM, flash JSON storage
-├── keypad.py              # Direct 4x4 matrix keypad scanner (16 keys, 8 GPIOs)
-├── main.py                # Interactive CLI menu, 4x4 keypad remote loop, device switcher
-├── circuit_visualizer.html# Interactive browser visualizer with clickable 4x4 keypad
+├── keypad.py              # Direct 4x4 matrix keypad scanner (8 GPIOs, zero ICs)
+├── ssd1306.py             # Official MicroPython SSD1306 I2C framebuf display driver
+├── oled_ui.py             # High-level OLED Heads-Up Display manager (HUD, status, prompts)
+├── main.py                # Main interactive remote application & 4x4 keypad loop
+├── test_all.py            # Complete modular hardware diagnostic & test suite
+├── circuit_visualizer.html# Interactive browser visualizer with clickable 4x4 keypad & OLED
+├── .gitignore             # Standard Python / project ignore rules
 └── README.md              # Documentation and wiring guide
 ```
 
@@ -210,7 +231,7 @@ Available Commands:
   repeat <dev> <btn> <n>    - Send command n times (e.g. vol_up 5)
   list                      - View all learned devices & buttons
   delete <device> [button]  - Remove a button or entire device
-  keypad                    - Start 4x5 Keypad Matrix (20 keys)
+  keypad                    - Start 4x4 Keypad Remote (16 keys)
   help                      - Show this command list
 ============================================================
 

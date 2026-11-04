@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Raspberry Pi Pico Universal IR Remote - Handheld TV Remote Visualizer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --bg-dark: #060912;
@@ -27,11 +30,15 @@
       --wire-3v3: #ec4899;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       background-color: var(--bg-dark);
-      background-image: 
+      background-image:
         radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(192, 132, 252, 0.08) 0%, transparent 40%),
         linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
@@ -210,18 +217,52 @@
       color: var(--text-muted);
     }
 
-    .net-pill:hover, .net-pill.active {
+    .net-pill:hover,
+    .net-pill.active {
       color: #fff;
       border-color: currentColor;
     }
 
-    .net-pill[data-net="all"].active   { background: rgba(255, 255, 255, 0.15); color: #fff; }
-    .net-pill[data-net="vsys"].active  { background: rgba(244, 63, 94, 0.25); color: #fda4af; border-color: #f43f5e; }
-    .net-pill[data-net="rows"].active  { background: rgba(192, 132, 252, 0.25); color: #e9d5ff; border-color: #c084fc; }
-    .net-pill[data-net="cols"].active  { background: rgba(34, 211, 238, 0.25); color: #a5f3fc; border-color: #22d3ee; }
-    .net-pill[data-net="tx"].active    { background: rgba(249, 115, 22, 0.25); color: #fdba74; border-color: #f97316; }
-    .net-pill[data-net="rx"].active    { background: rgba(234, 179, 8, 0.25); color: #fef08a; border-color: #eab308; }
-    .net-pill[data-net="gnd"].active   { background: rgba(148, 163, 184, 0.25); color: #cbd5e1; border-color: #94a3b8; }
+    .net-pill[data-net="all"].active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .net-pill[data-net="pwr"].active {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      border-color: #ef4444;
+    }
+
+    .net-pill[data-net="keypad"].active {
+      background: rgba(192, 132, 252, 0.25);
+      color: #d8b4fe;
+      border-color: #c084fc;
+    }
+
+    .net-pill[data-net="tx"].active {
+      background: rgba(249, 115, 22, 0.25);
+      color: #fdba74;
+      border-color: #f97316;
+    }
+
+    .net-pill[data-net="rx"].active {
+      background: rgba(234, 179, 8, 0.25);
+      color: #fef08a;
+      border-color: #eab308;
+    }
+
+    .net-pill[data-net="oled"].active {
+      background: rgba(56, 189, 248, 0.25);
+      color: #7dd3fc;
+      border-color: #38bdf8;
+    }
+
+    .net-pill[data-net="gnd"].active {
+      background: rgba(148, 163, 184, 0.25);
+      color: #cbd5e1;
+      border-color: #94a3b8;
+    }
 
     .zoom-toolbar {
       display: inline-flex;
@@ -332,9 +373,20 @@
       transition: all 0.3s ease;
     }
 
-    .status-dot.active-tx { background: #f43f5e; box-shadow: 0 0 12px #f43f5e; }
-    .status-dot.active-rx { background: #facc15; box-shadow: 0 0 12px #facc15; }
-    .status-dot.power-off { background: #475569; box-shadow: none; }
+    .status-dot.active-tx {
+      background: #f43f5e;
+      box-shadow: 0 0 12px #f43f5e;
+    }
+
+    .status-dot.active-rx {
+      background: #facc15;
+      box-shadow: 0 0 12px #facc15;
+    }
+
+    .status-dot.power-off {
+      background: #475569;
+      box-shadow: none;
+    }
 
     .sidebar {
       display: flex;
@@ -456,9 +508,19 @@
 
     /* Animations */
     @keyframes pulseBeam {
-      0% { opacity: 0; transform: scale(0.6) translateY(0); }
-      50% { opacity: 0.95; }
-      100% { opacity: 0; transform: scale(1.6) translateY(-40px); }
+      0% {
+        opacity: 0;
+        transform: scale(0.6) translateY(0);
+      }
+
+      50% {
+        opacity: 0.95;
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.6) translateY(-40px);
+      }
     }
 
     .ir-beam {
@@ -472,9 +534,19 @@
     }
 
     @keyframes rxPulse {
-      0% { opacity: 0; transform: scale(0.7); }
-      50% { opacity: 1; }
-      100% { opacity: 0; transform: scale(1.3); }
+      0% {
+        opacity: 0;
+        transform: scale(0.7);
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.3);
+      }
     }
 
     .rx-detect {
@@ -500,7 +572,9 @@
       padding: 2rem;
     }
 
-    .modal-overlay.open { display: flex; }
+    .modal-overlay.open {
+      display: flex;
+    }
 
     .modal-content {
       background: #0b1120;
@@ -551,14 +625,23 @@
       vertical-align: top;
     }
 
-    .bom-table tr:hover td { background: rgba(56, 189, 248, 0.04); }
+    .bom-table tr:hover td {
+      background: rgba(56, 189, 248, 0.04);
+    }
 
     @media (max-width: 1250px) {
-      .workspace { grid-template-columns: 1fr; }
-      .sidebar { grid-template-columns: 1fr 1fr; display: grid; }
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        grid-template-columns: 1fr 1fr;
+        display: grid;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- Top Navigation -->
@@ -567,7 +650,8 @@
       <div class="brand-icon">🎮</div>
       <div class="brand-title">
         <h1>Handheld TV Remote - Universal IR Controller</h1>
-        <p>Ergonomic TV Remote Layout &bull; <span style="color:#34d399; font-weight:600;">1:1 REAL SIZE RATIOS (1mm = 6.0px)</span></p>
+        <p>Ergonomic TV Remote Layout &bull; <span style="color:#34d399; font-weight:600;">1:1 REAL SIZE RATIOS (1mm =
+            6.0px)</span></p>
       </div>
     </div>
 
@@ -598,34 +682,35 @@
           </div>
           <div class="zoom-toolbar">
             <button class="zoom-btn" id="btnZoomOut" title="Zoom Out (or scroll down)">🔍−</button>
-            <span id="zoomLevelText" style="font-family:'Fira Code', monospace; font-size: 0.75rem; color:#38bdf8; min-width: 44px; text-align: center;">100%</span>
+            <span id="zoomLevelText"
+              style="font-family:'Fira Code', monospace; font-size: 0.75rem; color:#38bdf8; min-width: 44px; text-align: center;">100%</span>
             <button class="zoom-btn" id="btnZoomIn" title="Zoom In (or scroll up)">🔍+</button>
             <button class="zoom-btn" id="btnZoomFit" title="Fit to Screen">⟲ Fit</button>
           </div>
           <span style="font-size: 0.8rem; color: #94a3b8;">
-            Handheld TV Remote &bull; Dual Series IR LEDs (Zero Resistors / Diodes) &bull; Architecture in Sidebar ➜
+            Handheld TV Remote &bull; 3-Pin 5V IR LED Module + 3-Pin VS1838B Receiver &bull; Direct 8-Pin Keypad Matrix ➜
           </span>
         </div>
         <div class="net-filters">
           <button class="net-pill active" data-net="all">All Wires</button>
-          <button class="net-pill" data-net="vsys" style="color:#fda4af;">4.5V (VSYS)</button>
-          <button class="net-pill" data-net="rows" style="color:#e9d5ff;">Rows (GP6–9)</button>
-          <button class="net-pill" data-net="cols" style="color:#a5f3fc;">Cols (GP10–13)</button>
-          <button class="net-pill" data-net="tx" style="color:#fdba74;">TX (GP16)</button>
-          <button class="net-pill" data-net="rx" style="color:#fef08a;">RX (GP15)</button>
+          <button class="net-pill" data-net="pwr" style="color:#ef4444;">Power (5V/4.5V)</button>
+          <button class="net-pill" data-net="keypad" style="color:#c084fc;">Keypad (GP2-9)</button>
+          <button class="net-pill" data-net="tx" style="color:#fdba74;">TX (GP14)</button>
+          <button class="net-pill" data-net="rx" style="color:#fef08a;">RX (GP11)</button>
+          <button class="net-pill" data-net="oled" style="color:#38bdf8;">OLED (I2C)</button>
           <button class="net-pill" data-net="gnd" style="color:#cbd5e1;">GND</button>
         </div>
       </div>
 
       <div class="canvas-container" id="canvasContainer">
-        <!-- SVG Interactive TV Remote: CENTERED & LARGE -->
-        <svg id="circuitSvg" viewBox="0 0 490 855" xmlns="http://www.w3.org/2000/svg">
+        <!-- SVG Interactive Wiring Schematic: SPACIOUS, ZERO-OVERLAP 1200x820 WIDESCREEN -->
+        <svg id="circuitSvg" viewBox="0 0 1200 820" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <filter id="chassisShadow" x="-15%" y="-10%" width="130%" height="130%">
-              <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000000" flood-opacity="0.85"/>
+            <filter id="chassisShadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000000" flood-opacity="0.85" />
             </filter>
             <filter id="buttonShadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.75"/>
+              <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.75" />
             </filter>
             <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
               <feGaussianBlur stdDeviation="6" result="blur" />
@@ -635,412 +720,604 @@
               </feMerge>
             </filter>
 
+            <!-- Blueprint Grid Pattern -->
+            <pattern id="circuitGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.8" opacity="0.6" />
+              <circle cx="0" cy="0" r="1.5" fill="#334155" />
+            </pattern>
+
             <!-- Gradients -->
-            <linearGradient id="chassisGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#090d16" />
-              <stop offset="10%" stop-color="#1e293b" />
-              <stop offset="50%" stop-color="#0f172a" />
-              <stop offset="90%" stop-color="#1e293b" />
-              <stop offset="100%" stop-color="#090d16" />
-            </linearGradient>
-
-            <linearGradient id="irLensGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#581c87" />
-              <stop offset="50%" stop-color="#3b0764" />
-              <stop offset="100%" stop-color="#1e1b4b" />
-            </linearGradient>
-
             <linearGradient id="picoGreen" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#16a34a" />
               <stop offset="100%" stop-color="#0f766e" />
             </linearGradient>
 
-            <linearGradient id="batteryDuracell" x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id="batteryDuracell" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#d97706" />
-              <stop offset="22%" stop-color="#f59e0b" />
-              <stop offset="38%" stop-color="#b45309" />
-              <stop offset="39%" stop-color="#1e293b" />
-              <stop offset="92%" stop-color="#090d16" />
+              <stop offset="25%" stop-color="#f59e0b" />
+              <stop offset="42%" stop-color="#b45309" />
+              <stop offset="43%" stop-color="#1e293b" />
+              <stop offset="90%" stop-color="#090d16" />
               <stop offset="100%" stop-color="#1e293b" />
             </linearGradient>
           </defs>
 
-          <!-- ============================================================= -->
-          <!-- 1. AUTHENTIC TV REMOTE (CENTERED: 460px Wide x 845px Tall)   -->
-          <!-- Position: Centered at X=15, Y=8                              -->
-          <!-- ============================================================= -->
-          <g id="tvRemoteBody" transform="translate(15, 8)">
-            
-            <!-- REMOTE SHADOW & OUTER CASING (460px Wide x 840px Tall) -->
-            <path d="
-              M 130 45 
-              C 130 18, 190 8, 230 8 
-              C 270 8, 330 18, 330 45 
-              L 430 170 
-              C 445 220, 445 580, 435 640 
-              L 425 800 
-              C 420 835, 370 845, 230 845 
-              C 90 845, 40 835, 35 800 
-              L 25 640 
-              C 15 580, 15 220, 30 170 
-              Z" 
-              fill="url(#chassisGrad)" 
-              stroke="#475569" 
-              stroke-width="3" 
-              filter="url(#chassisShadow)" 
-            />
+          <!-- Canvas Background & Grid -->
+          <rect width="1200" height="820" fill="#040813" />
+          <rect width="1200" height="820" fill="url(#circuitGrid)" />
 
-            <!-- Top Bezel Infrared Lens Window -->
-            <path d="M 150 38 C 160 18, 190 14, 230 14 C 270 14, 300 18, 310 38 L 300 52 L 160 52 Z" 
-                  fill="url(#irLensGrad)" stroke="#a855f7" stroke-width="2.5" />
-            <text x="230" y="44" fill="#e9d5ff" font-family="'Fira Code', monospace" font-size="8" font-weight="bold" text-anchor="middle">940nm OPTICAL WINDOW</text>
+          <!-- Blueprint Header Title -->
+          <g opacity="0.75">
+            <text x="600" y="24" fill="#64748b" font-family="'Outfit', sans-serif" font-size="11" font-weight="800"
+              letter-spacing="2" text-anchor="middle">DIY UNIVERSAL IR REMOTE — SPACIOUS HARDWARE WIRING SCHEMATIC (ZERO OVERLAP)</text>
+          </g>
 
-            <!-- Animated IR Beam -->
-            <g id="irBeamAnim" class="ir-beam">
-              <circle cx="230" cy="20" r="24" fill="#c084fc" opacity="0.35" filter="url(#neonGlow)" />
-              <circle cx="230" cy="20" r="48" fill="none" stroke="#e879f9" stroke-width="3" opacity="0.8" />
-              <circle cx="230" cy="20" r="75" fill="none" stroke="#c084fc" stroke-width="2" opacity="0.5" />
+          <!-- ============================================================= -->
+          <!-- 1. COMPONENT CARDS (SPACIOUS EXPLODED PLACEMENT)              -->
+          <!-- ============================================================= -->
+
+          <!-- A. 4x4 TACTILE MATRIX KEYPAD (UPPER LEFT: X=30, Y=48) -->
+          <g id="keypadCard" class="interactive-part" transform="translate(30, 48)" data-name="Direct 4x4 Keypad 8-Pin Header">
+            <rect x="0" y="0" width="350" height="425" rx="12" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8" filter="url(#buttonShadow)" />
+            <rect x="6" y="6" width="338" height="413" rx="8" fill="#070c1a" stroke="#1e293b" />
+
+            <!-- Title Header -->
+            <rect x="12" y="10" width="326" height="24" rx="4" fill="#0f172a" stroke="#1e293b" />
+            <text x="175" y="26" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">★ DIRECT 4x4 MATRIX KEYPAD (8-PIN) ★</text>
+
+            <!-- 16 Tactile Keys (4 Rows x 4 Cols) -->
+            <!-- Row 0: Keys 1, 2, 3, A(MODE) -->
+            <g class="tactile-key matrix-key" data-key="1" transform="translate(18, 44)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">1</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="2" transform="translate(84, 44)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">2</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="3" transform="translate(150, 44)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">3</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="A" transform="translate(216, 44)">
+              <rect class="key-cap" x="0" y="0" width="64" height="48" rx="7" fill="#4c1d95" stroke="#a855f7" stroke-width="1.5" filter="url(#buttonShadow)" />
+              <text x="32" y="24" fill="#ffffff" font-size="14" font-weight="800" text-anchor="middle">A</text>
+              <text x="32" y="38" fill="#e9d5ff" font-size="7" font-weight="bold" text-anchor="middle">LEARN</text>
             </g>
 
-            <!-- Learning RX Waves -->
+            <!-- Row 1: Keys 4, 5, 6, B(VOL+) -->
+            <g class="tactile-key matrix-key" data-key="4" transform="translate(18, 100)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">4</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="5" transform="translate(84, 100)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">5</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="6" transform="translate(150, 100)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">6</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="B" transform="translate(216, 100)">
+              <rect class="key-cap" x="0" y="0" width="64" height="48" rx="7" fill="#0369a1" stroke="#38bdf8" stroke-width="1.5" filter="url(#buttonShadow)" />
+              <text x="32" y="24" fill="#ffffff" font-size="14" font-weight="800" text-anchor="middle">B</text>
+              <text x="32" y="38" fill="#bae6fd" font-size="7" font-weight="bold" text-anchor="middle">VOL ▲</text>
+            </g>
+
+            <!-- Row 2: Keys 7, 8, 9, C(VOL-) -->
+            <g class="tactile-key matrix-key" data-key="7" transform="translate(18, 156)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">7</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="8" transform="translate(84, 156)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">8</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="9" transform="translate(150, 156)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">9</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="C" transform="translate(216, 156)">
+              <rect class="key-cap" x="0" y="0" width="64" height="48" rx="7" fill="#0369a1" stroke="#38bdf8" stroke-width="1.5" filter="url(#buttonShadow)" />
+              <text x="32" y="24" fill="#ffffff" font-size="14" font-weight="800" text-anchor="middle">C</text>
+              <text x="32" y="38" fill="#bae6fd" font-size="7" font-weight="bold" text-anchor="middle">VOL ▼</text>
+            </g>
+
+            <!-- Row 3: Keys *, 0, #, D(POWER) -->
+            <g class="tactile-key matrix-key" data-key="*" transform="translate(18, 212)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="27" fill="#f8fafc" font-size="18" font-weight="bold" text-anchor="middle">*</text>
+              <text x="29" y="40" fill="#94a3b8" font-size="6.5" font-weight="bold" text-anchor="middle">MUTE</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="0" transform="translate(84, 212)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#1e293b" stroke="#475569" stroke-width="1.2" filter="url(#buttonShadow)" />
+              <text x="29" y="30" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">0</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="#" transform="translate(150, 212)">
+              <rect class="key-cap" x="0" y="0" width="58" height="48" rx="7" fill="#047857" stroke="#34d399" stroke-width="1.5" filter="url(#buttonShadow)" />
+              <text x="29" y="26" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">#</text>
+              <text x="29" y="39" fill="#a7f3d0" font-size="6.5" font-weight="bold" text-anchor="middle">ENTER</text>
+            </g>
+            <g class="tactile-key matrix-key" data-key="D" transform="translate(216, 212)">
+              <rect class="key-cap" x="0" y="0" width="64" height="48" rx="7" fill="#b91c1c" stroke="#f87171" stroke-width="1.8" filter="url(#buttonShadow)" />
+              <text x="32" y="24" fill="#ffffff" font-size="14" font-weight="800" text-anchor="middle">D</text>
+              <text x="32" y="38" fill="#fecaca" font-size="6.5" font-weight="800" text-anchor="middle">POWER</text>
+            </g>
+
+            <!-- 8-Pin Flex Ribbon Header Output Strip (Right Edge) -->
+            <rect x="290" y="44" width="52" height="375" rx="5" fill="#020617" stroke="#334155" stroke-width="1" />
+            <text x="316" y="60" fill="#38bdf8" font-size="6" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">8-PIN</text>
+            <text x="316" y="70" fill="#94a3b8" font-size="5" font-family="'Fira Code', monospace" text-anchor="middle">RIBBON</text>
+
+            <!-- 4 Row Output Terminals (GP2..GP5) -->
+            <circle cx="340" cy="167" r="3" fill="#a855f7" />
+            <text x="330" y="170" fill="#c4b5fd" font-size="6" font-family="monospace" text-anchor="end">R0</text>
+
+            <circle cx="340" cy="197" r="3" fill="#a855f7" />
+            <text x="330" y="200" fill="#c4b5fd" font-size="6" font-family="monospace" text-anchor="end">R1</text>
+
+            <circle cx="340" cy="227" r="3" fill="#a855f7" />
+            <text x="330" y="230" fill="#c4b5fd" font-size="6" font-family="monospace" text-anchor="end">R2</text>
+
+            <circle cx="340" cy="257" r="3" fill="#a855f7" />
+            <text x="330" y="260" fill="#c4b5fd" font-size="6" font-family="monospace" text-anchor="end">R3</text>
+
+            <!-- 4 Col Output Terminals (GP6..GP9) -->
+            <circle cx="340" cy="317" r="3" fill="#38bdf8" />
+            <text x="330" y="320" fill="#93c5fd" font-size="6" font-family="monospace" text-anchor="end">C0</text>
+
+            <circle cx="340" cy="347" r="3" fill="#38bdf8" />
+            <text x="330" y="350" fill="#93c5fd" font-size="6" font-family="monospace" text-anchor="end">C1</text>
+
+            <circle cx="340" cy="377" r="3" fill="#38bdf8" />
+            <text x="330" y="380" fill="#93c5fd" font-size="6" font-family="monospace" text-anchor="end">C2</text>
+
+            <circle cx="340" cy="407" r="3" fill="#38bdf8" />
+            <text x="330" y="410" fill="#93c5fd" font-size="6" font-family="monospace" text-anchor="end">C3</text>
+          </g>
+
+          <!-- B. IDENTICAL SIZE 3-PIN VS1838B IR RECEIVER (X=100, Y=486, 160x88) -->
+          <g id="rxCard" class="interactive-part" transform="translate(100, 486)" data-name="VS1838B IR Receiver (3-Pin Symmetrical Module)">
+            <rect x="0" y="0" width="160" height="88" rx="8" fill="#0b1329" stroke="#facc15" stroke-width="1.6" filter="url(#buttonShadow)" />
+            <rect x="4" y="4" width="152" height="80" rx="6" fill="#070c1a" stroke="#1e293b" />
+
+            <!-- Title Header -->
+            <text x="50" y="14" fill="#facc15" font-family="'Fira Code', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">VS1838B (38kHz)</text>
+
+            <!-- Photodiode Dome & Optical Metal Shield -->
+            <rect x="10" y="22" width="44" height="54" rx="4" fill="#020617" stroke="#ca8a04" stroke-width="1" />
+            <circle cx="32" cy="46" r="14" fill="#090d16" stroke="#facc15" stroke-width="1.3" />
+            <circle cx="32" cy="46" r="6.5" fill="#1e1b4b" stroke="#ca8a04" stroke-width="0.8" />
+            <circle cx="32" cy="46" r="2.8" fill="#facc15" />
+            <text x="32" y="68" fill="#fef08a" font-family="'Fira Code', monospace" font-size="5" font-weight="bold" text-anchor="middle">IR RX</text>
+
+            <!-- Learning RX Waves Animation (Incoming to Receiver) -->
             <g id="rxWaves" class="rx-detect">
-              <path d="M 180 20 Q 230 -12 280 20" fill="none" stroke="#facc15" stroke-width="3.5" stroke-linecap="round" />
-              <path d="M 165 10 Q 230 -28 295 10" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" opacity="0.7" />
+              <path d="M 10 46 Q 0 34 0 46 Q 0 58 10 46" fill="none" stroke="#facc15" stroke-width="2" stroke-linecap="round" />
+              <path d="M 2 46 Q -9 27 -9 46 Q -9 65 2 46" fill="none" stroke="#facc15" stroke-width="1.4" stroke-linecap="round" opacity="0.7" />
             </g>
 
-            <!-- Top Stage: OPTICAL TRANSCEIVER CIRCUIT MODULE -->
-            <g id="topTransceiverStage" transform="translate(45, 62)">
-              <rect x="0" y="0" width="370" height="74" rx="8" fill="#090d16" stroke="#334155" stroke-width="1.5" />
+            <!-- Specs Badge (Center) -->
+            <rect x="58" y="22" width="28" height="54" rx="3" fill="#020617" stroke="#1e293b" />
+            <text x="72" y="36" fill="#facc15" font-size="5.5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">DEMOD</text>
+            <text x="72" y="49" fill="#34d399" font-size="5" font-family="'Outfit', sans-serif" text-anchor="middle">3.3V</text>
+            <text x="72" y="62" fill="#94a3b8" font-size="5" font-family="'Outfit', sans-serif" text-anchor="middle">AGC</text>
 
-              <!-- A. VS1838B IR Demodulating Receiver (38kHz) -->
-              <g class="interactive-part" transform="translate(15, 8)" data-name="VS1838B IR Receiver (38kHz)">
-                <rect x="0" y="0" width="85" height="58" rx="6" fill="#131e31" stroke="#ca8a04" stroke-width="1.2" />
-                <rect x="18" y="6" width="48" height="26" rx="4" fill="#334155" stroke="#64748b" />
-                <!-- Photodiode Lens Dome -->
-                <circle cx="42" cy="19" r="9" fill="#0f172a" stroke="#ca8a04" stroke-width="1.5" />
-                <circle cx="42" cy="19" r="4" fill="#facc15" opacity="0.7" />
-                <text x="42" y="42" fill="#facc15" font-family="'Fira Code', monospace" font-size="7" font-weight="bold" text-anchor="middle">VS1838B</text>
-                
-                <!-- 3 Terminal Labels -->
-                <text x="18" y="53" fill="#94a3b8" font-size="6" font-family="monospace">OUT</text>
-                <text x="42" y="53" fill="#94a3b8" font-size="6" font-family="monospace" text-anchor="middle">GND</text>
-                <text x="68" y="53" fill="#94a3b8" font-size="6" font-family="monospace" text-anchor="end">3V3</text>
-              </g>
+            <!-- 3-Pin Header (Right Edge: Y=14, Y=44, Y=74 ➜ Global Y=500, 530, 560 Dead Straight!) -->
+            <rect x="90" y="8" width="65" height="72" rx="4" fill="#020617" stroke="#334155" stroke-width="0.8" />
 
-              <!-- B. Central Status & Appliance Indicator -->
-              <g transform="translate(112, 10)">
-                <rect x="0" y="0" width="144" height="54" rx="6" fill="#0b1120" stroke="#1e293b" />
-                <text x="72" y="16" fill="#64748b" font-family="'Outfit', sans-serif" font-size="8.5" font-weight="800" letter-spacing="1" text-anchor="middle">PICO REMOTE</text>
-                
-                <rect x="12" y="22" width="56" height="15" rx="3" fill="#1e293b" />
-                <text x="40" y="33" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="7" font-weight="bold" text-anchor="middle">38.0 kHz</text>
+            <!-- Pin 2: GND (Pin 13) -->
+            <text x="138" y="17" fill="#cbd5e1" font-size="5.5" font-family="monospace" text-anchor="end">GND(13)</text>
+            <circle cx="150" cy="14" r="2.8" fill="#cbd5e1" />
 
-                <rect x="74" y="22" width="58" height="24" rx="4" fill="#1e1b4b" stroke="#7c3aed" stroke-width="1" />
-                <text x="103" y="32" fill="#a855f7" font-size="6" font-family="'Fira Code', monospace" text-anchor="middle">TARGET</text>
-                <text id="remoteDevDisplay" x="103" y="43" fill="#ffffff" font-size="9.5" font-weight="bold" font-family="'Fira Code', monospace" text-anchor="middle">TV</text>
+            <!-- Pin 3: VCC (Pin 14 / GP10 3.3V) -->
+            <text x="138" y="47" fill="#f472b6" font-size="5.5" font-family="monospace" text-anchor="end">VCC(10)</text>
+            <circle cx="150" cy="44" r="2.8" fill="#f472b6" />
 
-                <circle id="keypadTxLed" cx="72" cy="45" r="4" fill="#334155" stroke="#475569" stroke-width="1" />
-              </g>
+            <!-- Pin 1: OUT (Pin 15 / GP11) -->
+            <text x="138" y="77" fill="#facc15" font-size="5.5" font-family="monospace" font-weight="bold" text-anchor="end">OUT(11)</text>
+            <circle cx="150" cy="74" r="2.8" fill="#facc15" />
+          </g>
 
-              <!-- C. Dual 940nm IR Emitter LEDs in Series (Direct GPIO Drive - No Resistors / No Transistors) -->
-              <g class="interactive-part" transform="translate(255, 8)" data-name="Dual 940nm IR LEDs (Series Direct Drive)">
-                <rect x="0" y="0" width="105" height="58" rx="6" fill="#131e31" stroke="#c084fc" stroke-width="1.2" />
+          <!-- C. IDENTICAL SIZE 3-PIN 5V IR TRANSMITTER (X=100, Y=606, 160x88) -->
+          <g id="txCard" class="interactive-part" transform="translate(100, 606)" data-name="3-Pin 5V High-Power IR LED Module">
+            <rect x="0" y="0" width="160" height="88" rx="8" fill="#0b1329" stroke="#ef4444" stroke-width="1.6" filter="url(#buttonShadow)" />
+            <rect x="4" y="4" width="152" height="80" rx="6" fill="#070c1a" stroke="#1e293b" />
 
-                <!-- LED 1: Straight Ahead Beam -->
-                <circle cx="28" cy="18" r="8" fill="#581c87" stroke="#c084fc" stroke-width="1.5" />
-                <circle cx="28" cy="18" r="4" fill="#a855f7" />
-                <text x="28" y="34" fill="#e9d5ff" font-size="6.5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">LED 1</text>
-                <text x="28" y="42" fill="#cbd5e1" font-size="5.5" font-family="'Fira Code', monospace" text-anchor="middle">Forward</text>
+            <!-- Title -->
+            <text x="50" y="14" fill="#f87171" font-family="'Fira Code', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">IR TX (5V BOOST)</text>
 
-                <!-- Series Interconnect Link -->
-                <path d="M 36 18 L 65 18" stroke="#38bdf8" stroke-width="2" stroke-dasharray="2,2" />
-                <circle cx="50.5" cy="18" r="2.5" fill="#38bdf8" />
-                <text x="50.5" y="27" fill="#38bdf8" font-size="5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">SERIES</text>
+            <!-- High-Power 940nm Emitter Dome -->
+            <rect x="10" y="22" width="44" height="54" rx="4" fill="#020617" stroke="#ef4444" stroke-width="1" />
+            <circle cx="32" cy="46" r="14" fill="#3b0764" stroke="#c084fc" stroke-width="1.4" />
+            <circle cx="32" cy="46" r="7" fill="#a855f7" />
+            <circle cx="32" cy="46" r="3" fill="#f5d0fe" />
+            <text x="32" y="68" fill="#e9d5ff" font-family="'Fira Code', monospace" font-size="4.8" font-weight="bold" text-anchor="middle">940nm</text>
 
-                <!-- LED 2: Angled Wide Beam -->
-                <circle cx="73" cy="18" r="8" fill="#581c87" stroke="#c084fc" stroke-width="1.5" />
-                <circle cx="73" cy="18" r="4" fill="#a855f7" />
-                <text x="73" y="34" fill="#e9d5ff" font-size="6.5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">LED 2</text>
-                <text x="73" y="42" fill="#cbd5e1" font-size="5.5" font-family="'Fira Code', monospace" text-anchor="middle">Wide Angle</text>
-
-                <!-- 3 Terminal Labels -->
-                <text x="20" y="53" fill="#fdba74" font-size="6" font-family="monospace">GP16 (+)</text>
-                <text x="50.5" y="53" fill="#34d399" font-size="5.5" font-family="monospace" text-anchor="middle">2.7V Drop</text>
-                <text x="82" y="53" fill="#94a3b8" font-size="6" font-family="monospace">GND (-)</text>
-              </g>
+            <!-- Animated Outgoing IR Beam -->
+            <g id="irBeamAnim" class="ir-beam">
+              <circle cx="32" cy="46" r="19" fill="none" stroke="#c084fc" opacity="0.35" filter="url(#neonGlow)" />
+              <circle cx="32" cy="46" r="27" fill="none" stroke="#e879f9" stroke-width="1.8" opacity="0.8" />
             </g>
 
-            <!-- 4x4 KEYPAD BUTTON MATRIX (16 TACTILE BUTTONS) -->
-            <!-- Position: x=45, y=145. Each button 78px x 60px -->
-            <g id="tactileKeypadMatrix" transform="translate(45, 145)">
-              <rect x="-6" y="-6" width="382" height="315" rx="12" fill="#131b2e" stroke="#1e293b" stroke-width="1.5" />
+            <!-- HUD & Status (Center) -->
+            <rect x="58" y="22" width="28" height="54" rx="3" fill="#020617" stroke="#1e293b" />
+            <circle id="keypadTxLed" cx="72" cy="33" r="3" fill="#334155" stroke="#475569" stroke-width="0.8" />
+            <text id="remoteDevDisplay" x="72" y="49" fill="#ffffff" font-size="6.5" font-weight="bold" font-family="'Fira Code', monospace" text-anchor="middle">TV</text>
+            <text x="72" y="63" fill="#38bdf8" font-size="5" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">38k</text>
 
-              <!-- ROW 0: [1] [2] [3] [A: MODE] -->
-              <g class="tactile-key matrix-key" data-key="1" transform="translate(0, 0)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">1</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="2" transform="translate(96, 0)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">2</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="3" transform="translate(192, 0)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">3</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="A" transform="translate(288, 0)">
-                <rect class="key-cap" x="0" y="0" width="82" height="60" rx="9" fill="#7e22ce" stroke="#c084fc" stroke-width="1.8" filter="url(#buttonShadow)" />
-                <text x="41" y="30" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">A</text>
-                <text x="41" y="46" fill="#e9d5ff" font-size="8.5" font-weight="700" text-anchor="middle">MODE</text>
+            <!-- 3-Pin Header (Right Edge: Y=14, Y=44, Y=74 ➜ Global Y=620, 650, 680 Dead Straight!) -->
+            <rect x="90" y="8" width="65" height="72" rx="4" fill="#020617" stroke="#334155" stroke-width="0.8" />
+
+            <!-- Pin 2: GND (Pin 18) -->
+            <text x="138" y="17" fill="#cbd5e1" font-size="5.5" font-family="monospace" text-anchor="end">GND(18)</text>
+            <circle cx="150" cy="14" r="2.8" fill="#cbd5e1" />
+
+            <!-- Pin 3: IN (GP14 / Pin 19) -->
+            <text x="138" y="47" fill="#fb923c" font-size="5.5" font-family="monospace" font-weight="bold" text-anchor="end">IN(GP14)</text>
+            <circle cx="150" cy="44" r="2.8" fill="#fb923c" />
+
+            <!-- Pin 1: 5V (VBUS / Pin 40) -->
+            <text x="138" y="77" fill="#ef4444" font-size="5.5" font-family="monospace" font-weight="bold" text-anchor="end">5V(VBUS)</text>
+            <circle cx="150" cy="74" r="2.8" fill="#ef4444" />
+          </g>
+
+
+
+          <!-- D. RASPBERRY PI PICO MCU (CENTER: X=470, Y=175) -->
+          <g id="picoMcu" class="interactive-part" transform="translate(470, 175)" data-name="Raspberry Pi Pico (USB Bottom-Facing)">
+            <!-- Green Board PCB -->
+            <rect x="0" y="0" width="260" height="590" rx="12" fill="url(#picoGreen)" stroke="#15803d" stroke-width="2.5" filter="url(#buttonShadow)" />
+            <rect x="8" y="8" width="244" height="574" rx="8" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-dasharray="4,4" />
+
+            <!-- Title Silk -->
+            <text x="130" y="32" fill="#ffffff" font-family="'Outfit', sans-serif" font-size="11" font-weight="800" letter-spacing="1" text-anchor="middle">RASPBERRY PI PICO</text>
+            <text x="130" y="46" fill="#86efac" font-family="'Fira Code', monospace" font-size="7" font-weight="bold" text-anchor="middle">RP2040 DUAL-CORE ARM CORTEX-M0+</text>
+
+            <!-- RP2040 Chip -->
+            <rect x="90" y="235" width="80" height="80" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+            <circle cx="100" cy="245" r="3" fill="#64748b" />
+            <text x="130" y="275" fill="#f8fafc" font-family="'Fira Code', monospace" font-size="9" font-weight="bold" text-anchor="middle">RP2040</text>
+            <text x="130" y="290" fill="#94a3b8" font-family="'Fira Code', monospace" font-size="6" text-anchor="middle">133 MHz</text>
+
+            <!-- BOOTSEL Button -->
+            <circle cx="130" cy="355" r="10" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5" />
+            <text x="130" y="375" fill="#f8fafc" font-size="6.5" font-weight="bold" font-family="'Fira Code', monospace" text-anchor="middle">BOOTSEL</text>
+
+            <!-- Onboard Activity LED -->
+            <circle id="picoOnboardLed" cx="155" cy="405" r="4.5" fill="#22c55e" opacity="0.8" />
+            <text x="155" y="420" fill="#86efac" font-size="6" font-family="monospace" text-anchor="middle">LED</text>
+
+            <!-- Bottom USB Port (Facing Downward) -->
+            <rect x="95" y="565" width="70" height="25" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="1.4" />
+            <rect x="110" y="575" width="40" height="12" rx="2" fill="#090d16" />
+            <text x="130" y="555" fill="#e2e8f0" font-family="'Fira Code', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">MICRO-USB</text>
+
+            <!-- ---------------------------------------------------- -->
+            <!-- LEFT PIN RAIL: PINS 1 TO 20 (X = 0)                  -->
+            <!-- ---------------------------------------------------- -->
+            <!-- Pin 4: GP2 (Row 0) -->
+            <rect x="0" y="40" width="22" height="14" rx="2" fill="#7c3aed" />
+            <text x="26" y="51" fill="#c4b5fd" font-size="7" font-weight="bold" font-family="monospace">GP2 (R0)</text>
+
+            <!-- Pin 5: GP3 (Row 1) -->
+            <rect x="0" y="70" width="22" height="14" rx="2" fill="#7c3aed" />
+            <text x="26" y="81" fill="#c4b5fd" font-size="7" font-weight="bold" font-family="monospace">GP3 (R1)</text>
+
+            <!-- Pin 6: GP4 (Row 2) -->
+            <rect x="0" y="100" width="22" height="14" rx="2" fill="#7c3aed" />
+            <text x="26" y="111" fill="#c4b5fd" font-size="7" font-weight="bold" font-family="monospace">GP4 (R2)</text>
+
+            <!-- Pin 7: GP5 (Row 3) -->
+            <rect x="0" y="130" width="22" height="14" rx="2" fill="#7c3aed" />
+            <text x="26" y="141" fill="#c4b5fd" font-size="7" font-weight="bold" font-family="monospace">GP5 (R3)</text>
+
+            <!-- Pin 8: GND -->
+            <rect x="0" y="160" width="22" height="14" rx="2" fill="#475569" />
+            <text x="26" y="171" fill="#cbd5e1" font-size="6.5" font-family="monospace">GND(8)</text>
+
+            <!-- Pin 9: GP6 (Col 0) -->
+            <rect x="0" y="190" width="22" height="14" rx="2" fill="#0284c7" />
+            <text x="26" y="201" fill="#93c5fd" font-size="7" font-weight="bold" font-family="monospace">GP6 (C0)</text>
+
+            <!-- Pin 10: GP7 (Col 1) -->
+            <rect x="0" y="220" width="22" height="14" rx="2" fill="#0284c7" />
+            <text x="26" y="231" fill="#93c5fd" font-size="7" font-weight="bold" font-family="monospace">GP7 (C1)</text>
+
+            <!-- Pin 11: GP8 (Col 2) -->
+            <rect x="0" y="250" width="22" height="14" rx="2" fill="#0284c7" />
+            <text x="26" y="261" fill="#93c5fd" font-size="7" font-weight="bold" font-family="monospace">GP8 (C2)</text>
+
+            <!-- Pin 12: GP9 (Col 3) -->
+            <rect x="0" y="280" width="22" height="14" rx="2" fill="#0284c7" />
+            <text x="26" y="291" fill="#93c5fd" font-size="7" font-weight="bold" font-family="monospace">GP9 (C3)</text>
+
+            <!-- Pin 13: GND (RX Ground) -->
+            <rect x="0" y="325" width="22" height="14" rx="2" fill="#475569" />
+            <text x="26" y="336" fill="#cbd5e1" font-size="6.5" font-family="monospace">GND(13)</text>
+
+            <!-- Pin 14: GP10 (RX 3.3V VCC) -->
+            <rect x="0" y="355" width="22" height="14" rx="2" fill="#db2777" />
+            <text x="26" y="366" fill="#f472b6" font-size="7" font-weight="bold" font-family="monospace">GP10 (3V3)</text>
+
+            <!-- Pin 15: GP11 (RX Data OUT) -->
+            <rect x="0" y="385" width="22" height="14" rx="2" fill="#ca8a04" />
+            <text x="26" y="396" fill="#fef08a" font-size="7" font-weight="bold" font-family="monospace">GP11 (RX)</text>
+
+            <!-- Pin 18: GND (TX Ground) -->
+            <rect x="0" y="445" width="22" height="14" rx="2" fill="#475569" />
+            <text x="26" y="456" fill="#cbd5e1" font-size="6.5" font-family="monospace">GND(18)</text>
+
+            <!-- Pin 19: GP14 (TX 38kHz PWM) -->
+            <rect x="0" y="475" width="22" height="14" rx="2" fill="#ea580c" />
+            <text x="26" y="486" fill="#ffedd5" font-size="7" font-weight="bold" font-family="monospace">GP14 (TX)</text>
+
+            <!-- ---------------------------------------------------- -->
+            <!-- RIGHT PIN RAIL: PINS 21 TO 40 (X = 238)              -->
+            <!-- ---------------------------------------------------- -->
+            <!-- Pin 40: VBUS 5V -->
+            <rect x="238" y="5" width="22" height="14" rx="2" fill="#ef4444" />
+            <text x="232" y="16" fill="#fca5a5" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">VBUS 5V(40)</text>
+
+            <!-- Pin 39: VSYS (4.5V Battery IN) -->
+            <rect x="238" y="55" width="22" height="14" rx="2" fill="#e11d48" />
+            <text x="232" y="66" fill="#fda4af" font-size="7.5" font-weight="bold" font-family="monospace" text-anchor="end">VSYS(39)</text>
+
+            <!-- Pin 38: GND (Battery Return) -->
+            <rect x="238" y="105" width="22" height="14" rx="2" fill="#475569" />
+            <text x="232" y="116" fill="#cbd5e1" font-size="7" font-family="monospace" text-anchor="end">GND(38)</text>
+
+            <!-- Pin 36: 3V3_OUT (OLED Power) -->
+            <rect x="238" y="155" width="22" height="14" rx="2" fill="#db2777" />
+            <text x="232" y="166" fill="#f472b6" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">3V3 OUT(36)</text>
+
+            <!-- Free Pins Silk Label (Pins 24 to 35) -->
+            <rect x="238" y="185" width="22" height="215" rx="3" fill="#1e293b" opacity="0.35" />
+            <text x="232" y="295" fill="#64748b" font-size="6" font-family="monospace" text-anchor="end" transform="rotate(-90 232 295)">PINS 24-35 (FREE)</text>
+
+            <!-- Pin 23: GND (OLED Ground) -->
+            <rect x="238" y="415" width="22" height="14" rx="2" fill="#475569" />
+            <text x="232" y="426" fill="#cbd5e1" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">GND(23)</text>
+
+            <!-- Pin 22: GP17 (OLED I2C0 SCL) -->
+            <rect x="238" y="445" width="22" height="14" rx="2" fill="#ca8a04" />
+            <text x="232" y="456" fill="#fef08a" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">GP17 SCL(22)</text>
+
+            <!-- Pin 21: GP16 (OLED I2C0 SDA) -->
+            <rect x="238" y="475" width="22" height="14" rx="2" fill="#0284c7" />
+            <text x="232" y="486" fill="#93c5fd" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">GP16 SDA(21)</text>
+          </g>
+
+          <!-- E. COMPACT POWER BAY: 3x AAA BATTERY PACK & SLIDE SWITCH (UPPER RIGHT: X=820, Y=48) -->
+          <g id="powerBay" class="interactive-part" transform="translate(820, 48)" data-name="3x AAA Battery Pack (4.5V)">
+            <rect x="0" y="0" width="350" height="240" rx="12" fill="#0b1329" stroke="#f43f5e" stroke-width="1.8" filter="url(#buttonShadow)" />
+            <rect x="5" y="5" width="340" height="230" rx="8" fill="#070c1a" stroke="#1e293b" />
+
+            <!-- Title Header -->
+            <rect x="12" y="8" width="326" height="20" rx="4" fill="#0f172a" stroke="#1e293b" />
+            <text x="175" y="22" fill="#fda4af" font-family="'Fira Code', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">★ 4.5V POWER SUPPLY &amp; SLIDE SWITCH ★</text>
+
+            <!-- SPST Miniature Slide Switch -->
+            <g id="powerSwitchGroup" class="interactive-part" transform="translate(16, 40)" data-name="SPST Miniature Slide Switch">
+              <rect x="0" y="0" width="68" height="96" rx="6" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5" />
+              <rect x="22" y="10" width="24" height="76" rx="4" fill="#090d16" />
+              
+              <!-- Switch Handle -->
+              <g id="switchHandle" transform="translate(15, 12)">
+                <rect id="switchKnob" x="0" y="0" width="38" height="34" rx="4" fill="#34d399" stroke="#059669" stroke-width="1.5" />
               </g>
 
-              <!-- ROW 1: [4] [5] [6] [B: VOL +] -->
-              <g class="tactile-key matrix-key" data-key="4" transform="translate(0, 74)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">4</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="5" transform="translate(96, 74)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">5</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="6" transform="translate(192, 74)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">6</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="B" transform="translate(288, 74)">
-                <rect class="key-cap" x="0" y="0" width="82" height="60" rx="9" fill="#0284c7" stroke="#38bdf8" stroke-width="1.8" filter="url(#buttonShadow)" />
-                <text x="41" y="30" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">B</text>
-                <text x="41" y="46" fill="#bae6fd" font-size="8.5" font-weight="700" text-anchor="middle">VOL ▲</text>
-              </g>
+              <text x="34" y="-5" fill="#38bdf8" font-size="7" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">SWITCH</text>
+              <text id="switchLabelText" x="34" y="118" fill="#34d399" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">ON</text>
 
-              <!-- ROW 2: [7] [8] [9] [C: VOL -] -->
-              <g class="tactile-key matrix-key" data-key="7" transform="translate(0, 148)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">7</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="8" transform="translate(96, 148)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">8</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="9" transform="translate(192, 148)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">9</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="C" transform="translate(288, 148)">
-                <rect class="key-cap" x="0" y="0" width="82" height="60" rx="9" fill="#0284c7" stroke="#38bdf8" stroke-width="1.8" filter="url(#buttonShadow)" />
-                <text x="41" y="30" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">C</text>
-                <text x="41" y="46" fill="#bae6fd" font-size="8.5" font-weight="700" text-anchor="middle">VOL ▼</text>
-              </g>
+              <!-- Switch Terminals -->
+              <circle cx="0" cy="28" r="3" fill="#ef4444" />
+              <text x="-6" y="31" fill="#fca5a5" font-size="6" font-family="monospace" text-anchor="end">IN(Bat+)</text>
 
-              <!-- ROW 3: [* : MUTE] [0] [# : ENTER] [D: POWER] -->
-              <g class="tactile-key matrix-key" data-key="*" transform="translate(0, 222)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#b45309" stroke="#facc15" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="33" fill="#ffffff" font-size="22" font-weight="800" text-anchor="middle">*</text>
-                <text x="39" y="47" fill="#fef08a" font-size="8.5" font-weight="700" text-anchor="middle">MUTE</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="0" transform="translate(96, 222)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="37" fill="#f8fafc" font-size="20" font-weight="700" text-anchor="middle">0</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="#" transform="translate(192, 222)">
-                <rect class="key-cap" x="0" y="0" width="78" height="60" rx="9" fill="#047857" stroke="#34d399" stroke-width="1.5" filter="url(#buttonShadow)" />
-                <text x="39" y="33" fill="#ffffff" font-size="18" font-weight="800" text-anchor="middle">#</text>
-                <text x="39" y="47" fill="#a7f3d0" font-size="8.5" font-weight="700" text-anchor="middle">ENTER</text>
-              </g>
-              <g class="tactile-key matrix-key" data-key="D" transform="translate(288, 222)">
-                <rect class="key-cap" x="0" y="0" width="82" height="60" rx="9" fill="#b91c1c" stroke="#f87171" stroke-width="2" filter="url(#buttonShadow)" />
-                <text x="41" y="30" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">D</text>
-                <text x="41" y="47" fill="#fecaca" font-size="8.5" font-weight="800" text-anchor="middle">POWER</text>
-              </g>
-
-              <!-- Keypad 8-Pin Flex Header Breakout at base of keypad -->
-              <rect x="35" y="295" width="135" height="14" rx="3" fill="#090d16" stroke="#334155" />
-              <text x="40" y="305" fill="#c084fc" font-size="6.5" font-family="'Fira Code', monospace">R0 R1 R2 R3</text>
-              <text x="110" y="305" fill="#22d3ee" font-size="6.5" font-family="'Fira Code', monospace">C0 C1 C2 C3</text>
+              <circle cx="0" cy="80" r="3" fill="#f43f5e" />
+              <text x="-6" y="83" fill="#fda4af" font-size="6" font-family="monospace" text-anchor="end">OUT(VSYS)</text>
             </g>
 
-            <!-- LOWER GRIP: PICO MCU (LEFT) & 3x AAA BATTERY BAY (RIGHT) -->
-            <!-- Position: x=45, y=485, height=335 -->
-            <g transform="translate(45, 485)">
-              <rect x="-6" y="-6" width="382" height="335" rx="12" fill="#0b1120" stroke="#1e293b" stroke-width="1.5" />
+            <!-- Compact 3x AAA Battery Compartment -->
+            <g transform="translate(98, 38)">
+              <rect x="0" y="0" width="238" height="186" rx="8" fill="#020617" stroke="#334155" stroke-width="1.2" />
 
-              <!-- A. RASPBERRY PI PICO (ROTATED 180°: USB FACING OUTWARD AT BOTTOM) -->
-              <!-- Position: x=12, y=15, width=135, height=305 -->
-              <g class="interactive-part" transform="translate(12, 15)" data-name="Raspberry Pi Pico (USB Bottom-Facing)">
-                <rect x="0" y="0" width="135" height="305" rx="7" fill="url(#picoGreen)" stroke="#15803d" stroke-width="2" filter="url(#buttonShadow)" />
-                <rect x="6" y="6" width="123" height="293" rx="4" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-dasharray="3,3" />
-
-                <!-- Micro-USB Port: Rotated to Face Bottom Edge of Remote -->
-                <rect x="42" y="295" width="51" height="22" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="1.4" />
-                <rect x="52" y="304" width="31" height="8" rx="2" fill="#090d16" />
-                <text x="67.5" y="328" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">USB OUTSIDE</text>
-
-                <!-- RP2040 Chip -->
-                <rect x="45" y="125" width="45" height="45" rx="3" fill="#1e293b" stroke="#334155" />
-                <text x="67.5" y="150" fill="#e2e8f0" font-family="'Fira Code', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">RP2040</text>
-                
-                <!-- BOOTSEL Button (Inverted lower half) -->
-                <circle cx="67.5" cy="225" r="8" fill="#cbd5e1" />
-                <text x="67.5" y="242" fill="#f8fafc" font-size="6.5" font-weight="bold" text-anchor="middle">BOOTSEL</text>
-
-                <!-- Onboard LED -->
-                <circle id="picoOnboardLed" cx="85" cy="265" r="3.5" fill="#22c55e" opacity="0.6" />
-                <text x="85" y="277" fill="#86efac" font-size="6" font-family="monospace" text-anchor="middle">LED</text>
-
-                <!-- Left Pin Breakout Pads (Inverted: Pins 21..40) -->
-                <rect id="pinGp16" x="0" y="25" width="18" height="14" fill="#ea580c" rx="2" /><text x="22" y="36" fill="#ffedd5" font-size="7.5" font-weight="bold" font-family="monospace">GP16(TX)</text>
-                <rect id="pin3v3" x="0" y="195" width="18" height="14" fill="#db2777" rx="2" /><text x="22" y="206" fill="#f472b6" font-size="7" font-family="monospace">3V3(36)</text>
-                <rect id="pinGnd38" x="0" y="235" width="18" height="14" fill="#475569" rx="2" /><text x="22" y="246" fill="#cbd5e1" font-size="7" font-family="monospace">GND(38)</text>
-                <rect id="pinVsys" x="0" y="265" width="18" height="14" fill="#e11d48" rx="2" /><text x="22" y="276" fill="#fda4af" font-size="7.5" font-weight="bold" font-family="monospace">VSYS(39)</text>
-
-                <!-- Right Pin Breakout Pads (Inverted: Pins 1..20) -->
-                <rect id="pinGp15" x="117" y="25" width="18" height="14" fill="#ca8a04" rx="2" /><text x="112" y="36" fill="#fef08a" font-size="7.5" font-weight="bold" font-family="monospace" text-anchor="end">GP15(RX)</text>
-                <rect id="pinGnd18" x="117" y="55" width="18" height="14" fill="#475569" rx="2" /><text x="112" y="66" fill="#cbd5e1" font-size="7" font-family="monospace" text-anchor="end">GND(18)</text>
-                <rect x="117" y="110" width="18" height="48" fill="#0891b2" rx="2" /><text x="112" y="138" fill="#cffafe" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">GP10-13</text>
-                <rect x="117" y="175" width="18" height="48" fill="#7e22ce" rx="2" /><text x="112" y="203" fill="#f3e8ff" font-size="7" font-weight="bold" font-family="monospace" text-anchor="end">GP6-9</text>
+              <!-- Cell 1 -->
+              <g transform="translate(16, 18)">
+                <rect x="0" y="0" width="54" height="140" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
+                <rect x="18" y="-7" width="18" height="7" rx="2" fill="#f1f5f9" />
+                <text x="27" y="75" fill="#ffffff" font-weight="bold" font-size="7.5" text-anchor="middle" transform="rotate(-90 27 75)">AAA 1.5V</text>
+                <text x="27" y="20" fill="#f87171" font-weight="bold" font-size="12" text-anchor="middle">+</text>
+                <text x="27" y="132" fill="#cbd5e1" font-weight="bold" font-size="14" text-anchor="middle">-</text>
               </g>
 
-              <!-- B. 3x AAA BATTERY PACK (RIGHT: 38mm x 52mm real proportions) -->
-              <!-- Position: x=165, y=15, width=195, height=305 -->
-              <g class="interactive-part" transform="translate(165, 15)" data-name="3x AAA Battery Pack (4.5V)">
-                <rect x="0" y="0" width="195" height="305" rx="10" fill="#131e31" stroke="#475569" stroke-width="1.8" filter="url(#buttonShadow)" />
-                <rect x="8" y="8" width="179" height="289" rx="6" fill="#090d16" stroke="#334155" stroke-width="1" />
-
-                <!-- 3 AAA Cells -->
-                <!-- Cell 1 -->
-                <g transform="translate(14, 25)">
-                  <rect x="0" y="0" width="46" height="235" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
-                  <rect x="16" y="-6" width="14" height="6" rx="2" fill="#f1f5f9" />
-                  <text x="23" y="120" fill="#ffffff" font-weight="bold" font-size="8" text-anchor="middle" transform="rotate(-90 23 120)">AAA 1.5V</text>
-                  <text x="23" y="20" fill="#f87171" font-weight="bold" font-size="11" text-anchor="middle">+</text>
-                  <text x="23" y="224" fill="#cbd5e1" font-weight="bold" font-size="13" text-anchor="middle">-</text>
-                </g>
-                <!-- Cell 2 -->
-                <g transform="translate(68, 25)">
-                  <rect x="0" y="0" width="46" height="235" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
-                  <rect x="16" y="-6" width="14" height="6" rx="2" fill="#f1f5f9" />
-                  <text x="23" y="120" fill="#ffffff" font-weight="bold" font-size="8" text-anchor="middle" transform="rotate(-90 23 120)">AAA 1.5V</text>
-                  <text x="23" y="20" fill="#f87171" font-weight="bold" font-size="11" text-anchor="middle">+</text>
-                  <text x="23" y="224" fill="#cbd5e1" font-weight="bold" font-size="13" text-anchor="middle">-</text>
-                </g>
-                <!-- Cell 3 -->
-                <g transform="translate(122, 25)">
-                  <rect x="0" y="0" width="46" height="235" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
-                  <rect x="16" y="-6" width="14" height="6" rx="2" fill="#f1f5f9" />
-                  <text x="23" y="120" fill="#ffffff" font-weight="bold" font-size="8" text-anchor="middle" transform="rotate(-90 23 120)">AAA 1.5V</text>
-                  <text x="23" y="20" fill="#f87171" font-weight="bold" font-size="11" text-anchor="middle">+</text>
-                  <text x="23" y="224" fill="#cbd5e1" font-weight="bold" font-size="13" text-anchor="middle">-</text>
-                </g>
-
-                <text x="98" y="280" fill="#34d399" font-family="'Fira Code', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">Series Total: 4.5V DC</text>
+              <!-- Cell 2 -->
+              <g transform="translate(92, 18)">
+                <rect x="0" y="0" width="54" height="140" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
+                <rect x="18" y="-7" width="18" height="7" rx="2" fill="#f1f5f9" />
+                <text x="27" y="75" fill="#ffffff" font-weight="bold" font-size="7.5" text-anchor="middle" transform="rotate(-90 27 75)">AAA 1.5V</text>
+                <text x="27" y="20" fill="#f87171" font-weight="bold" font-size="12" text-anchor="middle">+</text>
+                <text x="27" y="132" fill="#cbd5e1" font-weight="bold" font-size="14" text-anchor="middle">-</text>
               </g>
 
-              <!-- SPST Side Bezel Slide Switch -->
-              <g id="powerSwitchGroup" class="interactive-part" transform="translate(-38, 120)" data-name="SPST Miniature Slide Switch">
-                <rect x="0" y="0" width="32" height="60" rx="5" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5" />
-                <rect x="10" y="8" width="12" height="44" rx="4" fill="#090d16" />
-                <g id="switchHandle" transform="translate(8, 10)">
-                  <rect id="switchKnob" x="0" y="0" width="16" height="20" rx="3" fill="#34d399" stroke="#059669" stroke-width="1" />
-                </g>
-                <text x="16" y="-6" fill="#38bdf8" font-size="7" font-family="'Fira Code', monospace" font-weight="bold" text-anchor="middle">SWITCH</text>
-                <text id="switchLabelText" x="16" y="74" fill="#34d399" font-size="7" font-weight="bold" font-family="monospace" text-anchor="middle">ON</text>
+              <!-- Cell 3 -->
+              <g transform="translate(168, 18)">
+                <rect x="0" y="0" width="54" height="140" rx="5" fill="url(#batteryDuracell)" stroke="#475569" />
+                <rect x="18" y="-7" width="18" height="7" rx="2" fill="#f1f5f9" />
+                <text x="27" y="75" fill="#ffffff" font-weight="bold" font-size="7.5" text-anchor="middle" transform="rotate(-90 27 75)">AAA 1.5V</text>
+                <text x="27" y="20" fill="#f87171" font-weight="bold" font-size="12" text-anchor="middle">+</text>
+                <text x="27" y="132" fill="#cbd5e1" font-weight="bold" font-size="14" text-anchor="middle">-</text>
               </g>
+
+              <!-- Series Links -->
+              <path d="M 43 158 L 43 172 L 119 172 L 119 158" fill="none" stroke="#f59e0b" stroke-width="2.5" />
+              <path d="M 119 11 L 119 -3 L 195 -3 L 195 11" fill="none" stroke="#f59e0b" stroke-width="2.5" />
+
+              <text x="119" y="180" fill="#34d399" font-family="'Fira Code', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">Total: 4.5V DC</text>
+
+              <!-- Battery Main Output Terminals -->
+              <circle cx="43" cy="11" r="3.5" fill="#ef4444" />
+              <text x="43" y="4" fill="#fca5a5" font-size="6" font-family="monospace" text-anchor="middle">BAT(+)</text>
+
+              <circle cx="195" cy="158" r="3.5" fill="#cbd5e1" />
+              <text x="195" y="170" fill="#cbd5e1" font-size="6" font-family="monospace" text-anchor="middle">GND(-)</text>
+            </g>
+          </g>
+
+          <!-- F. 0.96" SSD1306 OLED DISPLAY (BELOW BATTERY: X=820, Y=305) -->
+          <g id="oledDisplayCard" class="interactive-part" transform="translate(820, 305)" data-name="0.96 inch I2C OLED Display (SSD1306 128x64)">
+            <!-- Outer PCB Module -->
+            <rect x="0" y="0" width="350" height="395" rx="12" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8" filter="url(#buttonShadow)" />
+            <rect x="5" y="5" width="340" height="385" rx="8" fill="#070c1a" stroke="#1e293b" />
+
+            <!-- Title Header -->
+            <rect x="12" y="8" width="326" height="20" rx="4" fill="#0f172a" stroke="#1e293b" />
+            <text x="175" y="22" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">★ 0.96" SSD1306 OLED (128x64 I2C HUD) ★</text>
+
+            <!-- Large Virtual OLED Glass Display Screen -->
+            <rect x="35" y="40" width="280" height="180" rx="6" fill="#020617" stroke="#38bdf8" stroke-width="1.6" filter="url(#buttonShadow)" />
+
+            <!-- Virtual Screen Pixel Grid Texture & HUD Graphics -->
+            <g id="virtualOledScreen">
+              <!-- Top Banner Inverted -->
+              <rect x="37" y="42" width="276" height="30" fill="#38bdf8" />
+              <text id="svgOledDev" x="46" y="63" fill="#020617" font-family="'Fira Code', monospace" font-size="14" font-weight="bold">[TV]</text>
+              <text id="svgOledTitle" x="145" y="62" fill="#020617" font-family="'Fira Code', monospace" font-size="11" font-weight="bold">IR REMOTE</text>
+
+              <!-- Center Live Telemetry -->
+              <text id="svgOledKey" x="46" y="106" fill="#f8fafc" font-family="'Fira Code', monospace" font-size="14" font-weight="bold">Key: [-]</text>
+              <text id="svgOledCmd" x="46" y="136" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="14" font-weight="bold">Cmd: READY</text>
+
+              <!-- Live Status Bar -->
+              <line x1="37" y1="162" x2="313" y2="162" stroke="#1e293b" stroke-width="1.5" />
+              <text id="svgOledStatus" x="46" y="186" fill="#94a3b8" font-family="'Fira Code', monospace" font-size="11">Status: Standby</text>
             </g>
 
-            <!-- Bottom Casing USB Port Cutout (External Access) -->
-            <rect x="75" y="830" width="60" height="10" rx="3" fill="#020617" stroke="#38bdf8" stroke-width="1.4" />
-            <text x="105" y="826" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="6" font-weight="bold" text-anchor="middle">EXTERNAL USB FLASHER</text>
+            <!-- Symmetrical Left-Edge Pin Terminals (Aligns 100% Straight with Pico!) -->
+            <!-- 1. VCC (3.3V) -> Global Y = 330 (Aligns with Pico Pin 36) -->
+            <circle cx="0" cy="25" r="3" fill="#db2777" />
+            <text x="8" y="29" fill="#f472b6" font-size="7.5" font-weight="bold" font-family="monospace">VCC(36)</text>
 
-            <!-- ============================================================= -->
-            <!-- 2. HIGH-PRECISION MANHATTAN WIRING WITH REAL SOLDER JOINTS    -->
-            <!-- ============================================================= -->
-            <g id="wiresLayer">
-              <!-- Keypad Column Lines (Cyan) ➜ Flex Header to Pico GP10–GP13 (on Pico right side) -->
-              <!-- C0: (142, 452) ➜ (192, 646) -->
-              <path class="wire-line net-cols" d="M 142 452 L 142 646 L 192 646" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
-              <!-- C1: (154, 452) ➜ (192, 629) -->
-              <path class="wire-line net-cols" d="M 154 452 L 154 629 L 192 629" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
-              <!-- C2: (166, 452) ➜ (192, 612) -->
-              <path class="wire-line net-cols" d="M 166 452 L 166 612 L 192 612" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
-              <!-- C3: (178, 452) ➜ (192, 595) -->
-              <path class="wire-line net-cols" d="M 178 452 L 178 595 L 192 595" fill="none" stroke="var(--wire-col)" stroke-width="2.5" />
+            <!-- 2. GND -> Global Y = 590 (Aligns with Pico Pin 23) -->
+            <circle cx="0" cy="285" r="3" fill="#cbd5e1" />
+            <text x="8" y="289" fill="#cbd5e1" font-size="7.5" font-weight="bold" font-family="monospace">GND(23)</text>
 
-              <!-- Keypad Row Lines (Purple) ➜ Flex Header to Pico GP6–GP9 (on Pico right side) -->
-              <!-- R0: (88, 452) ➜ (192, 726) -->
-              <path class="wire-line net-rows" d="M 88 452 L 88 475 L 208 475 L 208 726 L 192 726" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
-              <!-- R1: (100, 452) ➜ (192, 709) -->
-              <path class="wire-line net-rows" d="M 100 452 L 100 470 L 212 470 L 212 709 L 192 709" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
-              <!-- R2: (112, 452) ➜ (192, 692) -->
-              <path class="wire-line net-rows" d="M 112 452 L 112 465 L 216 465 L 216 692 L 192 692" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
-              <!-- R3: (124, 452) ➜ (192, 675) -->
-              <path class="wire-line net-rows" d="M 124 452 L 124 460 L 220 460 L 220 675 L 192 675" fill="none" stroke="var(--wire-row)" stroke-width="2.5" />
+            <!-- 3. SCL -> Global Y = 620 (Aligns with Pico Pin 22 GP17) -->
+            <circle cx="0" cy="315" r="3" fill="#ca8a04" />
+            <text x="8" y="319" fill="#fef08a" font-size="7.5" font-weight="bold" font-family="monospace">SCL(GP17)</text>
 
-              <!-- Battery (+) (Red) ➜ Battery (245, 520) to Switch IN (25, 622) -->
-              <path class="wire-line net-vsys" d="M 245 520 L 245 470 L 25 470 L 25 622" fill="none" stroke="var(--wire-red)" stroke-width="3" />
+            <!-- 4. SDA -> Global Y = 650 (Aligns with Pico Pin 21 GP16) -->
+            <circle cx="0" cy="345" r="3" fill="#0284c7" />
+            <text x="8" y="349" fill="#93c5fd" font-size="7.5" font-weight="bold" font-family="monospace">SDA(GP16)</text>
 
-              <!-- Switched 4.5V (Red) ➜ Switch OUT (25, 648) to Pico VSYS (57, 765) -->
-              <path class="wire-line net-vsys" d="M 25 648 L 25 765 L 57 765" fill="none" stroke="var(--wire-red)" stroke-width="3.2" />
+            <!-- Decorative OLED Driver Chip & Flex Ribbon on Module -->
+            <rect x="75" y="240" width="200" height="42" rx="4" fill="#0f172a" stroke="#1e293b" />
+            <text x="175" y="258" fill="#64748b" font-family="'Fira Code', monospace" font-size="7.5" text-anchor="middle">SSD1306 COG CONTROLLER</text>
+            <text x="175" y="272" fill="#38bdf8" font-family="'Fira Code', monospace" font-size="6.5" text-anchor="middle">I2C BUS @ 0x3C (400 kHz)</text>
+          </g>
 
-              <!-- Battery (-) Ground (Slate/Black) ➜ Battery (355, 755) to Pico Pin 38 GND (57, 735) -->
-              <path class="wire-line net-gnd" d="M 355 755 L 355 805 L 45 805 L 45 735 L 57 735" fill="none" stroke="var(--wire-black)" stroke-width="2.8" />
+          <!-- ============================================================= -->
+          <!-- 2. HIGH-PRECISION WIRING HIGHWAY (ZERO OVERLAP!)              -->
+          <!-- ============================================================= -->
+          <g id="wiresLayer">
 
-              <!-- Ground Return (Slate/Black) ➜ To Dual IR LED 2 Cathode (-) (373, 120) -->
-              <path class="wire-line net-gnd" d="M 45 735 L 45 146 L 373 146 L 373 120" fill="none" stroke="var(--wire-black)" stroke-width="2.2" />
+            <!-- ----------------------------------------------------------- -->
+            <!-- BUS 1: 8 KEYPAD WIRES (PURPLE ROWS & CYAN COLS)            -->
+            <!-- Direct Horizontal Traces: Keypad (370) ➜ Pico (470)        -->
+            <!-- ----------------------------------------------------------- -->
+            <!-- Row 0: Keypad (370, 215) ➜ Pico Pin 4 GP2 (470, 215) -->
+            <path class="wire-line net-keypad net-row" d="M 370 215 L 470 215" fill="none" stroke="#a855f7" stroke-width="2.5" />
+            <!-- Row 1: Keypad (370, 245) ➜ Pico Pin 5 GP3 (470, 245) -->
+            <path class="wire-line net-keypad net-row" d="M 370 245 L 470 245" fill="none" stroke="#a855f7" stroke-width="2.5" />
+            <!-- Row 2: Keypad (370, 275) ➜ Pico Pin 6 GP4 (470, 275) -->
+            <path class="wire-line net-keypad net-row" d="M 370 275 L 470 275" fill="none" stroke="#a855f7" stroke-width="2.5" />
+            <!-- Row 3: Keypad (370, 305) ➜ Pico Pin 7 GP5 (470, 305) -->
+            <path class="wire-line net-keypad net-row" d="M 370 305 L 470 305" fill="none" stroke="#a855f7" stroke-width="2.5" />
 
-              <!-- Pico GP16 IR TX Direct Drive (Orange) ➜ Pin 21 GP16 (57, 525) to Dual IR LED 1 Anode (+) (328, 120) -->
-              <path class="wire-line net-tx" d="M 57 525 L 35 525 L 35 152 L 328 152 L 328 120" fill="none" stroke="var(--wire-orange)" stroke-width="3" />
+            <!-- Col 0: Keypad (370, 365) ➜ Pico Pin 9 GP6 (470, 365) -->
+            <path class="wire-line net-keypad net-col" d="M 370 365 L 470 365" fill="none" stroke="#38bdf8" stroke-width="2.5" />
+            <!-- Col 1: Keypad (370, 395) ➜ Pico Pin 10 GP7 (470, 395) -->
+            <path class="wire-line net-keypad net-col" d="M 370 395 L 470 395" fill="none" stroke="#38bdf8" stroke-width="2.5" />
+            <!-- Col 2: Keypad (370, 425) ➜ Pico Pin 11 GP8 (470, 425) -->
+            <path class="wire-line net-keypad net-col" d="M 370 425 L 470 425" fill="none" stroke="#38bdf8" stroke-width="2.5" />
+            <!-- Col 3: Keypad (370, 455) ➜ Pico Pin 12 GP9 (470, 455) -->
+            <path class="wire-line net-keypad net-col" d="M 370 455 L 470 455" fill="none" stroke="#38bdf8" stroke-width="2.5" />
 
-              <!-- VS1838B OUT (Yellow) ➜ Sensor OUT (82, 120) to Pico Pin 20 GP15 (192, 525) -->
-              <path class="wire-line net-rx" d="M 82 120 L 82 135 L 204 135 L 204 525 L 192 525" fill="none" stroke="var(--wire-yellow)" stroke-width="3" />
+            <!-- ----------------------------------------------------------- -->
+            <!-- BUS 2: 3 IR RECEIVER WIRES (100% DEAD-STRAIGHT HORIZONTAL LINES!) -->
+            <!-- Receiver (250) ➜ Pico (470) (Zero Bends, Perfectly Aligned!)-->
+            <!-- ----------------------------------------------------------- -->
+            <!-- 1. GND: Receiver (250, 500) ➜ Pico Pin 13 GND (470, 500) -->
+            <path class="wire-line net-gnd" d="M 250 500 L 470 500" fill="none" stroke="var(--wire-black)" stroke-width="2.6" />
+            <!-- 2. VCC: Receiver (250, 530) ➜ Pico Pin 14 GP10 (470, 530) -->
+            <path class="wire-line net-pwr net-vsys" d="M 250 530 L 470 530" fill="none" stroke="#f472b6" stroke-width="2.6" />
+            <!-- 3. OUT: Receiver (250, 560) ➜ Pico Pin 15 GP11 (470, 560) -->
+            <path class="wire-line net-rx" d="M 250 560 L 470 560" fill="none" stroke="#facc15" stroke-width="2.8" />
 
-              <!-- VS1838B GND (Slate/Black) ➜ Sensor GND (95, 120) to Pico Pin 18 GND (192, 555) -->
-              <path class="wire-line net-gnd" d="M 95 120 L 95 142 L 198 142 L 198 555 L 192 555" fill="none" stroke="var(--wire-black)" stroke-width="2.2" />
+            <!-- ----------------------------------------------------------- -->
+            <!-- BUS 3: 3 IR TRANSMITTER WIRES (DEAD-STRAIGHT HORIZONTAL!)   -->
+            <!-- Direct Straight Lines to Pins 18 & 19 (Zero Bends!)        -->
+            <!-- ----------------------------------------------------------- -->
+            <!-- 1. GND: TX Pin 2 (250, 620) ➜ Pico Pin 18 GND (470, 620) -->
+            <path class="wire-line net-gnd" d="M 250 620 L 470 620" fill="none" stroke="var(--wire-black)" stroke-width="2.6" />
 
-              <!-- VS1838B 3V3 (Pink) ➜ Pico Pin 36 3V3 (57, 695) to Sensor 3V3 (108, 120) -->
-              <path class="wire-line net-vsys" d="M 57 695 L 18 695 L 18 130 L 108 130 L 108 120" fill="none" stroke="var(--wire-3v3)" stroke-width="2.4" />
+            <!-- 2. IN (Signal): TX Pin 3 (250, 650) ➜ Pico Pin 19 GP14 (470, 650) -->
+            <path class="wire-line net-tx" d="M 250 650 L 470 650" fill="none" stroke="#ea580c" stroke-width="2.8" />
 
-              <!-- SOLDER JOINT PADS (Precise Circular Gold Connection Points) -->
-              <!-- Top Optical Module Joints -->
-              <circle cx="82" cy="120" r="3.2" class="solder-joint" title="VS1838B OUT (Pin 1) ➜ Pico GP15 (Pin 20)" />
-              <circle cx="95" cy="120" r="3.2" class="solder-joint" title="VS1838B GND (Pin 2) ➜ Pico Pin 18 GND" />
-              <circle cx="108" cy="120" r="3.2" class="solder-joint" title="VS1838B VCC 3.3V (Pin 3) ➜ Pico Pin 36 3V3" />
-              <circle cx="328" cy="120" r="3.2" class="solder-joint" title="Dual IR LED 1 Anode (+) ➜ Pico GP16 (Pin 21 PWM)" />
-              <circle cx="350.5" cy="80" r="2.8" class="solder-joint" title="Direct Series Jumper: LED 1 Cathode (-) ➜ LED 2 Anode (+)" />
-              <circle cx="373" cy="120" r="3.2" class="solder-joint" title="Dual IR LED 2 Cathode (-) ➜ System GND" />
+            <!-- 3. 5V (Power): TX Pin 1 (250, 680) ➜ Goes cleanly up Left/Top of Pico into Pin 40 VBUS (708, 180) -->
+            <path class="wire-line net-pwr net-vbus" d="M 250 680 L 440 680 L 440 160 L 708 160 L 708 180" fill="none" stroke="#ef4444" stroke-width="3" />
 
-              <!-- Keypad Ribbon Header Joints -->
-              <circle cx="88" cy="452" r="2.8" class="solder-joint" title="Keypad Row 0 (GP6)" />
-              <circle cx="100" cy="452" r="2.8" class="solder-joint" title="Keypad Row 1 (GP7)" />
-              <circle cx="112" cy="452" r="2.8" class="solder-joint" title="Keypad Row 2 (GP8)" />
-              <circle cx="124" cy="452" r="2.8" class="solder-joint" title="Keypad Row 3 (GP9)" />
-              <circle cx="142" cy="452" r="2.8" class="solder-joint" title="Keypad Col 0 (GP10)" />
-              <circle cx="154" cy="452" r="2.8" class="solder-joint" title="Keypad Col 1 (GP11)" />
-              <circle cx="166" cy="452" r="2.8" class="solder-joint" title="Keypad Col 2 (GP12)" />
-              <circle cx="178" cy="452" r="2.8" class="solder-joint" title="Keypad Col 3 (GP13)" />
+            <!-- ----------------------------------------------------------- -->
+            <!-- BUS 4: 100% DEAD-STRAIGHT HORIZONTAL LINES TO PICO (RIGHT RAIL) -->
+            <!-- Direct Horizontal Traces: Modules (820) ➜ Pico (708)       -->
+            <!-- ----------------------------------------------------------- -->
+            <!-- 1. Switched 4.5V (VSYS): Switch OUT (820, 120) ➜ Pico Pin 39 (708, 230) -->
+            <!-- (Switch is at Y=48+40+80=168; let's wire from Terminal (820, 168) to Pin 39) -->
+            <!-- Direct Straight Lines: -->
+            <!-- Switch OUT (820, 230) ➜ Pico Pin 39 VSYS (708, 230) DEAD-STRAIGHT! -->
+            <path class="wire-line net-pwr net-vsys" d="M 820 230 L 708 230" fill="none" stroke="var(--wire-red)" stroke-width="3.2" />
 
-              <!-- Pico Microcontroller Solder Joints (Rotated Layout) -->
-              <circle cx="57" cy="525" r="3.2" class="solder-joint" title="Pico Pin 21 (GP16 - IR TX PWM)" />
-              <circle cx="57" cy="695" r="3.2" class="solder-joint" title="Pico Pin 36 (3V3 Regulated OUT)" />
-              <circle cx="57" cy="735" r="3.2" class="solder-joint" title="Pico Pin 38 (GND)" />
-              <circle cx="57" cy="765" r="3.2" class="solder-joint" title="Pico Pin 39 (VSYS 4.5V IN)" />
+            <!-- Battery Ground: Bat GND (820, 280) ➜ Pico Pin 38 GND (708, 280) DEAD-STRAIGHT! -->
+            <path class="wire-line net-gnd" d="M 820 280 L 708 280" fill="none" stroke="var(--wire-black)" stroke-width="3" />
 
-              <circle cx="192" cy="525" r="3.2" class="solder-joint" title="Pico Pin 20 (GP15 - IR RX)" />
-              <circle cx="192" cy="555" r="3.2" class="solder-joint" title="Pico Pin 18 (GND)" />
-              <circle cx="192" cy="595" r="3.2" class="solder-joint" title="Pico Pin 17 (GP13 - Col 3)" />
-              <circle cx="192" cy="612" r="3.2" class="solder-joint" title="Pico Pin 16 (GP12 - Col 2)" />
-              <circle cx="192" cy="629" r="3.2" class="solder-joint" title="Pico Pin 15 (GP11 - Col 1)" />
-              <circle cx="192" cy="646" r="3.2" class="solder-joint" title="Pico Pin 14 (GP10 - Col 0)" />
-              <circle cx="192" cy="675" r="3.2" class="solder-joint" title="Pico Pin 12 (GP9 - Row 3)" />
-              <circle cx="192" cy="692" r="3.2" class="solder-joint" title="Pico Pin 11 (GP8 - Row 2)" />
-              <circle cx="192" cy="709" r="3.2" class="solder-joint" title="Pico Pin 10 (GP7 - Row 1)" />
-              <circle cx="192" cy="726" r="3.2" class="solder-joint" title="Pico Pin 9 (GP6 - Row 0)" />
+            <!-- Internal Switch Connection from Bat+ to Switch IN -->
+            <path class="wire-line net-pwr net-vsys" d="M 961 97 L 904 97 L 904 116 L 836 116" fill="none" stroke="#ef4444" stroke-width="2.5" />
 
-              <!-- Battery & Slide Switch Solder Joints -->
-              <circle cx="245" cy="520" r="3.8" class="solder-joint" title="3x AAA Positive (+) Terminal (4.5V)" />
-              <circle cx="355" cy="755" r="3.8" class="solder-joint" title="3x AAA Negative (-) Ground Terminal" />
-              <circle cx="25" cy="622" r="3.2" class="solder-joint" title="Slide Switch Terminal 1 (Battery IN)" />
-              <circle cx="25" cy="648" r="3.2" class="solder-joint" title="Slide Switch Terminal 2 (Switched 4.5V OUT)" />
-            </g>
+            <!-- ----------------------------------------------------------- -->
+            <!-- BUS 5: OLED DISPLAY 4 I2C WIRES (DEAD-STRAIGHT HORIZONTAL!) -->
+            <!-- Direct Horizontal Lines from OLED (820) ➜ Pico (708)        -->
+            <!-- ----------------------------------------------------------- -->
+            <!-- 1. OLED VCC: OLED (820, 330) ➜ Pico Pin 36 3V3_OUT (708, 330) DEAD-STRAIGHT! -->
+            <path class="wire-line net-oled net-pwr" d="M 820 330 L 708 330" fill="none" stroke="#db2777" stroke-width="2.8" />
+
+            <!-- 2. OLED GND: OLED (820, 590) ➜ Pico Pin 23 GND (708, 590) DEAD-STRAIGHT! -->
+            <path class="wire-line net-oled net-gnd" d="M 820 590 L 708 590" fill="none" stroke="var(--wire-black)" stroke-width="2.8" />
+
+            <!-- 3. OLED SCL: OLED (820, 620) ➜ Pico Pin 22 GP17 SCL (708, 620) DEAD-STRAIGHT! -->
+            <path class="wire-line net-oled" d="M 820 620 L 708 620" fill="none" stroke="#eab308" stroke-width="2.8" />
+
+            <!-- 4. OLED SDA: OLED (820, 650) ➜ Pico Pin 21 GP16 SDA (708, 650) DEAD-STRAIGHT! -->
+            <path class="wire-line net-oled" d="M 820 650 L 708 650" fill="none" stroke="#38bdf8" stroke-width="2.8" />
+
+            <!-- ----------------------------------------------------------- -->
+            <!-- SOLDER JOINT PADS & PICO TERMINALS (RIGHT SIDE)             -->
+            <!-- ----------------------------------------------------------- -->
+            <!-- Pico Right Rail Solder Joints (X = 708) -->
+            <circle cx="708" cy="180" r="3.2" class="solder-joint" title="Pico Pin 40 (VBUS 5V Rail OUT to IR LED)" />
+            <circle cx="708" cy="230" r="3.4" class="solder-joint" title="Pico Pin 39 (VSYS 4.5V Switched Power IN)" />
+            <circle cx="708" cy="280" r="3.2" class="solder-joint" title="Pico Pin 38 (GND - Main Battery Return)" />
+            <circle cx="708" cy="330" r="3.2" class="solder-joint" title="Pico Pin 36 (3V3_OUT Power OUT to OLED)" />
+            <circle cx="708" cy="590" r="3.2" class="solder-joint" title="Pico Pin 23 (GND Return from OLED)" />
+            <circle cx="708" cy="620" r="3.2" class="solder-joint" title="Pico Pin 22 (GP17 I2C0 SCL to OLED)" />
+            <circle cx="708" cy="650" r="3.2" class="solder-joint" title="Pico Pin 21 (GP16 I2C0 SDA to OLED)" />
+
+            <!-- Right Module Terminals (All at X=820, 100% Dead-Straight!) -->
+            <circle cx="820" cy="230" r="3.2" class="solder-joint" title="Slide Switch Terminal 2 (Switched 4.5V OUT ➜ Pico Pin 39)" />
+            <circle cx="820" cy="280" r="3.2" class="solder-joint" title="3x AAA Battery Pack (-) GND Lead ➜ Pico Pin 38" />
+            <circle cx="820" cy="330" r="3" class="solder-joint" title="OLED Pin 2 (VCC) ➜ Pico Pin 36 (3V3_OUT)" />
+            <circle cx="820" cy="590" r="3" class="solder-joint" title="OLED Pin 1 (GND) ➜ Pico Pin 23 (GND)" />
+            <circle cx="820" cy="620" r="3" class="solder-joint" title="OLED Pin 3 (SCL) ➜ Pico Pin 22 (GP17 SCL)" />
+            <circle cx="820" cy="650" r="3" class="solder-joint" title="OLED Pin 4 (SDA) ➜ Pico Pin 21 (GP16 SDA)" />
           </g>
         </svg>
       </div>
@@ -1049,34 +1326,43 @@
       <div class="simulation-bar">
         <div class="status-indicator">
           <div class="status-dot" id="systemStatusDot"></div>
-          <span id="systemStatusText" style="font-weight: 500;">Power: 3x AAA Batteries (4.5V) ON &bull; Handheld TV Remote Active</span>
+          <span id="systemStatusText" style="font-weight: 500;">Power: 3x AAA Batteries (4.5V) ON &bull; Handheld TV
+            Remote Active</span>
         </div>
         <div style="font-family: 'Fira Code', monospace; font-size: 0.78rem; color: #94a3b8;">
-          Format: <span style="color: #38bdf8;">Handheld TV Remote</span> | Scale: <span style="color: #38bdf8;">1mm = 6px</span> | Supply: <span style="color: #fda4af;">3x AAA ➜ VSYS</span> | Signal: <span style="color: #fb923c;">GP16(TX)</span> &amp; <span style="color: #facc15;">GP15(RX)</span>
+          Format: <span style="color: #38bdf8;">Spacious Schematic View</span> | Scale: <span style="color: #38bdf8;">1:1 Zero-Overlap</span> | Supply: <span style="color: #fda4af;">3x AAA ➜ VSYS</span> | Signal: <span
+            style="color: #c084fc;">Keypad(GP2-9)</span> &bull; <span style="color: #fb923c;">TX(GP14)</span> &bull; <span
+            style="color: #facc15;">RX(GP11)</span>
         </div>
       </div>
     </div>
 
     <!-- Sidebar: Hardware Architecture, Connections, Console & Inspector -->
     <aside class="sidebar">
-      
+
       <!-- 1. LIVE CONTROLLER CONSOLE & OSCILLOSCOPE WAVEFORM -->
       <div class="panel">
         <div class="panel-title">
           <span>🎮</span> Live Controller &amp; Oscilloscope
         </div>
-        <div style="background: #070b14; border: 1px solid #1e293b; border-radius: 8px; padding: 0.7rem; margin-bottom: 0.75rem;">
+        <div
+          style="background: #070b14; border: 1px solid #1e293b; border-radius: 8px; padding: 0.7rem; margin-bottom: 0.75rem;">
           <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
             <span style="font-size:0.75rem; color:#94a3b8;">TARGET DEVICE:</span>
-            <span id="liveTargetDevice" style="font-size:0.8rem; font-weight:bold; color:#38bdf8; font-family:'Fira Code',monospace;">TV (Device 1/4)</span>
+            <span id="liveTargetDevice"
+              style="font-size:0.8rem; font-weight:bold; color:#38bdf8; font-family:'Fira Code',monospace;">TV (Device
+              1/4)</span>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
             <span style="font-size:0.75rem; color:#94a3b8;">LAST COMMAND:</span>
-            <span id="liveLastCmd" style="font-size:0.78rem; font-weight:bold; color:#34d399; font-family:'Fira Code',monospace; text-align:right;">Idle (Press any keypad button)</span>
+            <span id="liveLastCmd"
+              style="font-size:0.78rem; font-weight:bold; color:#34d399; font-family:'Fira Code',monospace; text-align:right;">Idle
+              (Press any keypad button)</span>
           </div>
           <div style="display:flex; justify-content:space-between;">
-            <span style="font-size:0.75rem; color:#94a3b8;">CARRIER PWM:</span>
-            <span id="liveCarrier" style="font-size:0.75rem; color:#facc15; font-family:'Fira Code',monospace;">RP2040 PWM @ 38.0 kHz</span>
+            <span style="font-size:0.75rem; color:#94a3b8;">KEYPAD &amp; CARRIER:</span>
+            <span id="liveCarrier" style="font-size:0.75rem; color:#67e8f9; font-family:'Fira Code',monospace;">Direct
+              8-Pin Matrix &bull; TX 38kHz</span>
           </div>
         </div>
 
@@ -1086,7 +1372,8 @@
         <div class="waveform-card">
           <canvas id="waveCanvas" width="410" height="75"></canvas>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-family: 'Fira Code', monospace; color: #94a3b8; margin-top: 0.35rem;">
+        <div
+          style="display: flex; justify-content: space-between; font-size: 0.7rem; font-family: 'Fira Code', monospace; color: #94a3b8; margin-top: 0.35rem;">
           <span id="waveLabel">Idle (HIGH = 3.3V)</span>
           <span id="pulseCount">0 transitions</span>
         </div>
@@ -1096,75 +1383,88 @@
       <div class="panel">
         <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
           <span>🔌 Hardware Architecture &amp; Pinout</span>
-          <span class="scale-tag" style="font-size:0.65rem; padding:0.15rem 0.45rem;">ZERO OVERLAPPING</span>
+          <span class="scale-tag" style="font-size:0.65rem; padding:0.15rem 0.45rem;">PINS 4-19 &amp; PIN 40</span>
         </div>
 
-        <!-- Zone 1: Front Optical Transceiver -->
-        <div class="zone-card" style="border-left: 3px solid #facc15;">
-          <div class="zone-badge" style="background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.35);">
-            ZONE 1: OPTICAL TRANSCEIVER (TOP HEAD)
+        <!-- Zone 1: Split Optical Architecture (Top 3-Pin 5V TX & Bottom 3-Pin RX) -->
+        <div class="zone-card" style="border-left: 3px solid #ef4444;">
+          <div class="zone-badge"
+            style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35);">
+            ZONE 1: TOP 3-PIN 5V IR TRANSMITTER &amp; BOTTOM 3-PIN IR RECEIVER
           </div>
           <p style="font-size:0.75rem; color:#cbd5e1; margin-bottom:0.4rem;">
-            Mounted behind the 940nm translucent acrylic front window:
+            Physically separated optics (170mm distance): Top 5V blaster for appliances, Bottom receiver for zero-crosstalk learning:
           </p>
           <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.5rem; margin-bottom:0.4rem;">
-            <strong style="color:#facc15; font-size:0.78rem;">VS1838B IR Receiver (38kHz Demodulator)</strong>
-            <div class="pin-row">&bull; Pin 1 (OUT) ➜ <span class="pin-highlight">Pico GP15 (Pin 20)</span> Active-LOW</div>
-            <div class="pin-row">&bull; Pin 2 (GND) ➜ <span class="pin-highlight">Pico Pin 18 (GND)</span></div>
-            <div class="pin-row">&bull; Pin 3 (VCC) ➜ <span class="pin-highlight">Pico Pin 36 (3V3 Regulated)</span></div>
+            <strong style="color:#f87171; font-size:0.78rem;">Top Module: 3-Pin 5V High-Power IR LED Blaster</strong>
+            <div class="pin-row">&bull; Pin 1 (5V) ➜ <span class="pin-highlight">Pico Pin 40 (VBUS 5V)</span> High-Power
+              Rail</div>
+            <div class="pin-row">&bull; Pin 2 (GND) ➜ <span class="pin-highlight">Pico Pin 18 (GND)</span> Ground Return
+            </div>
+            <div class="pin-row">&bull; Pin 3 (IN) ➜ <span class="pin-highlight">Pico GP14 (Pin 19)</span> 38kHz PWM
+              Carrier (Slice 7A)</div>
+            <div style="font-size:0.68rem; color:#34d399; margin-top:0.25rem;">⚡ Powered by 5V rail via onboard driver
+              transistor for ~100mA pulses and 10–15m range!</div>
           </div>
-          <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.5rem;">
-            <strong style="color:#c084fc; font-size:0.78rem;">Dual 940nm IR Emitter LEDs (Series Direct Drive)</strong>
-            <div class="pin-row">&bull; GP16 (Pin 21) ➜ <span class="pin-highlight">LED 1 Anode (+)</span> (Long leg)</div>
-            <div class="pin-row">&bull; LED 1 Cathode (-) ➜ <span class="pin-highlight">LED 2 Anode (+)</span> (Series Link)</div>
-            <div class="pin-row">&bull; LED 2 Cathode (-) ➜ <span class="pin-highlight">System GND (Pin 23)</span> (Short leg)</div>
-            <div style="font-size:0.68rem; color:#34d399; margin-top:0.25rem;">⚡ 2.70V forward drop matches 3.3V GPIO naturally. Zero resistors &amp; zero transistors needed!</div>
+          <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.5rem; margin-bottom:0.4rem;">
+            <strong style="color:#facc15; font-size:0.78rem;">Bottom Module: 3-Pin VS1838B IR Learning Eye</strong>
+            <div class="pin-row">&bull; Pin 1 (OUT) ➜ <span class="pin-highlight">Pico GP11 (Pin 15)</span> Demodulated
+              Active-LOW Data IN</div>
+            <div class="pin-row">&bull; Pin 2 (GND) ➜ <span class="pin-highlight">Pico Pin 13 (GND)</span> Ground Return
+            </div>
+            <div class="pin-row">&bull; Pin 3 (VCC) ➜ <span class="pin-highlight">Pico GP10 (Pin 14)</span> 3.3V Power
+              Out (driven HIGH)</div>
+            <div style="font-size:0.7rem; color:#cbd5e1; margin-top:0.2rem;">Captures and learns raw 38kHz infrared
+              signals from original remotes pointed at bottom window.</div>
           </div>
         </div>
 
-        <!-- Zone 2: 16-Key Keypad Matrix -->
-        <div class="zone-card" style="border-left: 3px solid #c084fc;">
-          <div class="zone-badge" style="background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.35);">
-            ZONE 2: 16-KEY MATRIX KEYPAD (REMOTE FACE)
+        <!-- Zone 2: Direct 8-Pin 4x4 Keypad Matrix (No I2C) -->
+        <div class="zone-card" style="border-left: 3px solid #38bdf8;">
+          <div class="zone-badge"
+            style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);">
+            ZONE 2: DIRECT 8-PIN 4x4 KEYPAD MATRIX (NO I2C)
           </div>
           <p style="font-size:0.75rem; color:#cbd5e1; margin-bottom:0.4rem;">
-            8-pin flex ribbon connecting flush top keypad directly to GPIOs:
+            8 direct GPIO connections using RP2040 internal pull-ups (zero extra chips):
           </p>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.45rem;">
-            <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.45rem;">
-              <strong style="color:#e9d5ff; font-size:0.73rem;">Row Outputs (GP6–9)</strong>
-              <div class="pin-row">R0: <span style="color:#e9d5ff;">GP6 (Pin 9)</span> [1,2,3,A]</div>
-              <div class="pin-row">R1: <span style="color:#e9d5ff;">GP7 (Pin 10)</span> [4,5,6,B]</div>
-              <div class="pin-row">R2: <span style="color:#e9d5ff;">GP8 (Pin 11)</span> [7,8,9,C]</div>
-              <div class="pin-row">R3: <span style="color:#e9d5ff;">GP9 (Pin 12)</span> [*,0,#,D]</div>
-            </div>
-            <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.45rem;">
-              <strong style="color:#a5f3fc; font-size:0.73rem;">Col Inputs (GP10–13)</strong>
-              <div class="pin-row">C0: <span style="color:#a5f3fc;">GP10 (Pin 14)</span> [1,4,7,*]</div>
-              <div class="pin-row">C1: <span style="color:#a5f3fc;">GP11 (Pin 15)</span> [2,5,8,0]</div>
-              <div class="pin-row">C2: <span style="color:#a5f3fc;">GP12 (Pin 16)</span> [3,6,9,#]</div>
-              <div class="pin-row">C3: <span style="color:#a5f3fc;">GP13 (Pin 17)</span> [A,B,C,D]</div>
-            </div>
+          <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.5rem; margin-bottom:0.4rem;">
+            <strong style="color:#c4b5fd; font-size:0.78rem;">4 Rows (Outputs - Driven LOW during scan):</strong>
+            <div class="pin-row">&bull; Row 0 (Pin 1) ➜ <span class="pin-highlight">Pico GP2 (Pin 4)</span></div>
+            <div class="pin-row">&bull; Row 1 (Pin 2) ➜ <span class="pin-highlight">Pico GP3 (Pin 5)</span></div>
+            <div class="pin-row">&bull; Row 2 (Pin 3) ➜ <span class="pin-highlight">Pico GP4 (Pin 6)</span></div>
+            <div class="pin-row">&bull; Row 3 (Pin 4) ➜ <span class="pin-highlight">Pico GP5 (Pin 7)</span></div>
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.5rem;">
+            <strong style="color:#38bdf8; font-size:0.78rem;">4 Columns (Inputs with Internal Pull-Up):</strong>
+            <div class="pin-row">&bull; Col 0 (Pin 5) ➜ <span class="pin-highlight">Pico GP6 (Pin 9)</span></div>
+            <div class="pin-row">&bull; Col 1 (Pin 6) ➜ <span class="pin-highlight">Pico GP7 (Pin 10)</span></div>
+            <div class="pin-row">&bull; Col 2 (Pin 7) ➜ <span class="pin-highlight">Pico GP8 (Pin 11)</span></div>
+            <div class="pin-row">&bull; Col 3 (Pin 8) ➜ <span class="pin-highlight">Pico GP9 (Pin 12)</span></div>
           </div>
         </div>
 
-        <!-- Zone 3: 4.5V Power Grid & Bottom USB -->
+        <!-- Zone 3: 4.5V Power Grid & Bottom USB / Learn Port -->
         <div class="zone-card" style="border-left: 3px solid #f43f5e;">
-          <div class="zone-badge" style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.35);">
-            ZONE 3: 4.5V POWER SUPPLY &amp; EXTERNAL USB
+          <div class="zone-badge"
+            style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.35);">
+            ZONE 3: 4.5V POWER SUPPLY, BOTTOM USB &amp; IR LEARN PORT
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.5rem; margin-bottom:0.4rem;">
             <strong style="color:#fda4af; font-size:0.78rem;">3x AAA Battery Pack &amp; Thumb Slide Switch</strong>
-            <div class="pin-row">&bull; Red Wire (+) ➜ <span class="pin-highlight">Slide Switch IN</span> (3x AAA = 4.5V DC)</div>
-            <div class="pin-row">&bull; Switch OUT ➜ <span class="pin-highlight">Pico VSYS (Pin 39)</span> &amp; 100Ω IR rail</div>
+            <div class="pin-row">&bull; Red Wire (+) ➜ <span class="pin-highlight">Slide Switch IN</span> (3x AAA = 4.5V
+              DC)</div>
+            <div class="pin-row">&bull; Switch OUT ➜ <span class="pin-highlight">Pico VSYS (Pin 39)</span></div>
             <div class="pin-row">&bull; Black Wire (-) ➜ <span class="pin-highlight">Pico GND (Pin 38)</span></div>
-            <div style="font-size:0.68rem; color:#34d399; margin-top:0.25rem;">Zero quiescent battery drain when switch is turned OFF</div>
+            <div style="font-size:0.68rem; color:#34d399; margin-top:0.25rem;">Zero quiescent battery drain when switch
+              is turned OFF</div>
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border-radius:6px; padding:0.5rem;">
-            <strong style="color:#38bdf8; font-size:0.78rem;">External USB Access &amp; 3D Casing Specs</strong>
-            <div class="pin-row">&bull; <span class="pin-highlight">Bottom USB Port:</span> Direct cable access without opening enclosure</div>
-            <div class="pin-row">&bull; <span class="pin-highlight">Outer Casing:</span> 170mm × 80mm × 24mm (PLA / PETG)</div>
-            <div class="pin-row">&bull; <span class="pin-highlight">Wall Thickness:</span> 2.0mm &bull; Keypad Recess: 72×78×1.5mm</div>
+            <strong style="color:#38bdf8; font-size:0.78rem;">Bottom Bezel Ports &amp; 3D Casing Specs</strong>
+            <div class="pin-row">&bull; <span class="pin-highlight">Bottom USB Port:</span> Direct flashing cable access</div>
+            <div class="pin-row">&bull; <span class="pin-highlight">Bottom IR Learn Port:</span> VS1838B optical window</div>
+            <div class="pin-row">&bull; <span class="pin-highlight">Outer Casing:</span> 170mm × 80mm × 24mm (PLA /
+              PETG)</div>
           </div>
         </div>
       </div>
@@ -1176,12 +1476,20 @@
         </div>
         <div id="inspectorBox" class="inspector-content">
           <h4 id="inspName">Hover / Click any part of the Remote!</h4>
-          <span class="badge" id="inspBadge" style="display:inline-block; font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); margin-bottom:0.5rem; font-family:'Fira Code',monospace;">100% CALIBRATED RATIOS</span>
-          <p id="inspDesc" style="font-size:0.78rem; color:var(--text-muted); line-height:1.45;">The entire remote is aligned in true TV remote ergonomics: Optical window at top, 4x4 keypad on upper face, and Pico MCU + 3x AAA battery bay in handheld grip!</p>
-          
+          <span class="badge" id="inspBadge"
+            style="display:inline-block; font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:4px; background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); margin-bottom:0.5rem; font-family:'Fira Code',monospace;">100%
+            CALIBRATED RATIOS</span>
+          <p id="inspDesc" style="font-size:0.78rem; color:var(--text-muted); line-height:1.45;">The entire remote is
+            aligned in true TV remote ergonomics: Top 5V blaster firing forward, 4x4 keypad on upper face, Pico MCU + 3x AAA
+            battery bay in grip, and USB + IR Learning Eye at the bottom!</p>
+
           <table class="bom-table" id="inspTable" style="display:none; margin-top:0.65rem;">
             <thead>
-              <tr><th>Terminal / Spec</th><th>Connects To</th><th>Function</th></tr>
+              <tr>
+                <th>Terminal / Spec</th>
+                <th>Connects To</th>
+                <th>Function</th>
+              </tr>
             </thead>
             <tbody id="inspTableBody"></tbody>
           </table>
@@ -1194,17 +1502,53 @@
         </div>
         <table class="bom-table" style="font-size: 0.75rem;">
           <thead>
-            <tr><th>Component</th><th>Real (mm)</th><th>Position in Remote</th></tr>
+            <tr>
+              <th>Component</th>
+              <th>Real (mm)</th>
+              <th>Position in Remote</th>
+            </tr>
           </thead>
           <tbody>
-            <tr><td style="color:#7c3aed; font-weight:600;">Remote Shell</td><td>80 × 170 mm</td><td>Full handheld ergonomic shell</td></tr>
-            <tr><td style="color:#fb923c; font-weight:600;">IR Emitter</td><td>Ø 5.0 mm</td><td>Top Front (Firing forward)</td></tr>
-            <tr><td style="color:#facc15; font-weight:600;">VS1838B</td><td>7.5 × 6.0 mm</td><td>Top Front (Receiving window)</td></tr>
-            <tr><td style="color:#c084fc; font-weight:600;">4x4 Keypad</td><td>70 × 76 mm</td><td>Upper Face (16 buttons)</td></tr>
-            <tr><td style="color:#22c55e; font-weight:600;">Pico MCU</td><td>21 × 51 mm</td><td>Lower Left Internal Bay</td></tr>
-            <tr><td style="color:#fda4af; font-weight:600;">3x AAA Pack</td><td>38 × 52 mm</td><td>Lower Right Grip Bay (4.5V)</td></tr>
-            <tr><td style="color:#cbd5e1; font-weight:600;">Slide Switch</td><td>12 × 6.0 mm</td><td>Side Bezel Thumb Switch</td></tr>
-            <tr><td style="color:#38bdf8; font-weight:600;">USB Port</td><td>8.0 × 3.0 mm</td><td>Bottom Exterior Bezel Cutout</td></tr>
+            <tr>
+              <td style="color:#7c3aed; font-weight:600;">Remote Shell</td>
+              <td>80 × 170 mm</td>
+              <td>Full handheld ergonomic shell</td>
+            </tr>
+            <tr>
+              <td style="color:#fb923c; font-weight:600;">IR Emitter (3-Pin 5V)</td>
+              <td>Ø 5.0 mm</td>
+              <td>Top Front (Firing forward - Blaster)</td>
+            </tr>
+            <tr>
+              <td style="color:#facc15; font-weight:600;">VS1838B (3-Pin)</td>
+              <td>7.5 × 6.0 mm</td>
+              <td>Bottom Bezel (Facing Down - Learn Port)</td>
+            </tr>
+            <tr>
+              <td style="color:#c084fc; font-weight:600;">4x4 Keypad</td>
+              <td>70 × 76 mm</td>
+              <td>Upper Face (16 buttons)</td>
+            </tr>
+            <tr>
+              <td style="color:#22c55e; font-weight:600;">Pico MCU</td>
+              <td>21 × 51 mm</td>
+              <td>Lower Left Internal Bay</td>
+            </tr>
+            <tr>
+              <td style="color:#fda4af; font-weight:600;">3x AAA Pack</td>
+              <td>38 × 52 mm</td>
+              <td>Lower Right Grip Bay (4.5V)</td>
+            </tr>
+            <tr>
+              <td style="color:#cbd5e1; font-weight:600;">Slide Switch</td>
+              <td>12 × 6.0 mm</td>
+              <td>Side Bezel Thumb Switch</td>
+            </tr>
+            <tr>
+              <td style="color:#38bdf8; font-weight:600;">USB Port</td>
+              <td>8.0 × 3.0 mm</td>
+              <td>Bottom Exterior Bezel Cutout</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -1218,8 +1562,10 @@
         <div style="display:flex; align-items:center; gap: 0.6rem;">
           <span style="font-size: 1.3rem;">📋</span>
           <div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff;">Bill of Materials (BOM) &amp; Cost Estimation</h3>
-            <p style="font-size: 0.72rem; color: #94a3b8;">Itemized hardware components for DIY Raspberry Pi Pico Universal IR Remote</p>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff;">Bill of Materials (BOM) &amp; Cost Estimation
+            </h3>
+            <p style="font-size: 0.72rem; color: #94a3b8;">Itemized hardware components for DIY Raspberry Pi Pico
+              Universal IR Remote</p>
           </div>
         </div>
         <button class="btn" id="btnCloseBom" style="padding: 0.35rem 0.75rem;">✕ Close</button>
@@ -1250,60 +1596,33 @@
             </tr>
             <tr>
               <td style="font-weight: bold; color: #38bdf8;">2</td>
-              <td style="font-weight: 600; color: #f8fafc;">Keypad</td>
+              <td style="font-weight: 600; color: #f8fafc;">4x4 Keypad</td>
               <td>4x4 Matrix Membrane Keypad (16 tactile keys, 8-pin 2.54mm pitch)</td>
               <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
               <td style="color: #94a3b8;">₹70 / $0.90</td>
               <td style="font-weight: bold; color: #34d399;">₹70 / $0.90</td>
-              <td>User input buttons: digits 0-9, Mode, Vol+, Vol-, Mute, Power</td>
+              <td>Direct 8-pin GPIO connection (GP2-GP9); uses RP2040 internal pull-ups (zero extra ICs)</td>
             </tr>
             <tr>
               <td style="font-weight: bold; color: #38bdf8;">3</td>
-              <td style="font-weight: 600; color: #f8fafc;">IR Receiver</td>
-              <td>VS1838B (or TSOP38238) 38kHz Demodulating Receiver</td>
+              <td style="font-weight: 600; color: #f8fafc;">IR LED Transmitter (Top)</td>
+              <td>3-Pin 5V High-Power IR LED Module (940nm LED + Onboard Driver Transistor)</td>
               <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
-              <td style="color: #94a3b8;">₹20 / $0.25</td>
-              <td style="font-weight: bold; color: #34d399;">₹20 / $0.25</td>
-              <td>Captures &amp; learns raw optical signals from original remotes</td>
+              <td style="color: #94a3b8;">₹35 / $0.45</td>
+              <td style="font-weight: bold; color: #34d399;">₹35 / $0.45</td>
+              <td>Top-firing 38kHz IR blaster; powered from 5V rail for ~100mA peak pulses and 10–15m range</td>
             </tr>
             <tr>
               <td style="font-weight: bold; color: #38bdf8;">4</td>
-              <td style="font-weight: 600; color: #f8fafc;">IR Emitter</td>
-              <td>940nm High-Power Infrared LED (5mm, &plusmn;20&deg; beam angle)</td>
+              <td style="font-weight: 600; color: #f8fafc;">IR Receiver (Bottom)</td>
+              <td>VS1838B 3-Pin Demodulating IR Receiver Module (OUT, GND, VCC)</td>
               <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
-              <td style="color: #94a3b8;">₹10 / $0.15</td>
-              <td style="font-weight: bold; color: #34d399;">₹10 / $0.15</td>
-              <td>Emits modulated 38kHz infrared command pulses to appliances</td>
+              <td style="color: #94a3b8;">₹30 / $0.40</td>
+              <td style="font-weight: bold; color: #34d399;">₹30 / $0.40</td>
+              <td>Dedicated bottom learning eye; receives and decodes raw 38kHz signals from original remotes</td>
             </tr>
             <tr>
               <td style="font-weight: bold; color: #38bdf8;">5</td>
-              <td style="font-weight: 600; color: #f8fafc;">Transistor</td>
-              <td>2N2222 (or BC547 / 2N3904) NPN Bipolar Junction Transistor</td>
-              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
-              <td style="color: #94a3b8;">₹5 / $0.07</td>
-              <td style="font-weight: bold; color: #34d399;">₹5 / $0.07</td>
-              <td>High-speed current amplifier driving high-power IR LED pulses</td>
-            </tr>
-            <tr>
-              <td style="font-weight: bold; color: #38bdf8;">6</td>
-              <td style="font-weight: 600; color: #f8fafc;">Base Resistor</td>
-              <td>1 kΩ 1/4W Metal Film Resistor (&plusmn;5% tolerance)</td>
-              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
-              <td style="color: #94a3b8;">₹2 / $0.03</td>
-              <td style="font-weight: bold; color: #34d399;">₹2 / $0.03</td>
-              <td>Limits RP2040 GP16 GPIO output current to ~2.6mA</td>
-            </tr>
-            <tr>
-              <td style="font-weight: bold; color: #38bdf8;">7</td>
-              <td style="font-weight: 600; color: #f8fafc;">LED Limiter</td>
-              <td>100 Ω 1/4W Metal Film Resistor (&plusmn;5% tolerance)</td>
-              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
-              <td style="color: #94a3b8;">₹2 / $0.03</td>
-              <td style="font-weight: bold; color: #34d399;">₹2 / $0.03</td>
-              <td>Sets ~35mA pulse current through the IR LED from 4.5V rail</td>
-            </tr>
-            <tr>
-              <td style="font-weight: bold; color: #38bdf8;">8</td>
               <td style="font-weight: 600; color: #f8fafc;">Battery Holder</td>
               <td>3x AAA Battery Holder with lead wires &amp; cover</td>
               <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
@@ -1312,7 +1631,7 @@
               <td>Series battery case supplying 4.5V DC to Pico VSYS (Pin 39)</td>
             </tr>
             <tr>
-              <td style="font-weight: bold; color: #38bdf8;">9</td>
+              <td style="font-weight: bold; color: #38bdf8;">6</td>
               <td style="font-weight: 600; color: #f8fafc;">Batteries</td>
               <td>1.5V AAA Alkaline Cells (or 1.2V AAA NiMH Rechargeable)</td>
               <td style="text-align: center; color: #38bdf8; font-weight: bold;">3</td>
@@ -1321,7 +1640,7 @@
               <td>Standard portable power source; Pico runs smoothly from 4.5V down to 2.0V</td>
             </tr>
             <tr>
-              <td style="font-weight: bold; color: #38bdf8;">10</td>
+              <td style="font-weight: bold; color: #38bdf8;">7</td>
               <td style="font-weight: 600; color: #f8fafc;">Slide Switch</td>
               <td>SPST Miniature Slide Switch (Panel or PCB Mount)</td>
               <td style="text-align: center; color: #38bdf8; font-weight: bold;">1</td>
@@ -1329,16 +1648,27 @@
               <td style="font-weight: bold; color: #34d399;">₹10 / $0.15</td>
               <td>Main power disconnect switch; provides zero standby drain when remote is idle</td>
             </tr>
+            <tr>
+              <td style="font-weight: bold; color: #38bdf8;">8</td>
+              <td style="font-weight: 600; color: #f8fafc;">DuPont Wires</td>
+              <td>Flexible Jumper Wires (8-pin keypad flex + optics jumpers)</td>
+              <td style="text-align: center; color: #38bdf8; font-weight: bold;">1 set</td>
+              <td style="color: #94a3b8;">₹30 / $0.40</td>
+              <td style="font-weight: bold; color: #34d399;">₹30 / $0.40</td>
+              <td>Direct plug &amp; solder wiring between Pico, keypad, and optics</td>
+            </tr>
           </tbody>
         </table>
 
-        <div style="margin-top: 1.25rem; padding: 1rem 1.25rem; background: rgba(30, 41, 59, 0.5); border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between; align-items: center;">
+        <div
+          style="margin-top: 1.25rem; padding: 1rem 1.25rem; background: rgba(30, 41, 59, 0.5); border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-size: 0.85rem; color: #94a3b8;">Complete DIY Handheld Project Budget:</div>
-            <div style="font-size: 0.75rem; color: #cbd5e1;">(Core electronics: ~₹515 / $6.50 &bull; Full kit with batteries: ~₹750 / $9.35)</div>
+            <div style="font-size: 0.75rem; color: #cbd5e1;">(Core electronics: ~₹515 / $6.50 &bull; Full kit with
+              batteries: ~₹670 / $8.40)</div>
           </div>
           <div style="font-size: 1.35rem; font-weight: 800; color: #34d399; font-family: 'Fira Code', monospace;">
-            ₹750 / ~$9.35
+            ₹670 / ~$8.40
           </div>
         </div>
       </div>
@@ -1351,50 +1681,104 @@
     let isPowerOn = true;
 
     const COMPONENT_INFO = {
-      "Raspberry Pi Pico": {
-        badge: "21mm × 51mm PHYSICAL SIZE",
-        desc: "Dual-core RP2040 MCU running MicroPython. Housed in the lower-left grip with bottom-facing USB flasher port. Connects directly to 3x AAA battery power on Pin 39 (VSYS).",
+      "0.96 inch I2C OLED Display (SSD1306 128x64)": {
+        badge: "I2C 128x64 HEADS-UP DISPLAY (HUD)",
+        desc: "0.96 inch monochrome OLED display mounted at the top of the remote. Displays active appliance (TV/AC), current keypress & IR action, signal transmission animation, and step-by-step learning prompts in real time.",
         pins: [
-          ["Pin 39 (VSYS)", "3x AAA Battery Pack (+)", "Main battery supply (1.8V - 5.5V)"],
-          ["Pin 38 (GND)", "3x AAA Battery Pack (-)", "Common system ground"],
-          ["Pin 20 (GP15)", "VS1838B OUT", "Active-LOW raw IR demodulated signal"],
-          ["Pin 21 (GP16)", "Dual IR LEDs (Anode +)", "Direct 38kHz Hardware PWM drive"],
-          ["GP6 - GP9", "Keypad Rows R0-R3", "Sequential LOW scanning outputs"],
-          ["GP10 - GP13", "Keypad Cols C0-C3", "Input pull-up sensing pins"]
+          ["Pin 1 (GND)", "Pico Pin 23 (GND)", "Display clean ground return loop"],
+          ["Pin 2 (VCC)", "Pico Pin 36 (3V3_OUT)", "Clean 3.3V DC power supply rail"],
+          ["Pin 3 (SCL)", "Pico Pin 22 (GP17)", "Hardware I2C0 Clock line (400kHz)"],
+          ["Pin 4 (SDA)", "Pico Pin 21 (GP16)", "Hardware I2C0 Data line (bidirectional)"]
         ]
       },
-      "VS1838B IR Receiver (38kHz)": {
+      "Raspberry Pi Pico (USB Bottom-Facing)": {
+        badge: "21mm × 51mm PHYSICAL SIZE • RP2040",
+        desc: "Dual-core ARM Cortex-M0+ running MicroPython. Dedicated left pin rail powers the direct 8-pin keypad matrix (GP2-GP9), bottom 3-pin IR receiver (GP10, GP11, GND), and top 3-pin 5V IR transmitter (GP14, VBUS, GND).",
+        pins: [
+          ["Pin 40 (VBUS)", "IR LED Module Pin 1 (5V)", "5V High-Power booster rail (~100mA pulses)"],
+          ["Pin 39 (VSYS)", "Slide Switch OUT", "Main switched 4.5V battery power rail"],
+          ["Pin 38 (GND)", "Battery Pack (-) Black", "Common system ground"],
+          ["Pin 19 (GP14)", "IR LED Module Pin 3 (IN)", "38kHz Hardware PWM modulation carrier (Slice 7A)"],
+          ["Pin 18 (GND)", "IR LED Module Pin 2 (GND)", "IR Transmitter ground return"],
+          ["Pin 15 (GP11)", "VS1838B Pin 1 (OUT)", "Active-LOW raw IR demodulated signal input"],
+          ["Pin 14 (GP10)", "VS1838B Pin 3 (VCC)", "Clean 3.3V power (driven HIGH in software)"],
+          ["Pin 13 (GND)", "VS1838B Pin 2 (GND)", "IR Receiver ground return"],
+          ["Pins 12..9", "Keypad Cols 3..0 (GP9..GP6)", "Inputs with RP2040 internal pull-ups"],
+          ["Pins 7..4", "Keypad Rows 3..0 (GP5..GP2)", "Outputs driven LOW during matrix scan"],
+          ["Pins 1-3, 21-37", "Unused / Open GPIOs", "All other Pico pins 100% free!"]
+        ]
+      },
+      "Direct 4x4 Keypad 8-Pin Header": {
+        badge: "8-PIN DIRECT GPIO MATRIX (NO I2C)",
+        desc: "Standard 4x4 matrix membrane keypad connected directly to 8 Pico GPIOs without any I2C backpack. Rows (GP2-GP5) are driven LOW during scan, and Columns (GP6-GP9) are read using RP2040 internal pull-ups.",
+        pins: [
+          ["Pin 1 (Row 0)", "Pico Pin 4 (GP2)", "Row 0 output (driven LOW during scan)"],
+          ["Pin 2 (Row 1)", "Pico Pin 5 (GP3)", "Row 1 output (driven LOW during scan)"],
+          ["Pin 3 (Row 2)", "Pico Pin 6 (GP4)", "Row 2 output (driven LOW during scan)"],
+          ["Pin 4 (Row 3)", "Pico Pin 7 (GP5)", "Row 3 output (driven LOW during scan)"],
+          ["Pin 5 (Col 0)", "Pico Pin 9 (GP6)", "Col 0 input (internal PULL_UP, 1=idle, 0=pressed)"],
+          ["Pin 6 (Col 1)", "Pico Pin 10 (GP7)", "Col 1 input (internal PULL_UP, 1=idle, 0=pressed)"],
+          ["Pin 7 (Col 2)", "Pico Pin 11 (GP8)", "Col 2 input (internal PULL_UP, 1=idle, 0=pressed)"],
+          ["Pin 8 (Col 3)", "Pico Pin 12 (GP9)", "Col 3 input (internal PULL_UP, 1=idle, 0=pressed)"]
+        ]
+      },
+      "3-Pin 5V High-Power IR LED Module": {
+        badge: "5V TRANSISTOR BOOSTED TRANSMITTER (10-15M RANGE)",
+        desc: "High-power 940nm IR transmitter module positioned at the top optical window. Built-in driver transistor and current limiter powered from the 5V rail deliver ~100mA peak pulses for 10–15 meter range without loading the Pico GPIO.",
+        pins: [
+          ["Pin 1 (5V / VBUS)", "Pico Pin 40 (VBUS 5V)", "Dedicated 5V booster power rail"],
+          ["Pin 2 (GND)", "Pico Pin 18 (GND)", "Transmitter power ground return"],
+          ["Pin 3 (IN / SIG)", "Pico Pin 19 (GP14)", "38kHz Hardware PWM modulation carrier (RP2040 Slice 7A)"]
+        ]
+      },
+      "VS1838B IR Receiver (3-Pin Symmetrical Module)": {
+        badge: "BOTTOM DEDICATED IR LEARNING EYE (ZERO CROSSTALK)",
+        desc: "Positioned at the bottom bezel of the remote, physically separated from the top transmitter by 170mm. Point your original remote directly at this bottom window to learn and store any IR command into ir_codes.json.",
+        pins: [
+          ["Pin 1 (OUT)", "Pico Pin 15 (GP11)", "Demodulated Active-LOW baseband signal IN"],
+          ["Pin 2 (GND)", "Pico Pin 13 (GND)", "Receiver clean ground return"],
+          ["Pin 3 (VCC)", "Pico Pin 14 (GP10)", "Clean 3.3V DC power (driven HIGH in MicroPython)"]
+        ]
+      },
+      "VS1838B IR Receiver (3-Pin)": {
         badge: "3-PIN ACTIVE DEMODULATOR",
-        desc: "Integrated photodiode, AGC, and 38kHz bandpass filter. Demodulates raw infrared pulse trains directly to Active-LOW signal on GP15 without any external components.",
+        desc: "Integrated photodiode, pre-amplifier, AGC, and 38kHz bandpass filter. Demodulates raw infrared remote signals down to Active-LOW pulses directly readable by Pico GP11.",
         pins: [
-          ["Pin 1 (OUT)", "Pico GP15 (Pin 20)", "Demodulated Active-LOW input"],
-          ["Pin 2 (GND)", "Pico Pin 18 (GND)", "System Ground return"],
-          ["Pin 3 (VCC)", "Pico Pin 36 (3V3)", "Clean 3.3V power from Pico SMPS"]
-        ]
-      },
-      "Dual 940nm IR LEDs (Series Direct Drive)": {
-        badge: "DIRECT GPIO DRIVE (NO RESISTOR / NO TRANSISTOR)",
-        desc: "Two 940nm high-power IR LEDs wired in series directly between GP16 and GND. With dual ~1.35V forward drops (2.70V total), the 3.3V GPIO naturally self-limits the drive current to a safe ~12-15mA at 33% carrier PWM duty cycle, while providing wide optical beam coverage.",
-        pins: [
-          ["LED 1 Anode (+)", "Pico GP16 (Pin 21)", "38kHz Hardware PWM modulation"],
-          ["LED 1 Cathode (-)", "LED 2 Anode (+)", "Direct series jumper link"],
-          ["LED 2 Cathode (-)", "Pico Pin 23 (GND)", "Return loop to system ground"]
+          ["Pin 1 (OUT)", "Pico Pin 15 (GP11)", "Demodulated Active-LOW baseband signal IN"],
+          ["Pin 2 (GND)", "Pico Pin 13 (GND)", "Ground return loop"],
+          ["Pin 3 (VCC)", "Pico Pin 14 (GP10)", "Clean 3.3V DC power (driven HIGH in MicroPython)"]
         ]
       },
       "3x AAA Battery Pack (4.5V)": {
         badge: "38mm × 52mm PHYSICAL SIZE",
         desc: "Holds 3 standard AAA alkaline (or rechargeable NiMH) cells in series producing 4.5V DC. Positioned in the lower-right grip for comfortable palm balance.",
         pins: [
-          ["Red Wire (+)", "Slide Switch IN / VSYS", "4.5V Battery supply lead"],
+          ["Red Wire (+)", "Slide Switch IN", "4.5V Battery supply lead"],
           ["Black Wire (-)", "Pico Pin 38 (GND)", "System Ground return"]
         ]
       },
       "SPST Miniature Slide Switch": {
         badge: "12mm × 6mm PHYSICAL SIZE",
-        desc: "Mounted directly on the remote's left side bezel under the thumb. Cuts off all power for zero idle battery drain.",
+        desc: "Mounted directly on the remote's left side bezel under the thumb. Completely isolates the battery from Pico VSYS for zero standby current drain when off.",
         pins: [
           ["Terminal 1 (IN)", "Battery (+) Red", "Input lead from 4.5V battery pack"],
-          ["Terminal 2 (OUT)", "Pico VSYS (Pin 39)", "Switched 4.5V power rail"]
+          ["Terminal 2 (OUT)", "Pico VSYS (Pin 39)", "Switched 4.5V power rail to Pico internal regulator"]
+        ]
+      },
+      "Raspberry Pi Pico": {
+        badge: "21mm × 51mm PHYSICAL SIZE",
+        desc: "RP2040 Dual-Core MCU running MicroPython. Left pin rail connects direct 8-pin keypad matrix (GP2-GP9), bottom 3-pin receiver (GP10, GP11, GND), and top 3-pin 5V IR LED (GP14, VBUS, GND).",
+        pins: [
+          ["Pin 40 (VBUS)", "IR LED Module Pin 1 (5V)", "5V High-Power booster rail"],
+          ["Pin 39 (VSYS)", "Slide Switch OUT", "Switched 4.5V battery power"],
+          ["Pin 38 (GND)", "Battery Pack (-) Black", "System ground"],
+          ["Pin 19 (GP14)", "IR LED Pin 3 (IN)", "38kHz Hardware PWM carrier"],
+          ["Pin 18 (GND)", "IR LED Pin 2 (GND)", "Transmitter ground"],
+          ["Pin 15 (GP11)", "VS1838B Pin 1 (OUT)", "IR Data input"],
+          ["Pin 14 (GP10)", "VS1838B Pin 3 (VCC)", "3.3V power OUT"],
+          ["Pin 13 (GND)", "VS1838B Pin 2 (GND)", "Receiver ground"],
+          ["Pins 12..9", "Keypad Cols (GP9..GP6)", "Inputs with internal pull-up"],
+          ["Pins 7..4", "Keypad Rows (GP5..GP2)", "Outputs driven LOW"]
         ]
       }
     };
@@ -1435,7 +1819,7 @@
     const btnZoomFit = document.getElementById("btnZoomFit");
     const zoomLevelText = document.getElementById("zoomLevelText");
 
-    const BASE_VB = { x: 0, y: 0, w: 490, h: 855 };
+    const BASE_VB = { x: 0, y: 0, w: 1200, h: 820 };
     let currentScale = 1.0; // 100% zoom fills canvas nicely
     let panOffset = { x: 0, y: 0 };
     let isPanning = false;
@@ -1519,7 +1903,7 @@
     powerSwitchGroup.addEventListener("click", () => {
       isPowerOn = !isPowerOn;
       if (isPowerOn) {
-        switchHandle.setAttribute("transform", "translate(9, 10)");
+        switchHandle.setAttribute("transform", "translate(15, 12)");
         switchKnob.setAttribute("fill", "#34d399");
         switchLabelText.textContent = "ON";
         switchLabelText.setAttribute("fill", "#34d399");
@@ -1529,9 +1913,10 @@
         picoOnboardLed.style.opacity = "0.6";
         remoteDevDisplay.textContent = DEVICES[currentDeviceIndex];
         liveLastCmd.textContent = "Powered ON (Ready to transmit / learn)";
+        updateVirtualOled(DEVICES[currentDeviceIndex], "-", "READY", "STANDBY");
         drawIdleWaveform();
       } else {
-        switchHandle.setAttribute("transform", "translate(9, 30)");
+        switchHandle.setAttribute("transform", "translate(15, 45)");
         switchKnob.setAttribute("fill", "#ef4444");
         switchLabelText.textContent = "OFF";
         switchLabelText.setAttribute("fill", "#ef4444");
@@ -1541,6 +1926,7 @@
         picoOnboardLed.style.opacity = "0.05";
         remoteDevDisplay.textContent = "OFF";
         liveLastCmd.textContent = "Remote Powered OFF (Slide switch opened)";
+        updateVirtualOled("OFF", "-", "SHUTDOWN", "POWER OFF");
         waveCtx.fillStyle = "#090d16";
         waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
         waveLabel.textContent = "0.0V (Battery Disconnected)";
@@ -1557,32 +1943,61 @@
       });
     });
 
+    let isLearningStep1 = false;
+
     function handleKey(key) {
-      if (key === "A") {
-        currentDeviceIndex = (currentDeviceIndex + 1) % DEVICES.length;
+      if (isLearningStep1) {
+        isLearningStep1 = false;
         const dev = DEVICES[currentDeviceIndex];
-        currentDevName.textContent = dev;
-        remoteDevDisplay.textContent = dev;
-        liveTargetDevice.textContent = `${dev} (Device ${currentDeviceIndex + 1}/4)`;
-        liveLastCmd.textContent = `[A] Switched Mode ➜ ${dev}`;
-        triggerTx(`CYCLE_MODE [${dev}]`);
+        updateVirtualOled(dev, key, "MATCH SIGNAL", "AIM AT RX");
+        liveLastCmd.textContent = `[*] Key [${key}] Selected ➜ Signal Matching... Aim remote at RX!`;
+        systemStatusText.textContent = `Learning Key [${key}] for ${dev}... Point remote at VS1838B`;
+        triggerRx();
+        setTimeout(() => {
+          updateVirtualOled(dev, key, "SAVED OK", "PULSES: 67");
+          liveLastCmd.textContent = `[+] SIGNAL MATCHED & SAVED for Key [${key}] in ir_codes.json!`;
+          systemStatusText.textContent = `Matched & Saved! Press [${key}] anytime to transmit.`;
+        }, 900);
+        return;
+      }
+
+      if (key === "A") {
+        isLearningStep1 = true;
+        const dev = DEVICES[currentDeviceIndex];
+        updateVirtualOled(dev, "A", "LEARN STEP 1", "PICK KEY");
+        liveLastCmd.textContent = `[A] LEARN MODE: Step 1 ➜ Press key to store (e.g. '1')...`;
+        systemStatusText.textContent = `[LEARN MODE] Press the keypad key you want to teach...`;
+        picoOnboardLed.style.opacity = "1";
+        setTimeout(() => { picoOnboardLed.style.opacity = "0.6"; }, 400);
       } else if (key === "D") {
-        liveLastCmd.textContent = `[D] Power Toggle Command ➜ ${DEVICES[currentDeviceIndex]}`;
+        const dev = DEVICES[currentDeviceIndex];
+        updateVirtualOled(dev, "D", "POWER", "TX OK");
+        liveLastCmd.textContent = `[D] Power Toggle Command ➜ ${dev}`;
         triggerTx(`POWER TOGGLE [0x20DF10EF]`);
       } else if (key === "B") {
-        liveLastCmd.textContent = `[B] Volume Up (▲) ➜ ${DEVICES[currentDeviceIndex]}`;
+        const dev = DEVICES[currentDeviceIndex];
+        updateVirtualOled(dev, "B", "VOL_UP", "TX OK");
+        liveLastCmd.textContent = `[B] Volume Up (▲) ➜ ${dev}`;
         triggerTx(`VOL_UP [0x20DF40BF]`);
       } else if (key === "C") {
-        liveLastCmd.textContent = `[C] Volume Down (▼) ➜ ${DEVICES[currentDeviceIndex]}`;
+        const dev = DEVICES[currentDeviceIndex];
+        updateVirtualOled(dev, "C", "VOL_DOWN", "TX OK");
+        liveLastCmd.textContent = `[C] Volume Down (▼) ➜ ${dev}`;
         triggerTx(`VOL_DOWN [0x20DFC03F]`);
       } else if (key === "*") {
-        liveLastCmd.textContent = `[*] Mute Audio ➜ ${DEVICES[currentDeviceIndex]}`;
+        const dev = DEVICES[currentDeviceIndex];
+        updateVirtualOled(dev, "*", "MUTE", "TX OK");
+        liveLastCmd.textContent = `[*] Mute Audio ➜ ${dev}`;
         triggerTx(`MUTE [0x20DF906F]`);
       } else if (key === "#") {
-        liveLastCmd.textContent = `[#] Enter / Select ➜ ${DEVICES[currentDeviceIndex]}`;
+        const dev = DEVICES[currentDeviceIndex];
+        updateVirtualOled(dev, "#", "ENTER", "TX OK");
+        liveLastCmd.textContent = `[#] Enter / Select ➜ ${dev}`;
         triggerTx(`ENTER [0x20DF22DD]`);
       } else {
-        liveLastCmd.textContent = `[${key}] Digit '${key}' ➜ ${DEVICES[currentDeviceIndex]}`;
+        const dev = DEVICES[currentDeviceIndex];
+        updateVirtualOled(dev, key, `KEY_${key}`, "TX OK");
+        liveLastCmd.textContent = `[${key}] Digit '${key}' ➜ ${dev}`;
         triggerTx(`DIGIT_${key}`);
       }
     }
@@ -1651,6 +2066,17 @@
     });
 
     // TX Simulation
+    function updateVirtualOled(dev, key, cmd, status) {
+      const elDev = document.getElementById("svgOledDev");
+      const elKey = document.getElementById("svgOledKey");
+      const elCmd = document.getElementById("svgOledCmd");
+      const elStatus = document.getElementById("svgOledStatus");
+      if (elDev) elDev.textContent = `[${(dev || 'TV').toUpperCase()}]`;
+      if (elKey) elKey.textContent = `Key: [${key || '-'}]`;
+      if (elCmd) elCmd.textContent = `Cmd: ${(cmd || 'READY').toUpperCase()}`;
+      if (elStatus) elStatus.textContent = `Status: ${status || 'Standby'}`;
+    }
+
     function triggerTx(label) {
       irBeamAnim.classList.add("firing");
       keypadTxLed.setAttribute("fill", "#f43f5e");
@@ -1673,7 +2099,7 @@
     function triggerRx() {
       rxWaves.classList.add("receiving");
       systemStatusDot.className = "status-dot active-rx";
-      systemStatusText.textContent = `Learning IR: Capturing raw pulses on GP15 from original remote...`;
+      systemStatusText.textContent = `Learning IR: Capturing raw pulses on GP11 from original remote...`;
       liveLastCmd.textContent = `LEARNING: 68 raw transitions captured & stored into ir_codes.json!`;
 
       renderWaveform(false);
@@ -1745,11 +2171,12 @@
       waveCtx.lineTo(waveCanvas.width - 10, 18);
       waveCtx.stroke();
 
-      waveLabel.textContent = isTx ? "TX PWM Mark/Space (NEC 38kHz)" : "RX Raw Demodulated (GP15 Pin 20)";
+      waveLabel.textContent = isTx ? "TX PWM Mark/Space (NEC 38kHz)" : "RX Raw Demodulated (GP11 Pin 15)";
       pulseCount.textContent = "68 transitions (32-bit NEC)";
     }
 
     drawIdleWaveform();
   </script>
 </body>
+
 </html>

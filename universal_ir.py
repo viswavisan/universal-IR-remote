@@ -15,11 +15,10 @@ class UniversalIR:
     (NEC, Sony, Philips RC5/RC6, Samsung, LG, AC remotes, etc.).
     """
 
-    def __init__(self, rx_pin=15, tx_pin=16, carrier_freq=38000, duty_percent=33, storage_file="ir_codes.json"):
+    def __init__(self, rx_pin=11, tx_pin=14, carrier_freq=38000, duty_percent=33, storage_file="ir_codes.json"):
         """
-        :param rx_pin: GPIO pin connected to demodulating IR receiver (e.g., VS1838B / TSOP38238).
-                       Receiver output is typically Active-LOW.
-        :param tx_pin: GPIO pin connected to IR LED drive transistor base (via 1k resistor).
+        :param rx_pin: GPIO pin connected to demodulating IR receiver (GP11 / Physical Pin 15, Active-LOW).
+        :param tx_pin: GPIO pin connected to 3-pin 5V IR transmitter module (GP14 / Physical Pin 19, 38kHz PWM).
         :param carrier_freq: Carrier frequency in Hz (typically 38000 Hz / 38 kHz).
         :param duty_percent: Carrier duty cycle percentage (33% is standard for IR LEDs).
         :param storage_file: Path to JSON database file on Pico flash filesystem.
@@ -205,27 +204,27 @@ class UniversalIR:
             print("[-] Invalid pulse data to transmit.")
             return
 
-        pwm = self.tx_pwm
         duty_on = self.duty_on
         duty_off = self.duty_off
+        duty_u16 = self.tx_pwm.duty_u16
+        sleep_us = time.sleep_us
 
-        # Critical: turn interrupts off or minimize GC impact during transmission
+        # Clean up RAM before time-critical transmission to avoid GC pauses
         gc.collect()
 
         # Transmit pulse train
         is_mark = True
         for duration in pulses:
             if is_mark:
-                pwm.duty_u16(duty_on)
+                duty_u16(duty_on)
             else:
-                pwm.duty_off = 0
-                pwm.duty_u16(duty_off)
+                duty_u16(duty_off)
 
-            time.sleep_us(duration)
+            sleep_us(duration)
             is_mark = not is_mark
 
         # Ensure carrier is completely off after transmission
-        pwm.duty_u16(duty_off)
+        duty_u16(duty_off)
 
     def send(self, device, button, repeat=1, delay_between_repeats_ms=45):
         """
