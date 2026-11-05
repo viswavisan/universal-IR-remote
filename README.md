@@ -148,28 +148,33 @@ The 4x4 matrix keypad connects directly to the Raspberry Pi Pico without requiri
 > - **Pin 19 (GP14)**: 38 kHz Hardware PWM TX (IR Transmitter IN)
 > - **Pin 40 (VBUS)**: 5V High-Power Rail (IR Transmitter 5V)
 
-##### 4x4 Keypad Remote Layout:
+##### Remote Keypad Layout:
 ```text
-  [ 1 ]    [ 2 ]    [ 3 ]    [ A: MODE (Switch Device) ] <- Row 0 (GP2, Pin 4)
-  [ 4 ]    [ 5 ]    [ 6 ]    [ B: VOL ▲                ] <- Row 1 (GP3, Pin 5)
-  [ 7 ]    [ 8 ]    [ 9 ]    [ C: VOL ▼                ] <- Row 2 (GP4, Pin 6)
-  [ * ]    [ 0 ]    [ # ]    [ D: POWER                ] <- Row 3 (GP5, Pin 7)
-    ^        ^        ^        ^
-  Col 0    Col 1    Col 2    Col 3
-  (GP6)    (GP7)    (GP8)    (GP9)
- (Pin 9)  (Pin 10) (Pin 11) (Pin 12)
+  [ 1: POWER ON ]   [ 2: UP (▲)  ]   [ 3: POWER OFF ]   [ A: LEARN   ] <- Row 0 (GP2, Pin 4)
+  [ 4: LEFT (◀) ]   [ 5: OK/ENT  ]   [ 6: RIGHT (▶) ]   [ B: MODE    ] <- Row 1 (GP3, Pin 5)
+  [ 7: VOL -    ]   [ 8: DOWN(▼) ]   [ 9: VOL +     ]   [ C: MUTE    ] <- Row 2 (GP4, Pin 6)
+  [ *           ]   [ 0          ]   [ #            ]   [ D: POWER   ] <- Row 3 (GP5, Pin 7)
+        ^                 ^                 ^                 ^
+      Col 0             Col 1             Col 2             Col 3
+      (GP6)             (GP7)             (GP8)             (GP9)
+     (Pin 9)           (Pin 10)          (Pin 11)          (Pin 12)
 ```
 
 ##### Key Action Map:
 | Key | Remote Action | Description |
-|---|---|---|
-| **A** | **MODE** | Cycles target appliance: `TV` $\rightarrow$ `AC` $\rightarrow$ `SOUNDBAR` $\rightarrow$ `PROJECTOR` |
-| **D** | **power** | Power On / Off |
-| **B** | **vol_up** | Volume Up |
-| **C** | **vol_down** | Volume Down |
-| **\*** | **mute** | Mute Audio |
-| **#** | **enter** | Confirm / OK |
-| **0 – 9** | **0 – 9** | Channel and number selection |
+|:---:|---|---|
+| **`A`** | **LEARN** | Handheld learning mode (Press `A` ➜ Pick Key ➜ Match Signal ➜ Auto-save) |
+| **`B`** | **MODE** | Cycle target device: `TV` $\rightarrow$ `AC` $\rightarrow$ `SOUNDBAR` $\rightarrow$ `PROJECTOR` |
+| **`1`** | **power_on** | Dedicated Power ON command |
+| **`3`** | **power_off** | Dedicated Power OFF command |
+| **`2`** | **up** | Directional D-Pad: Navigate UP (▲) |
+| **`4`** | **left** | Directional D-Pad: Navigate LEFT (◀) |
+| **`5`** | **ok** | Directional D-Pad: OK / ENTER / Select |
+| **`6`** | **right** | Directional D-Pad: Navigate RIGHT (▶) |
+| **`8`** | **down** | Directional D-Pad: Navigate DOWN (▼) |
+| **`7`** | **vol_down** | Volume Down (VOL −) |
+| **`9`** | **vol_up** | Volume Up (VOL +) |
+| **`C`** | **mute** | Mute / Unmute Audio Toggle |
 
 ---
 
@@ -184,18 +189,33 @@ universal-IR-remote/
 ├── main.py                # Main interactive remote application & 4x4 keypad loop
 ├── test_all.py            # Complete modular hardware diagnostic & test suite
 ├── circuit_visualizer.html# Interactive browser visualizer with clickable 4x4 keypad & OLED
+├── pcb_design.html        # Interactive 28x36 prototype perfboard PCB designer & solder guide
 ├── .gitignore             # Standard Python / project ignore rules
 └── README.md              # Documentation and wiring guide
 ```
 
 ---
 
-## Interactive Circuit Visualizer
+## Interactive Visualizers & PCB Designer
 
+This project includes two complementary browser-based interactive visualizers:
+
+### 1. Circuit Schematic & Virtual Handheld Remote
 Open [`circuit_visualizer.html`](circuit_visualizer.html) in your browser:
-- **Clickable 4x4 Keypad**: Test any of the 16 buttons interactively. Press `A` to change devices!
-- **Signal Trace**: Live simulated oscillograms of demodulated 38 kHz pulse trains.
-- **Net Filtering**: Highlight Rows, Columns, Power, Ground, RX, and TX lines individually.
+- **Clickable 4x4 Keypad & Live OLED**: Test any of the 16 buttons interactively with real-time multi-line OLED feedback.
+- **2-Step Learn Workflow**: Test `Key A` (Learn), target key selection, and signal matching right in your browser.
+- **Device Mode Switching**: Press `Key B` to toggle between TV, AC, Soundbar, and Projector profiles.
+- **Live Signal Trace**: Real-time oscillogram of demodulated 38 kHz pulse trains.
+
+### 2. Prototype Perfboard PCB Designer (70×90mm)
+Open [`pcb_design.html`](pcb_design.html) in your browser:
+- **True 2.54mm (0.1") Prototype Grid**: 28 columns (A–AB) × 36 rows (1–36) matching standard 70×90mm double-sided FR4 protoboards (1,008 plated through-holes).
+- **Dual-Perspective Views**:
+  - **Top View (Component Side)**: Raspberry Pi Pico DIP-40 socket, 0.96" OLED, 4×4 Keypad socket, IR RX/TX modules, slide switch, battery pads, and color-coded top jumper wires.
+  - **Bottom View (Solder Side)**: Mirrored view showing solder bridge rails and bare copper bus wires for hassle-free hand soldering!
+  - **X-Ray View**: Translucent composite view of top jumpers and bottom traces simultaneously.
+- **Interactive Pad Inspector & Netlist Highlighter**: Click or hover any pad on the perfboard to inspect coordinates (e.g. `J17`), connected component pins, wire color, and physical soldering tips.
+- **Step-by-Step Soldering Guide**: Built-in 8-step assembly checklist with safe multimeter continuity testing instructions before powering.
 
 ---
 

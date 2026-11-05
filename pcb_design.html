@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clean PCB Perfboard - Interactive Keypad Matrix</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --panel: #111827;
+      --border: #1f293d;
+      --accent: #38bdf8;
+      --text: #f3f4f6;
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 10;
+    }
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      background: #0284c7;
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      background: #334155;
+      color: #fff;
+    }
+
+    .btn.active {
+      background: var(--accent);
+      color: #04101d;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .workspace {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 84px);
+      position: relative;
+    }
+
+    .canvas-container {
+      flex: 1;
+      background: radial-gradient(#151e2e 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-color: var(--bg);
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+
+    .canvas-container.panning {
+      cursor: grabbing;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .sidebar {
+      width: 320px;
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      font-size: 12px;
+    }
+
+    .sidebar-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-content {
+      padding: 14px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .log-item {
+      background: #0b111e;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .log-item .coords {
+      font-weight: 700;
+      font-family: monospace;
+      color: #38bdf8;
+      font-size: 13px;
+    }
+
+    .log-item .desc {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .solder-trace, .solder-joint {
+      transition: opacity 0.15s ease;
+      cursor: pointer;
+    }
+
+    .highlight-net line {
+      stroke-width: 6.5 !important;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.7));
+    }
+
+    .highlight-net circle {
+      stroke-width: 3.2 !important;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+    }
+
+    .dimmed-net {
+      opacity: 0.18 !important;
+    }
+
+    .net-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 10px;
+      color: #64748b;
+      font-style: italic;
+    }
+
+    footer {
+      background: #0b0f19;
+      border-top: 1px solid var(--border);
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: monospace;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid #38bdf8;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: #fff;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-title">
+      <span>Keypad Perfboard Canvas</span>
+      <span class="badge" id="linesCountBadge">0 Solder Lines</span>
+    </div>
+    <div class="controls">
+      <div style="display:flex; background:#0b111e; border:1px solid #334155; border-radius:6px; padding:2px; gap:2px;">
+        <button class="btn active" id="btnFront" onclick="setView('top')">Front (Buttons)</button>
+        <button class="btn" id="btnBack" onclick="setView('bottom')">Back (Solder)</button>
+        <button class="btn" id="btnXray" onclick="setView('xray')">X-Ray</button>
+      </div>
+      <button class="btn" id="btnFit" onclick="fitView()">⛶ Fit View</button>
+      <button class="btn" onclick="resetZoom()">100%</button>
+      <button class="btn" style="color:#f87171;" onclick="clearAllLines()">Clear Lines</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <div class="canvas-container" id="canvasContainer">
+      <svg id="pcbSvg">
+        <defs>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6" />
+          </filter>
+          <radialGradient id="padGrad" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#fde047" />
+            <stop offset="60%" stop-color="#d97706" />
+            <stop offset="100%" stop-color="#78350f" />
+          </radialGradient>
+          <linearGradient id="solderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f8fafc" />
+            <stop offset="35%" stop-color="#cbd5e1" />
+            <stop offset="70%" stop-color="#94a3b8" />
+            <stop offset="100%" stop-color="#475569" />
+          </linearGradient>
+          <radialGradient id="btnCap" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#38bdf8" />
+            <stop offset="70%" stop-color="#0284c7" />
+            <stop offset="100%" stop-color="#075985" />
+          </radialGradient>
+        </defs>
+        <g id="worldGroup">
+          <g id="substrateLayer"></g>
+          <g id="silkscreenLayer"></g>
+          <g id="padLayer"></g>
+          <g id="solderLayer"></g>
+          <g id="componentLayer"></g>
+        </g>
+      </svg>
+      <div id="tooltip"></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span>Soldering Log</span>
+        <span style="color:#38bdf8;" id="sidebarCount">0 Active</span>
+      </div>
+      <div class="sidebar-content">
+        <div style="font-size:11px; color:#94a3b8; line-height:1.4;">
+          Clean board ready. Instruct soldering step-by-step. All lines appear in real-time below:
+        </div>
+        <div class="log-list" id="logList">
+          <div class="empty-state">No soldering lines yet.<br />Instruct: "draw line to e4 to e23"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div id="statusCursor">Hover over any pad or button</div>
+    <div>Columns A–R (0–17) | Rows 1–18</div>
+  </footer>
+
+  <script>
+    // Geometry (Columns renamed starting from A, Rows 2-7 removed & renamed)
+    const COLS = 18; // A through R
+    const ROWS = 18; // 1 through 18
+    const COL_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'];
+    const PITCH = 36;
+    const MARGIN_X = 100;
+    const MARGIN_Y = 80;
+    const BOARD_W = (COLS - 1) * PITCH + 80;
+    const BOARD_H = (ROWS - 1) * PITCH + 80;
+
+    // View state
+    const state = {
+      viewMode: 'top', // top, bottom, xray
+      zoom: 1.0,
+      panX: 40,
+      panY: 20,
+      isPanning: false,
+      startX: 0,
+      startY: 0
+    };
+
+    // ACTIVE SOLDER LINES (Complete 2x8 Matrix - Color-coded by Electrical Net)
+    const solderLines = [
+      // --- 8 VERTICAL COLUMN BUSSES (Cols B, D, F, H, J, L, N, P) ---
+      { fromCol: 'B', fromRow: 1, toCol: 'B', toRow: 17, from: 'B1', to: 'B17', net: 'Col 0A', desc: 'Col 0 Bus A (B1 to B17)', color: '#38bdf8' },
+      { fromCol: 'D', fromRow: 1, toCol: 'D', toRow: 17, from: 'D1', to: 'D17', net: 'Col 0B', desc: 'Col 0 Bus B (D1 to D17 in gap C-E)', color: '#2563eb' },
+      { fromCol: 'F', fromRow: 1, toCol: 'F', toRow: 17, from: 'F1', to: 'F17', net: 'Col 1A', desc: 'Col 1 Bus A (F1 to F17)', color: '#06b6d4' },
+      { fromCol: 'H', fromRow: 1, toCol: 'H', toRow: 17, from: 'H1', to: 'H17', net: 'Col 1B', desc: 'Col 1 Bus B (H1 to H17 in gap G-I)', color: '#0d9488' },
+      { fromCol: 'J', fromRow: 1, toCol: 'J', toRow: 17, from: 'J1', to: 'J17', net: 'Col 2A', desc: 'Col 2 Bus A (J1 to J17)', color: '#10b981' },
+      { fromCol: 'L', fromRow: 1, toCol: 'L', toRow: 17, from: 'L1', to: 'L17', net: 'Col 2B', desc: 'Col 2 Bus B (L1 to L17 in gap K-M)', color: '#84cc16' },
+      { fromCol: 'N', fromRow: 1, toCol: 'N', toRow: 17, from: 'N1', to: 'N17', net: 'Col 3A', desc: 'Col 3 Bus A (N1 to N17)', color: '#eab308' },
+      { fromCol: 'P', fromRow: 1, toCol: 'P', toRow: 17, from: 'P1', to: 'P17', net: 'Col 3B', desc: 'Col 3 Bus B (P1 to P17)', color: '#8b5cf6' },
+
+      // --- 2 HORIZONTAL ROW BUSSES (Rows 5 and 13) ---
+      { fromCol: 'C', fromRow: 5, toCol: 'O', toRow: 5, from: 'C5', to: 'O5', net: 'Row 5', desc: 'Row 5 Bus (Cols C to O)', color: '#f43f5e' },
+      { fromCol: 'O', fromRow: 5, toCol: 'Q', toRow: 5, from: 'O5', to: 'Q5', net: 'Row 5', desc: 'Jumper O5 to Q5 (hops over P5 unsoldered)', color: '#f43f5e' },
+      { fromCol: 'C', fromRow: 13, toCol: 'O', toRow: 13, from: 'C13', to: 'O13', net: 'Row 13', desc: 'Row 13 Bus (Cols C to O)', color: '#d946ef' },
+      { fromCol: 'O', fromRow: 13, toCol: 'Q', toRow: 13, from: 'O13', to: 'Q13', net: 'Row 13', desc: 'Jumper O13 to Q13 (hops over P13 unsoldered)', color: '#d946ef' },
+
+      // --- BUTTON COLUMN 0 (Keys 1, 4, 7, *): Pins on A (left) and C (right) ---
+      { fromCol: 'B', fromRow: 2, toCol: 'C', toRow: 2, from: 'B2', to: 'C2', net: 'Col 0A', desc: 'Key 1: Bridge B2 to C2 (Bus B)', color: '#38bdf8' },
+      { fromCol: 'C', fromRow: 4, toCol: 'C', toRow: 6, from: 'C4', to: 'C6', net: 'Row 5', desc: 'Key 4 Jumper C4 to C6 (welded at C5)', color: '#f43f5e' },
+      { fromCol: 'C', fromRow: 8, toCol: 'D', toRow: 8, from: 'C8', to: 'D8', net: 'Col 0B', desc: 'Key 4: Bridge C8 to D8 (Bus D in gap C-E)', color: '#2563eb' },
+      { fromCol: 'B', fromRow: 10, toCol: 'C', toRow: 10, from: 'B10', to: 'C10', net: 'Col 0A', desc: 'Key 7: Bridge B10 to C10 (Bus B)', color: '#38bdf8' },
+      { fromCol: 'C', fromRow: 12, toCol: 'C', toRow: 14, from: 'C12', to: 'C14', net: 'Row 13', desc: 'Key * Jumper C12 to C14 (welded at C13)', color: '#d946ef' },
+      { fromCol: 'C', fromRow: 16, toCol: 'D', toRow: 16, from: 'C16', to: 'D16', net: 'Col 0B', desc: 'Key *: Bridge C16 to D16 (Bus D in gap C-E)', color: '#2563eb' },
+
+      // --- BUTTON COLUMN 1 (Keys 2, 5, 8, 0): Pins on E (left) and G (right) ---
+      { fromCol: 'F', fromRow: 2, toCol: 'G', toRow: 2, from: 'F2', to: 'G2', net: 'Col 1A', desc: 'Key 2: Bridge F2 to G2 (Bus F)', color: '#06b6d4' },
+      { fromCol: 'G', fromRow: 4, toCol: 'G', toRow: 6, from: 'G4', to: 'G6', net: 'Row 5', desc: 'Key 5 Jumper G4 to G6 (welded at G5)', color: '#f43f5e' },
+      { fromCol: 'G', fromRow: 8, toCol: 'H', toRow: 8, from: 'G8', to: 'H8', net: 'Col 1B', desc: 'Key 5: Bridge G8 to H8 (Bus H in gap G-I)', color: '#0d9488' },
+      { fromCol: 'F', fromRow: 10, toCol: 'G', toRow: 10, from: 'F10', to: 'G10', net: 'Col 1A', desc: 'Key 8: Bridge F10 to G10 (Bus F)', color: '#06b6d4' },
+      { fromCol: 'G', fromRow: 12, toCol: 'G', toRow: 14, from: 'G12', to: 'G14', net: 'Row 13', desc: 'Key 0 Jumper G12 to G14 (welded at G13)', color: '#d946ef' },
+      { fromCol: 'G', fromRow: 16, toCol: 'H', toRow: 16, from: 'G16', to: 'H16', net: 'Col 1B', desc: 'Key 0: Bridge G16 to H16 (Bus H in gap G-I)', color: '#0d9488' },
+
+      // --- BUTTON COLUMN 2 (Keys 3, 6, 9, #): Pins on I (left) and K (right) ---
+      { fromCol: 'J', fromRow: 2, toCol: 'K', toRow: 2, from: 'J2', to: 'K2', net: 'Col 2A', desc: 'Key 3: Bridge J2 to K2 (Bus J)', color: '#10b981' },
+      { fromCol: 'K', fromRow: 4, toCol: 'K', toRow: 6, from: 'K4', to: 'K6', net: 'Row 5', desc: 'Key 6 Jumper K4 to K6 (welded at K5)', color: '#f43f5e' },
+      { fromCol: 'K', fromRow: 8, toCol: 'L', toRow: 8, from: 'K8', to: 'L8', net: 'Col 2B', desc: 'Key 6: Bridge K8 to L8 (Bus L in gap K-M)', color: '#84cc16' },
+      { fromCol: 'J', fromRow: 10, toCol: 'K', toRow: 10, from: 'J10', to: 'K10', net: 'Col 2A', desc: 'Key 9: Bridge J10 to K10 (Bus J)', color: '#10b981' },
+      { fromCol: 'K', fromRow: 12, toCol: 'K', toRow: 14, from: 'K12', to: 'K14', net: 'Row 13', desc: 'Key # Jumper K12 to K14 (welded at K13)', color: '#d946ef' },
+      { fromCol: 'K', fromRow: 16, toCol: 'L', toRow: 16, from: 'K16', to: 'L16', net: 'Col 2B', desc: 'Key #: Bridge K16 to L16 (Bus L in gap K-M)', color: '#84cc16' },
+
+      // --- BUTTON COLUMN 3 (Keys A, B, C, D): Pins on M (left) and O (right) ---
+      { fromCol: 'N', fromRow: 2, toCol: 'O', toRow: 2, from: 'N2', to: 'O2', net: 'Col 3A', desc: 'Key A: Bridge N2 to O2 (Bus N)', color: '#eab308' },
+      { fromCol: 'O', fromRow: 4, toCol: 'O', toRow: 6, from: 'O4', to: 'O6', net: 'Row 5', desc: 'Key B Jumper O4 to O6 (welded at O5)', color: '#f43f5e' },
+      { fromCol: 'O', fromRow: 8, toCol: 'P', toRow: 8, from: 'O8', to: 'P8', net: 'Col 3B', desc: 'Key B: Bridge O8 to P8 (Bus P)', color: '#8b5cf6' },
+      { fromCol: 'N', fromRow: 10, toCol: 'O', toRow: 10, from: 'N10', to: 'O10', net: 'Col 3A', desc: 'Key C: Bridge N10 to O10 (Bus N)', color: '#eab308' },
+      { fromCol: 'O', fromRow: 12, toCol: 'O', toRow: 14, from: 'O12', to: 'O14', net: 'Row 13', desc: 'Key D Jumper O12 to O14 (welded at O13)', color: '#d946ef' },
+      { fromCol: 'O', fromRow: 16, toCol: 'P', toRow: 16, from: 'O16', to: 'P16', net: 'Col 3B', desc: 'Key D: Bridge O16 to P16 (Bus P)', color: '#8b5cf6' }
+    ];
+
+    // INDIVIDUAL SOLDER JOINTS (Spot solder points where jumpers weld to Row 5 & Row 13, color-coded by Net)
+    const solderJoints = [
+      { pad: 'C5', net: 'Row 5', color: '#f43f5e' },
+      { pad: 'G5', net: 'Row 5', color: '#f43f5e' },
+      { pad: 'K5', net: 'Row 5', color: '#f43f5e' },
+      { pad: 'O5', net: 'Row 5', color: '#f43f5e' },
+      { pad: 'Q5', net: 'Row 5', color: '#f43f5e' },
+      { pad: 'C13', net: 'Row 13', color: '#d946ef' },
+      { pad: 'G13', net: 'Row 13', color: '#d946ef' },
+      { pad: 'K13', net: 'Row 13', color: '#d946ef' },
+      { pad: 'O13', net: 'Row 13', color: '#d946ef' },
+      { pad: 'Q13', net: 'Row 13', color: '#d946ef' }
+    ];
+
+    // Micro-buttons (4 corner pins strictly)
+    const BUTTON_COL_PAIRS = [
+      { left: 'A', right: 'C', center: 'B' }, // Col 0
+      { left: 'E', right: 'G', center: 'F' }, // Col 1
+      { left: 'I', right: 'K', center: 'J' }, // Col 2
+      { left: 'M', right: 'O', center: 'N' }  // Col 3
+    ];
+
+    const BUTTON_ROW_PAIRS = [
+      { top: 2, bottom: 4, center: 3 },     // Row 1: Keys 1, 2, 3, A
+      { top: 6, bottom: 8, center: 7 },     // Row 2: Keys 4, 5, 6, B
+      { top: 10, bottom: 12, center: 11 },  // Row 3: Keys 7, 8, 9, C
+      { top: 14, bottom: 16, center: 15 }   // Row 4: Keys *, 0, #, D
+    ];
+
+    const KEY_GRID = [
+      ["1", "2", "3", "A"],
+      ["4", "5", "6", "B"],
+      ["7", "8", "9", "C"],
+      ["*", "0", "#", "D"]
+    ];
+
+    function getPadPos(colIdx, rowIdx) {
+      return {
+        x: MARGIN_X + colIdx * PITCH,
+        y: MARGIN_Y + rowIdx * PITCH
+      };
+    }
+
+    function getCoordPos(colName, rowNum) {
+      return getPadPos(COL_NAMES.indexOf(colName.toUpperCase()), rowNum - 1);
+    }
+
+    // Render Substrate
+    function renderSubstrate() {
+      const g = document.getElementById('substrateLayer');
+      const bx = MARGIN_X - 40;
+      const by = MARGIN_Y - 40;
+      g.innerHTML = `
+        <rect x="${bx}" y="${by}" width="${BOARD_W}" height="${BOARD_H}" rx="14" ry="14"
+              fill="#144627" stroke="#227845" stroke-width="4" filter="url(#shadow)" />
+      `;
+    }
+
+    // Render Silkscreen Coordinates
+    function renderSilkscreen() {
+      const g = document.getElementById('silkscreenLayer');
+      let out = '';
+      const bx = MARGIN_X - 40;
+      const by = MARGIN_Y - 40;
+
+      // Col letters
+      for (let c = 0; c < COLS; c++) {
+        const x = MARGIN_X + c * PITCH;
+        out += `<text x="${x}" y="${by + 24}" fill="#ffffff88" font-size="11" font-weight="700" text-anchor="middle">${COL_NAMES[c]}</text>`;
+        out += `<text x="${x}" y="${by + BOARD_H - 14}" fill="#ffffff88" font-size="11" font-weight="700" text-anchor="middle">${COL_NAMES[c]}</text>`;
+      }
+      // Row numbers
+      for (let r = 0; r < ROWS; r++) {
+        const y = MARGIN_Y + r * PITCH + 4;
+        out += `<text x="${bx + 20}" y="${y}" fill="#ffffff88" font-size="10" font-weight="600" text-anchor="middle">${r + 1}</text>`;
+        out += `<text x="${bx + BOARD_W - 20}" y="${y}" fill="#ffffff88" font-size="10" font-weight="600" text-anchor="middle">${r + 1}</text>`;
+      }
+      g.innerHTML = out;
+    }
+
+    // Render Pads
+    function renderPads() {
+      const g = document.getElementById('padLayer');
+      let out = '';
+      for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS; r++) {
+          const pos = getPadPos(c, r);
+          const id = `${COL_NAMES[c]}${r + 1}`;
+          out += `
+            <g class="pad" data-id="${id}" transform="translate(${pos.x}, ${pos.y})">
+              <circle cx="0" cy="0" r="8" fill="url(#padGrad)" stroke="#78350f" stroke-width="0.8" />
+              <circle cx="0" cy="0" r="3.2" fill="#080c12" />
+            </g>
+          `;
+        }
+      }
+      g.innerHTML = out;
+
+      // Tooltip events
+      document.querySelectorAll('.pad').forEach(p => {
+        p.addEventListener('mouseenter', e => {
+          const id = p.getAttribute('data-id');
+          document.getElementById('statusCursor').innerText = `Pad: ${id}`;
+          showTooltip(e, `<strong>Pad ${id}</strong>`);
+        });
+        p.addEventListener('mouseleave', hideTooltip);
+      });
+    }
+
+    // Render 16 Buttons (Corner pins only)
+    function renderComponents() {
+      const g = document.getElementById('componentLayer');
+      let out = '';
+
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const key = KEY_GRID[r][c];
+          const colPair = BUTTON_COL_PAIRS[c];
+          const rowPair = BUTTON_ROW_PAIRS[r];
+
+          const pTL = getCoordPos(colPair.left, rowPair.top);
+          const pBR = getCoordPos(colPair.right, rowPair.bottom);
+          const pTR = getCoordPos(colPair.right, rowPair.top);
+          const pBL = getCoordPos(colPair.left, rowPair.bottom);
+
+          const cx = (pTL.x + pBR.x) / 2;
+          const cy = (pTL.y + pBR.y) / 2;
+          const w = 44, h = 44;
+
+          out += `
+            <g class="button-comp" data-key="${key}" transform="translate(${cx}, ${cy})">
+              <!-- Corner Pins -->
+              <line x1="${-w / 2 + 4}" y1="${-h / 2 + 4}" x2="${pTL.x - cx}" y2="${pTL.y - cy}" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+              <line x1="${w / 2 - 4}" y1="${-h / 2 + 4}" x2="${pTR.x - cx}" y2="${pTR.y - cy}" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+              <line x1="${-w / 2 + 4}" y1="${h / 2 - 4}" x2="${pBL.x - cx}" y2="${pBL.y - cy}" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+              <line x1="${w / 2 - 4}" y1="${h / 2 - 4}" x2="${pBR.x - cx}" y2="${pBR.y - cy}" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+
+              <!-- Metal Case -->
+              <rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="5" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#shadow)"/>
+              
+              <!-- Plunger -->
+              <circle cx="0" cy="0" r="14" fill="url(#btnCap)" stroke="#0284c7" stroke-width="1.5"/>
+              <text x="0" y="5" fill="#fff" font-size="14" font-weight="800" text-anchor="middle" font-family="monospace">${key}</text>
+            </g>
+          `;
+        }
+      }
+      g.innerHTML = out;
+    }
+
+    // Render Solder Lines
+    function renderSolderLines() {
+      const g = document.getElementById('solderLayer');
+      let out = '';
+
+      solderLines.forEach((line, idx) => {
+        const p1 = getCoordPos(line.fromCol, line.fromRow);
+        const p2 = getCoordPos(line.toCol, line.toRow);
+        const color = line.color || '#38bdf8';
+        const net = line.net || '';
+
+        out += `
+          <g class="solder-trace" id="trace_${idx}" data-net="${net}" onmouseenter="highlightNet('${net}')" onmouseleave="clearHighlightNet()">
+            <!-- Base Shadow -->
+            <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#000" stroke-width="7" stroke-linecap="round"/>
+            <!-- Wire Body -->
+            <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${color}" stroke-width="4.5" stroke-linecap="round"/>
+            <!-- Top Highlight -->
+            <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="rgba(255,255,255,0.45)" stroke-width="1.4" stroke-linecap="round"/>
+            
+            <!-- Terminal Solder Joints ONLY at the two ends -->
+            <circle cx="${p1.x}" cy="${p1.y}" r="7" fill="url(#solderGrad)" stroke="${color}" stroke-width="2"/>
+            <circle cx="${p2.x}" cy="${p2.y}" r="7" fill="url(#solderGrad)" stroke="${color}" stroke-width="2"/>
+            <circle cx="${p1.x}" cy="${p1.y}" r="2" fill="#fff"/>
+            <circle cx="${p2.x}" cy="${p2.y}" r="2" fill="#fff"/>
+
+            <!-- Terminal Labels -->
+            ${line.fromRow === line.toRow ? `
+              <text x="${p1.x - 12}" y="${p1.y + 4}" fill="${color}" font-size="10" font-weight="700" font-family="monospace" text-anchor="end">${line.from}</text>
+              <text x="${p2.x + 12}" y="${p2.y + 4}" fill="${color}" font-size="10" font-weight="700" font-family="monospace" text-anchor="start">${line.to}</text>
+            ` : `
+              <text x="${p1.x}" y="${p1.y - 10}" fill="${color}" font-size="10" font-weight="700" font-family="monospace" text-anchor="middle">${line.from}</text>
+              <text x="${p2.x}" y="${p2.y + 18}" fill="${color}" font-size="10" font-weight="700" font-family="monospace" text-anchor="middle">${line.to}</text>
+            `}
+          </g>
+        `;
+      });
+
+      // Individual Solder Joints (Spot Welds)
+      solderJoints.forEach((joint, idx) => {
+        const padId = typeof joint === 'string' ? joint : joint.pad;
+        const color = (typeof joint === 'object' && joint.color) ? joint.color : '#f43f5e';
+        const net = (typeof joint === 'object' && joint.net) ? joint.net : '';
+        const m = padId.match(/^([A-R])(\d+)$/);
+        if (!m) return;
+        const col = m[1];
+        const row = parseInt(m[2], 10);
+        const p = getCoordPos(col, row);
+        out += `
+          <g class="solder-joint" id="joint_${idx}" data-net="${net}" onmouseenter="highlightNet('${net}')" onmouseleave="clearHighlightNet()">
+            <circle cx="${p.x}" cy="${p.y}" r="8.5" fill="url(#solderGrad)" stroke="${color}" stroke-width="2.5" filter="url(#shadow)"/>
+            <circle cx="${p.x}" cy="${p.y}" r="2.2" fill="#fff"/>
+            <text x="${p.x + 12}" y="${p.y - 8}" fill="${color}" font-size="10" font-weight="800" font-family="monospace">${padId}</text>
+          </g>
+        `;
+      });
+
+      g.innerHTML = out;
+      updateSidebar();
+    }
+
+    // Net Highlighting Helpers
+    function highlightNet(netName) {
+      if (!netName) return;
+      document.querySelectorAll('.solder-trace, .solder-joint').forEach(el => {
+        if (el.getAttribute('data-net') === netName) {
+          el.classList.add('highlight-net');
+          el.classList.remove('dimmed-net');
+        } else {
+          el.classList.add('dimmed-net');
+          el.classList.remove('highlight-net');
+        }
+      });
+    }
+
+    function clearHighlightNet() {
+      document.querySelectorAll('.solder-trace, .solder-joint').forEach(el => {
+        el.classList.remove('highlight-net', 'dimmed-net');
+      });
+    }
+
+    // Add a connection
+    function addLine(fromPad, toPad, desc = '', color = '#38bdf8', net = '') {
+      const fromMatch = fromPad.toUpperCase().match(/^([A-Z])(\d+)$/);
+      const toMatch = toPad.toUpperCase().match(/^([A-Z])(\d+)$/);
+      if (!fromMatch || !toMatch) return false;
+
+      solderLines.push({
+        fromCol: fromMatch[1],
+        fromRow: parseInt(fromMatch[2], 10),
+        toCol: toMatch[1],
+        toRow: parseInt(toMatch[2], 10),
+        from: fromPad.toUpperCase(),
+        to: toPad.toUpperCase(),
+        net: net || '',
+        desc: desc || `Trace ${fromPad.toUpperCase()} ➔ ${toPad.toUpperCase()}`,
+        color: color || '#38bdf8'
+      });
+
+      renderSolderLines();
+      return true;
+    }
+
+    function addJoint(padId, color = '#facc15', net = '') {
+      const pad = typeof padId === 'string' ? padId.toUpperCase() : padId.pad;
+      if (!solderJoints.some(j => (typeof j === 'string' ? j : j.pad) === pad)) {
+        solderJoints.push({ pad, color, net });
+        renderSolderLines();
+      }
+    }
+
+    function removeJoint(idx) {
+      solderJoints.splice(idx, 1);
+      renderSolderLines();
+    }
+
+    function removeLine(idx) {
+      solderLines.splice(idx, 1);
+      renderSolderLines();
+    }
+
+    function clearAllLines() {
+      solderLines.length = 0;
+      solderJoints.length = 0;
+      renderSolderLines();
+    }
+
+    function updateSidebar() {
+      const list = document.getElementById('logList');
+      const badge = document.getElementById('linesCountBadge');
+      const count = document.getElementById('sidebarCount');
+
+      const totalItems = solderLines.length + solderJoints.length;
+      badge.innerText = `${solderLines.length} Lines • ${solderJoints.length} Joints`;
+      count.innerText = `${totalItems} Active`;
+
+      if (totalItems === 0) {
+        list.innerHTML = `<div class="empty-state">No soldering lines yet.</div>`;
+        return;
+      }
+
+      // Complete 10-node Net Legend
+      const nets = [
+        { name: 'Row 5', color: '#f43f5e', desc: 'Row Bus 5 (C-Q) + 4 Key Jumpers' },
+        { name: 'Row 13', color: '#d946ef', desc: 'Row Bus 13 (C-Q) + 4 Key Jumpers' },
+        { name: 'Col 0A', color: '#38bdf8', desc: 'Bus B (Keys 1, 7)' },
+        { name: 'Col 0B', color: '#2563eb', desc: 'Bus D (Keys 4, *)' },
+        { name: 'Col 1A', color: '#06b6d4', desc: 'Bus F (Keys 2, 8)' },
+        { name: 'Col 1B', color: '#0d9488', desc: 'Bus H (Keys 5, 0)' },
+        { name: 'Col 2A', color: '#10b981', desc: 'Bus J (Keys 3, 9)' },
+        { name: 'Col 2B', color: '#84cc16', desc: 'Bus L (Keys 6, #)' },
+        { name: 'Col 3A', color: '#eab308', desc: 'Bus N (Keys A, C)' },
+        { name: 'Col 3B', color: '#8b5cf6', desc: 'Bus P (Keys B, D)' }
+      ];
+
+      let html = `
+        <div style="margin-bottom: 12px; background:#0b111e; border:1px solid #1e293b; border-radius:6px; padding:10px;">
+          <div style="font-weight:700; color:#fff; font-size:11px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>ELECTRICAL NETS (10 NODES)</span>
+            <span style="color:#64748b; font-weight:400; font-size:10px;">Hover to isolate</span>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+            ${nets.map(n => `
+              <div class="net-chip" onmouseenter="highlightNet('${n.name}')" onmouseleave="clearHighlightNet()"
+                   style="border:1px solid ${n.color}55; background:${n.color}15; border-radius:4px; padding:4px 6px; cursor:pointer; transition:all 0.15s;">
+                <div style="display:flex; align-items:center; gap:5px;">
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${n.color};"></span>
+                  <span style="font-weight:700; font-size:11px; color:#fff;">${n.name}</span>
+                </div>
+                <div style="font-size:9.5px; color:#94a3b8; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.desc}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      if (solderJoints.length > 0) {
+        html += `<div style="font-weight:700; color:#facc15; margin:6px 0 4px; font-size:11px;">SPOT SOLDER JOINTS (${solderJoints.length})</div>`;
+        html += solderJoints.map((j, i) => {
+          const pad = typeof j === 'string' ? j : j.pad;
+          const color = (typeof j === 'object' && j.color) ? j.color : '#f43f5e';
+          const net = (typeof j === 'object' && j.net) ? j.net : '';
+          return `
+            <div class="log-item" style="border-left: 3px solid ${color};" onmouseenter="highlightNet('${net}')" onmouseleave="clearHighlightNet()">
+              <div>
+                <div class="coords" style="color:${color};">Joint Pad ${pad} <span style="font-size:10px; font-weight:400; color:#94a3b8;">(${net})</span></div>
+                <div class="desc">Soldered Joint / Bus Weld</div>
+              </div>
+              <button class="btn" style="padding:2px 8px; font-size:11px; color:#f87171;" onclick="removeJoint(${i})">✕</button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (solderLines.length > 0) {
+        html += `<div style="font-weight:700; color:#38bdf8; margin:10px 0 4px; font-size:11px;">SOLDER / WIRE BUSSES (${solderLines.length})</div>`;
+        html += solderLines.map((l, i) => `
+          <div class="log-item" style="border-left: 3px solid ${l.color};" onmouseenter="highlightNet('${l.net}')" onmouseleave="clearHighlightNet()">
+            <div>
+              <div class="coords" style="color:${l.color};">${l.from} ➔ ${l.to} <span style="font-size:10px; font-weight:400; color:#94a3b8;">(${l.net})</span></div>
+              <div class="desc">${l.desc}</div>
+            </div>
+            <button class="btn" style="padding:2px 8px; font-size:11px; color:#f87171;" onclick="removeLine(${i})">✕</button>
+          </div>
+        `).join('');
+      }
+
+      list.innerHTML = html;
+    }
+
+    // View Modes
+    function setView(mode) {
+      state.viewMode = mode;
+      document.getElementById('btnFront').classList.toggle('active', mode === 'top');
+      document.getElementById('btnBack').classList.toggle('active', mode === 'bottom');
+      document.getElementById('btnXray').classList.toggle('active', mode === 'xray');
+
+      const comp = document.getElementById('componentLayer');
+      const solder = document.getElementById('solderLayer');
+
+      if (mode === 'top') {
+        comp.style.display = 'block';
+        comp.style.opacity = '1';
+        solder.style.opacity = '0.35';
+      } else if (mode === 'bottom') {
+        comp.style.display = 'none';
+        solder.style.opacity = '1';
+      } else { // xray
+        comp.style.display = 'block';
+        comp.style.opacity = '0.45';
+        solder.style.opacity = '1';
+      }
+      updateTransform();
+    }
+
+    function updateTransform() {
+      let t = `translate(${state.panX}, ${state.panY}) scale(${state.zoom})`;
+      if (state.viewMode === 'bottom') {
+        const cx = MARGIN_X + BOARD_W / 2 - 40;
+        t += ` translate(${cx * 2}, 0) scale(-1, 1)`;
+      }
+      document.getElementById('worldGroup').setAttribute('transform', t);
+    }
+
+    function fitView() {
+      const container = document.getElementById('canvasContainer');
+      const w = container.clientWidth || 800;
+      const h = container.clientHeight || 600;
+
+      const bx = MARGIN_X - 40;
+      const by = MARGIN_Y - 40;
+      const totalW = BOARD_W + 60;
+      const totalH = BOARD_H + 60;
+
+      const scaleX = w / totalW;
+      const scaleY = h / totalH;
+      state.zoom = Math.max(0.4, Math.min(2.5, Math.min(scaleX, scaleY) * 0.92));
+
+      const centerX = bx + BOARD_W / 2;
+      const centerY = by + BOARD_H / 2;
+
+      state.panX = w / 2 - centerX * state.zoom;
+      state.panY = h / 2 - centerY * state.zoom;
+
+      updateTransform();
+    }
+
+    function resetZoom() {
+      state.zoom = 1.0;
+      const container = document.getElementById('canvasContainer');
+      const w = container.clientWidth || 800;
+      const h = container.clientHeight || 600;
+      const bx = MARGIN_X - 40;
+      const by = MARGIN_Y - 40;
+      const centerX = bx + BOARD_W / 2;
+      const centerY = by + BOARD_H / 2;
+      state.panX = w / 2 - centerX;
+      state.panY = h / 2 - centerY;
+      updateTransform();
+    }
+
+    // Pan / Zoom
+    const container = document.getElementById('canvasContainer');
+    container.addEventListener('mousedown', e => {
+      if (e.target.closest('.btn')) return;
+      state.isPanning = true;
+      state.startX = e.clientX - state.panX;
+      state.startY = e.clientY - state.panY;
+      container.classList.add('panning');
+    });
+    window.addEventListener('mousemove', e => {
+      if (!state.isPanning) return;
+      state.panX = e.clientX - state.startX;
+      state.panY = e.clientY - state.startY;
+      updateTransform();
+    });
+    window.addEventListener('mouseup', () => {
+      state.isPanning = false;
+      container.classList.remove('panning');
+    });
+    container.addEventListener('wheel', e => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      state.zoom = Math.max(0.4, Math.min(3.0, state.zoom * zoomFactor));
+      updateTransform();
+    }, { passive: false });
+
+    // Tooltip
+    const tooltip = document.getElementById('tooltip');
+    function showTooltip(e, html) {
+      tooltip.style.display = 'block';
+      tooltip.innerHTML = html;
+      tooltip.style.left = `${e.clientX + 14}px`;
+      tooltip.style.top = `${e.clientY + 14}px`;
+    }
+    function hideTooltip() {
+      tooltip.style.display = 'none';
+    }
+
+    // Init
+    renderSubstrate();
+    renderSilkscreen();
+    renderPads();
+    renderComponents();
+    renderSolderLines();
+    setView('top');
+
+    // Initial fit view & window resize handler
+    setTimeout(fitView, 60);
+    window.addEventListener('resize', () => {
+      fitView();
+    });
+  </script>
+</body>
+
+</html>

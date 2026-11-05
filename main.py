@@ -68,14 +68,26 @@ display = RemoteDisplay(sda_pin=PIN_OLED_SDA, scl_pin=PIN_OLED_SCL)
 SUPPORTED_DEVICES = ["tv", "ac", "soundbar", "projector"]
 current_device_index = 0
 
-# Meaningful Action Mappings for 4x4 Keypad:
-# A = LEARN (Press A -> Pick Key to store -> Match Signal -> Save!)
-# B = Vol Up, C = Vol Down, D = Power
-# * = Mute, # = Enter/OK, 0-9 = Numbers
+# Meaningful Action Mappings for Keypad (User Custom Layout):
+# A = LEARN (Pick Key + Signal Matching)
+# B = MODE (Switch / Add Multiple Devices: TV, AC, Soundbar, Projector)
+# C = MUTE
+# 1 = POWER ON, 3 = POWER OFF
+# 2 = UP, 4 = LEFT, 5 = OK, 6 = RIGHT, 8 = DOWN (D-Pad cluster)
+# 7 = VOL -, 9 = VOL +
 KEY_ACTION_MAP = {
     "A": "LEARN",
-    "B": "vol_up",
-    "C": "vol_down",
+    "B": "MODE",
+    "C": "mute",
+    "1": "power_on",
+    "2": "up",
+    "3": "power_off",
+    "4": "left",
+    "5": "ok",
+    "6": "right",
+    "7": "vol_down",
+    "8": "down",
+    "9": "vol_up",
     "D": "power",
     "*": "mute",
     "#": "enter",
@@ -147,10 +159,10 @@ def handle_keypad_matrix(ir):
     print("  IR RX -> GP11 (Pin 15) | IR TX -> GP14 (Pin 19)")
     print("-" * 65)
     print("Key Action Layout:")
-    print("  [ 1 ]   [ 2 ]   [ 3 ]   [ A: LEARN (Pick Key + Match Signal) ]")
-    print("  [ 4 ]   [ 5 ]   [ 6 ]   [ B: VOL +                            ]")
-    print("  [ 7 ]   [ 8 ]   [ 9 ]   [ C: VOL -                            ]")
-    print("  [ * ]   [ 0 ]   [ # ]   [ D: POWER                            ]")
+    print("  [ 1: PWR ON  ]   [ 2: UP (▲)  ]   [ 3: PWR OFF ]   [ A: LEARN ]")
+    print("  [ 4: LEFT(◀) ]   [ 5: OK/ENT  ]   [ 6: RGHT(▶) ]   [ B: MODE  ]")
+    print("  [ 7: VOL -   ]   [ 8: DOWN(▼) ]   [ 9: VOL +   ]   [ C: MUTE  ]")
+    print("  [ *          ]   [ 0          ]   [ #          ]   [ D: POWER ]")
     print("=" * 65)
     active_dev = SUPPORTED_DEVICES[current_device_index]
     print(f"Active Device: [{active_dev.upper()}]")
@@ -234,6 +246,16 @@ def handle_keypad_matrix(ir):
                         display.show_learn_result(active_dev, target_key, success=False)
                         time.sleep_ms(1500)
                         display.show_idle(device=active_dev, status="LEARN FAIL")
+
+                # =============================================================
+                # Key 'B': MODE SWITCHER (Cycle target device: TV, AC, etc.)
+                # =============================================================
+                elif action == "MODE":
+                    current_device_index = (current_device_index + 1) % len(SUPPORTED_DEVICES)
+                    active_dev = SUPPORTED_DEVICES[current_device_index]
+                    print(f"\n[MODE KEY 'B'] Target Device Switched to: ---> [{active_dev.upper()}] <---")
+                    display.show_idle(device=active_dev, last_key='B', last_action="MODE", status="DEV CHANGED")
+                    led_blink(current_device_index + 1, 60)
 
                 # =============================================================
                 # Normal Keys: TRANSMIT STORED SIGNAL
