@@ -239,7 +239,7 @@
 
   <header>
     <div class="header-title">
-      <span>Keypad Perfboard Canvas</span>
+      <span>Keypad Perfboard Canvas (8 Sets • 64 Buttons)</span>
       <span class="badge" id="linesCountBadge">0 Solder Lines</span>
     </div>
     <div class="controls">
@@ -248,6 +248,7 @@
         <button class="btn" id="btnBack" onclick="setView('bottom')">Back (Solder)</button>
         <button class="btn" id="btnXray" onclick="setView('xray')">X-Ray</button>
       </div>
+      <button class="btn" onclick="rotateView(90)" title="Rotate 90° Clockwise">↻ Rotate <span id="rotAngleBadge" style="opacity:0.8; font-size:10px; margin-left:2px;">0°</span></button>
       <button class="btn" id="btnFit" onclick="fitView()">⛶ Fit View</button>
       <button class="btn" onclick="resetZoom()">100%</button>
       <button class="btn" style="color:#f87171;" onclick="clearAllLines()">Clear Lines</button>
@@ -307,13 +308,14 @@
 
   <footer>
     <div id="statusCursor">Hover over any pad or button</div>
-    <div>Columns A–R (0–17) | Rows 1–18</div>
+    <div>Columns A–R (0–17) | Rows 1–66 (8 Sets • 64 Buttons • 8×8 Matrix)</div>
   </footer>
 
   <script>
-    // Geometry (Columns renamed starting from A, Rows 2-7 removed & renamed)
+    // Geometry (Columns A-R, 8 Sets of 8 Buttons = 64 Buttons total across 66 rows)
     const COLS = 18; // A through R
-    const ROWS = 18; // 1 through 18
+    const SETS_COUNT = 8;
+    const ROWS = 66; // Rows 1 through 66
     const COL_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'];
     const PITCH = 36;
     const MARGIN_X = 100;
@@ -327,77 +329,41 @@
       zoom: 1.0,
       panX: 40,
       panY: 20,
+      rotation: 0,
       isPanning: false,
       startX: 0,
       startY: 0
     };
 
-    // ACTIVE SOLDER LINES (Complete 2x8 Matrix - Color-coded by Electrical Net)
+    // 8 ROW NET DISTINCT COLORS
+    const ROW_COLORS = [
+      '#f43f5e', // Set 1 (Row 5)
+      '#d946ef', // Set 2 (Row 13)
+      '#ec4899', // Set 3 (Row 21)
+      '#f97316', // Set 4 (Row 29)
+      '#ef4444', // Set 5 (Row 37)
+      '#e11d48', // Set 6 (Row 45)
+      '#c026d3', // Set 7 (Row 53)
+      '#fb7185'  // Set 8 (Row 61)
+    ];
+
+    // ACTIVE SOLDER LINES (Complete 8-Set 8x8 Matrix)
     const solderLines = [
-      // --- 8 VERTICAL COLUMN BUSSES (Cols B, D, F, H, J, L, N, P) ---
-      { fromCol: 'B', fromRow: 1, toCol: 'B', toRow: 17, from: 'B1', to: 'B17', net: 'Col 0A', desc: 'Col 0 Bus A (B1 to B17)', color: '#38bdf8' },
-      { fromCol: 'D', fromRow: 1, toCol: 'D', toRow: 17, from: 'D1', to: 'D17', net: 'Col 0B', desc: 'Col 0 Bus B (D1 to D17 in gap C-E)', color: '#2563eb' },
-      { fromCol: 'F', fromRow: 1, toCol: 'F', toRow: 17, from: 'F1', to: 'F17', net: 'Col 1A', desc: 'Col 1 Bus A (F1 to F17)', color: '#06b6d4' },
-      { fromCol: 'H', fromRow: 1, toCol: 'H', toRow: 17, from: 'H1', to: 'H17', net: 'Col 1B', desc: 'Col 1 Bus B (H1 to H17 in gap G-I)', color: '#0d9488' },
-      { fromCol: 'J', fromRow: 1, toCol: 'J', toRow: 17, from: 'J1', to: 'J17', net: 'Col 2A', desc: 'Col 2 Bus A (J1 to J17)', color: '#10b981' },
-      { fromCol: 'L', fromRow: 1, toCol: 'L', toRow: 17, from: 'L1', to: 'L17', net: 'Col 2B', desc: 'Col 2 Bus B (L1 to L17 in gap K-M)', color: '#84cc16' },
-      { fromCol: 'N', fromRow: 1, toCol: 'N', toRow: 17, from: 'N1', to: 'N17', net: 'Col 3A', desc: 'Col 3 Bus A (N1 to N17)', color: '#eab308' },
-      { fromCol: 'P', fromRow: 1, toCol: 'P', toRow: 17, from: 'P1', to: 'P17', net: 'Col 3B', desc: 'Col 3 Bus B (P1 to P17)', color: '#8b5cf6' },
-
-      // --- 2 HORIZONTAL ROW BUSSES (Rows 5 and 13) ---
-      { fromCol: 'C', fromRow: 5, toCol: 'O', toRow: 5, from: 'C5', to: 'O5', net: 'Row 5', desc: 'Row 5 Bus (Cols C to O)', color: '#f43f5e' },
-      { fromCol: 'O', fromRow: 5, toCol: 'Q', toRow: 5, from: 'O5', to: 'Q5', net: 'Row 5', desc: 'Jumper O5 to Q5 (hops over P5 unsoldered)', color: '#f43f5e' },
-      { fromCol: 'C', fromRow: 13, toCol: 'O', toRow: 13, from: 'C13', to: 'O13', net: 'Row 13', desc: 'Row 13 Bus (Cols C to O)', color: '#d946ef' },
-      { fromCol: 'O', fromRow: 13, toCol: 'Q', toRow: 13, from: 'O13', to: 'Q13', net: 'Row 13', desc: 'Jumper O13 to Q13 (hops over P13 unsoldered)', color: '#d946ef' },
-
-      // --- BUTTON COLUMN 0 (Keys 1, 4, 7, *): Pins on A (left) and C (right) ---
-      { fromCol: 'B', fromRow: 2, toCol: 'C', toRow: 2, from: 'B2', to: 'C2', net: 'Col 0A', desc: 'Key 1: Bridge B2 to C2 (Bus B)', color: '#38bdf8' },
-      { fromCol: 'C', fromRow: 4, toCol: 'C', toRow: 6, from: 'C4', to: 'C6', net: 'Row 5', desc: 'Key 4 Jumper C4 to C6 (welded at C5)', color: '#f43f5e' },
-      { fromCol: 'C', fromRow: 8, toCol: 'D', toRow: 8, from: 'C8', to: 'D8', net: 'Col 0B', desc: 'Key 4: Bridge C8 to D8 (Bus D in gap C-E)', color: '#2563eb' },
-      { fromCol: 'B', fromRow: 10, toCol: 'C', toRow: 10, from: 'B10', to: 'C10', net: 'Col 0A', desc: 'Key 7: Bridge B10 to C10 (Bus B)', color: '#38bdf8' },
-      { fromCol: 'C', fromRow: 12, toCol: 'C', toRow: 14, from: 'C12', to: 'C14', net: 'Row 13', desc: 'Key * Jumper C12 to C14 (welded at C13)', color: '#d946ef' },
-      { fromCol: 'C', fromRow: 16, toCol: 'D', toRow: 16, from: 'C16', to: 'D16', net: 'Col 0B', desc: 'Key *: Bridge C16 to D16 (Bus D in gap C-E)', color: '#2563eb' },
-
-      // --- BUTTON COLUMN 1 (Keys 2, 5, 8, 0): Pins on E (left) and G (right) ---
-      { fromCol: 'F', fromRow: 2, toCol: 'G', toRow: 2, from: 'F2', to: 'G2', net: 'Col 1A', desc: 'Key 2: Bridge F2 to G2 (Bus F)', color: '#06b6d4' },
-      { fromCol: 'G', fromRow: 4, toCol: 'G', toRow: 6, from: 'G4', to: 'G6', net: 'Row 5', desc: 'Key 5 Jumper G4 to G6 (welded at G5)', color: '#f43f5e' },
-      { fromCol: 'G', fromRow: 8, toCol: 'H', toRow: 8, from: 'G8', to: 'H8', net: 'Col 1B', desc: 'Key 5: Bridge G8 to H8 (Bus H in gap G-I)', color: '#0d9488' },
-      { fromCol: 'F', fromRow: 10, toCol: 'G', toRow: 10, from: 'F10', to: 'G10', net: 'Col 1A', desc: 'Key 8: Bridge F10 to G10 (Bus F)', color: '#06b6d4' },
-      { fromCol: 'G', fromRow: 12, toCol: 'G', toRow: 14, from: 'G12', to: 'G14', net: 'Row 13', desc: 'Key 0 Jumper G12 to G14 (welded at G13)', color: '#d946ef' },
-      { fromCol: 'G', fromRow: 16, toCol: 'H', toRow: 16, from: 'G16', to: 'H16', net: 'Col 1B', desc: 'Key 0: Bridge G16 to H16 (Bus H in gap G-I)', color: '#0d9488' },
-
-      // --- BUTTON COLUMN 2 (Keys 3, 6, 9, #): Pins on I (left) and K (right) ---
-      { fromCol: 'J', fromRow: 2, toCol: 'K', toRow: 2, from: 'J2', to: 'K2', net: 'Col 2A', desc: 'Key 3: Bridge J2 to K2 (Bus J)', color: '#10b981' },
-      { fromCol: 'K', fromRow: 4, toCol: 'K', toRow: 6, from: 'K4', to: 'K6', net: 'Row 5', desc: 'Key 6 Jumper K4 to K6 (welded at K5)', color: '#f43f5e' },
-      { fromCol: 'K', fromRow: 8, toCol: 'L', toRow: 8, from: 'K8', to: 'L8', net: 'Col 2B', desc: 'Key 6: Bridge K8 to L8 (Bus L in gap K-M)', color: '#84cc16' },
-      { fromCol: 'J', fromRow: 10, toCol: 'K', toRow: 10, from: 'J10', to: 'K10', net: 'Col 2A', desc: 'Key 9: Bridge J10 to K10 (Bus J)', color: '#10b981' },
-      { fromCol: 'K', fromRow: 12, toCol: 'K', toRow: 14, from: 'K12', to: 'K14', net: 'Row 13', desc: 'Key # Jumper K12 to K14 (welded at K13)', color: '#d946ef' },
-      { fromCol: 'K', fromRow: 16, toCol: 'L', toRow: 16, from: 'K16', to: 'L16', net: 'Col 2B', desc: 'Key #: Bridge K16 to L16 (Bus L in gap K-M)', color: '#84cc16' },
-
-      // --- BUTTON COLUMN 3 (Keys A, B, C, D): Pins on M (left) and O (right) ---
-      { fromCol: 'N', fromRow: 2, toCol: 'O', toRow: 2, from: 'N2', to: 'O2', net: 'Col 3A', desc: 'Key A: Bridge N2 to O2 (Bus N)', color: '#eab308' },
-      { fromCol: 'O', fromRow: 4, toCol: 'O', toRow: 6, from: 'O4', to: 'O6', net: 'Row 5', desc: 'Key B Jumper O4 to O6 (welded at O5)', color: '#f43f5e' },
-      { fromCol: 'O', fromRow: 8, toCol: 'P', toRow: 8, from: 'O8', to: 'P8', net: 'Col 3B', desc: 'Key B: Bridge O8 to P8 (Bus P)', color: '#8b5cf6' },
-      { fromCol: 'N', fromRow: 10, toCol: 'O', toRow: 10, from: 'N10', to: 'O10', net: 'Col 3A', desc: 'Key C: Bridge N10 to O10 (Bus N)', color: '#eab308' },
-      { fromCol: 'O', fromRow: 12, toCol: 'O', toRow: 14, from: 'O12', to: 'O14', net: 'Row 13', desc: 'Key D Jumper O12 to O14 (welded at O13)', color: '#d946ef' },
-      { fromCol: 'O', fromRow: 16, toCol: 'P', toRow: 16, from: 'O16', to: 'P16', net: 'Col 3B', desc: 'Key D: Bridge O16 to P16 (Bus P)', color: '#8b5cf6' }
+      // --- 8 VERTICAL COLUMN BUSSES (Cols B, D, F, H, J, L, N, P from Row 1 to 65) ---
+      { fromCol: 'B', fromRow: 1, toCol: 'B', toRow: 65, from: 'B1', to: 'B65', net: 'Col 0A', desc: 'Col 0 Bus A (B1 to B65)', color: '#38bdf8' },
+      { fromCol: 'D', fromRow: 1, toCol: 'D', toRow: 65, from: 'D1', to: 'D65', net: 'Col 0B', desc: 'Col 0 Bus B (D1 to D65 in gap C-E)', color: '#2563eb' },
+      { fromCol: 'F', fromRow: 1, toCol: 'F', toRow: 65, from: 'F1', to: 'F65', net: 'Col 1A', desc: 'Col 1 Bus A (F1 to F65)', color: '#06b6d4' },
+      { fromCol: 'H', fromRow: 1, toCol: 'H', toRow: 65, from: 'H1', to: 'H65', net: 'Col 1B', desc: 'Col 1 Bus B (H1 to H65 in gap G-I)', color: '#0d9488' },
+      { fromCol: 'J', fromRow: 1, toCol: 'J', toRow: 65, from: 'J1', to: 'J65', net: 'Col 2A', desc: 'Col 2 Bus A (J1 to J65)', color: '#10b981' },
+      { fromCol: 'L', fromRow: 1, toCol: 'L', toRow: 65, from: 'L1', to: 'L65', net: 'Col 2B', desc: 'Col 2 Bus B (L1 to L65 in gap K-M)', color: '#84cc16' },
+      { fromCol: 'N', fromRow: 1, toCol: 'N', toRow: 65, from: 'N1', to: 'N65', net: 'Col 3A', desc: 'Col 3 Bus A (N1 to N65)', color: '#eab308' },
+      { fromCol: 'P', fromRow: 1, toCol: 'P', toRow: 65, from: 'P1', to: 'P65', net: 'Col 3B', desc: 'Col 3 Bus B (P1 to P65)', color: '#8b5cf6' }
     ];
 
-    // INDIVIDUAL SOLDER JOINTS (Spot solder points where jumpers weld to Row 5 & Row 13, color-coded by Net)
-    const solderJoints = [
-      { pad: 'C5', net: 'Row 5', color: '#f43f5e' },
-      { pad: 'G5', net: 'Row 5', color: '#f43f5e' },
-      { pad: 'K5', net: 'Row 5', color: '#f43f5e' },
-      { pad: 'O5', net: 'Row 5', color: '#f43f5e' },
-      { pad: 'Q5', net: 'Row 5', color: '#f43f5e' },
-      { pad: 'C13', net: 'Row 13', color: '#d946ef' },
-      { pad: 'G13', net: 'Row 13', color: '#d946ef' },
-      { pad: 'K13', net: 'Row 13', color: '#d946ef' },
-      { pad: 'O13', net: 'Row 13', color: '#d946ef' },
-      { pad: 'Q13', net: 'Row 13', color: '#d946ef' }
-    ];
+    // INDIVIDUAL SOLDER JOINTS (Spot solder points where jumpers weld to each row bus)
+    const solderJoints = [];
 
-    // Micro-buttons (4 corner pins strictly)
+    // Micro-buttons Column Pairs
     const BUTTON_COL_PAIRS = [
       { left: 'A', right: 'C', center: 'B' }, // Col 0
       { left: 'E', right: 'G', center: 'F' }, // Col 1
@@ -405,19 +371,90 @@
       { left: 'M', right: 'O', center: 'N' }  // Col 3
     ];
 
-    const BUTTON_ROW_PAIRS = [
-      { top: 2, bottom: 4, center: 3 },     // Row 1: Keys 1, 2, 3, A
-      { top: 6, bottom: 8, center: 7 },     // Row 2: Keys 4, 5, 6, B
-      { top: 10, bottom: 12, center: 11 },  // Row 3: Keys 7, 8, 9, C
-      { top: 14, bottom: 16, center: 15 }   // Row 4: Keys *, 0, #, D
-    ];
+    // Button Row Pairs (16 rows for 8 sets)
+    const BUTTON_ROW_PAIRS = [];
 
+    // Key Grid (64 buttons)
     const KEY_GRID = [
+      // Set 1 (Keys 1-8)
       ["1", "2", "3", "A"],
       ["4", "5", "6", "B"],
+      // Set 2 (Keys 9-16)
       ["7", "8", "9", "C"],
-      ["*", "0", "#", "D"]
+      ["*", "0", "#", "D"],
+      // Set 3 (Keys 17-24)
+      ["17", "18", "19", "20"],
+      ["21", "22", "23", "24"],
+      // Set 4 (Keys 25-32)
+      ["25", "26", "27", "28"],
+      ["29", "30", "31", "32"],
+      // Set 5 (Keys 33-40)
+      ["33", "34", "35", "36"],
+      ["37", "38", "39", "40"],
+      // Set 6 (Keys 41-48)
+      ["41", "42", "43", "44"],
+      ["45", "46", "47", "48"],
+      // Set 7 (Keys 49-56)
+      ["49", "50", "51", "52"],
+      ["53", "54", "55", "56"],
+      // Set 8 (Keys 57-64)
+      ["57", "58", "59", "60"],
+      ["61", "62", "63", "64"]
     ];
+
+    // Build the 8 sets symmetrically
+    for (let s = 0; s < SETS_COUNT; s++) {
+      const o = s * 8;
+      const uTop = 2 + o;
+      const uBot = 4 + o;
+      const busRow = 5 + o;
+      const lTop = 6 + o;
+      const lBot = 8 + o;
+      const rowColor = ROW_COLORS[s];
+      const netName = `Row ${busRow}`;
+
+      // 2 button rows per set
+      BUTTON_ROW_PAIRS.push({ top: uTop, bottom: uBot, center: uTop + 1 });
+      BUTTON_ROW_PAIRS.push({ top: lTop, bottom: lBot, center: lTop + 1 });
+
+      // Row Bus across buttons (Cols C to O)
+      solderLines.push({
+        fromCol: 'C', fromRow: busRow, toCol: 'O', toRow: busRow,
+        from: `C${busRow}`, to: `O${busRow}`, net: netName,
+        desc: `Row ${busRow} Bus (Set ${s + 1})`, color: rowColor
+      });
+
+      // Row Jumper hopping over Column P (Col O to Q)
+      solderLines.push({
+        fromCol: 'O', fromRow: busRow, toCol: 'Q', toRow: busRow,
+        from: `O${busRow}`, to: `Q${busRow}`, net: netName,
+        desc: `Jumper O${busRow} to Q${busRow} (hops over P${busRow} unsoldered)`, color: rowColor
+      });
+
+      // 4 Right-pin vertical jumpers across the row bus
+      ['C', 'G', 'K', 'O'].forEach(col => {
+        solderLines.push({
+          fromCol: col, fromRow: uBot, toCol: col, toRow: lTop,
+          from: `${col}${uBot}`, to: `${col}${lTop}`, net: netName,
+          desc: `Set ${s + 1} Jumper ${col}${uBot} to ${col}${lTop} (welded at ${col}${busRow})`, color: rowColor
+        });
+        solderJoints.push({ pad: `${col}${busRow}`, net: netName, color: rowColor });
+      });
+      // Weld point on Q for the P-hop jumper
+      solderJoints.push({ pad: `Q${busRow}`, net: netName, color: rowColor });
+
+      // 4 Bridges to Bus A on upper buttons (B, F, J, N)
+      solderLines.push({ fromCol: 'B', fromRow: uTop, toCol: 'C', toRow: uTop, from: `B${uTop}`, to: `C${uTop}`, net: 'Col 0A', desc: `Set ${s + 1} Bridge B${uTop}➔C${uTop} (Bus B)`, color: '#38bdf8' });
+      solderLines.push({ fromCol: 'F', fromRow: uTop, toCol: 'G', toRow: uTop, from: `F${uTop}`, to: `G${uTop}`, net: 'Col 1A', desc: `Set ${s + 1} Bridge F${uTop}➔G${uTop} (Bus F)`, color: '#06b6d4' });
+      solderLines.push({ fromCol: 'J', fromRow: uTop, toCol: 'K', toRow: uTop, from: `J${uTop}`, to: `K${uTop}`, net: 'Col 2A', desc: `Set ${s + 1} Bridge J${uTop}➔K${uTop} (Bus J)`, color: '#10b981' });
+      solderLines.push({ fromCol: 'N', fromRow: uTop, toCol: 'O', toRow: uTop, from: `N${uTop}`, to: `O${uTop}`, net: 'Col 3A', desc: `Set ${s + 1} Bridge N${uTop}➔O${uTop} (Bus N)`, color: '#eab308' });
+
+      // 4 Bridges to Bus B on lower buttons (D, H, L, P)
+      solderLines.push({ fromCol: 'C', fromRow: lBot, toCol: 'D', toRow: lBot, from: `C${lBot}`, to: `D${lBot}`, net: 'Col 0B', desc: `Set ${s + 1} Bridge C${lBot}➔D${lBot} (Bus D)`, color: '#2563eb' });
+      solderLines.push({ fromCol: 'G', fromRow: lBot, toCol: 'H', toRow: lBot, from: `G${lBot}`, to: `H${lBot}`, net: 'Col 1B', desc: `Set ${s + 1} Bridge G${lBot}➔H${lBot} (Bus H)`, color: '#0d9488' });
+      solderLines.push({ fromCol: 'K', fromRow: lBot, toCol: 'L', toRow: lBot, from: `K${lBot}`, to: `L${lBot}`, net: 'Col 2B', desc: `Set ${s + 1} Bridge K${lBot}➔L${lBot} (Bus L)`, color: '#84cc16' });
+      solderLines.push({ fromCol: 'O', fromRow: lBot, toCol: 'P', toRow: lBot, from: `O${lBot}`, to: `P${lBot}`, net: 'Col 3B', desc: `Set ${s + 1} Bridge O${lBot}➔P${lBot} (Bus P)`, color: '#8b5cf6' });
+    }
 
     function getPadPos(colIdx, rowIdx) {
       return {
@@ -492,14 +529,14 @@
       });
     }
 
-    // Render 16 Buttons (Corner pins only)
+    // Render 64 Buttons (8 sets of 8 buttons)
     function renderComponents() {
       const g = document.getElementById('componentLayer');
       let out = '';
 
-      for (let r = 0; r < 4; r++) {
+      for (let r = 0; r < BUTTON_ROW_PAIRS.length; r++) {
         for (let c = 0; c < 4; c++) {
-          const key = KEY_GRID[r][c];
+          const key = KEY_GRID[r] ? KEY_GRID[r][c] : `B${r * 4 + c + 1}`;
           const colPair = BUTTON_COL_PAIRS[c];
           const rowPair = BUTTON_ROW_PAIRS[r];
 
@@ -525,7 +562,7 @@
               
               <!-- Plunger -->
               <circle cx="0" cy="0" r="14" fill="url(#btnCap)" stroke="#0284c7" stroke-width="1.5"/>
-              <text x="0" y="5" fill="#fff" font-size="14" font-weight="800" text-anchor="middle" font-family="monospace">${key}</text>
+              <text x="0" y="5" fill="#fff" font-size="${key.length > 2 ? 10 : 13}" font-weight="800" text-anchor="middle" font-family="monospace">${key}</text>
             </g>
           `;
         }
@@ -674,24 +711,32 @@
         return;
       }
 
-      // Complete 10-node Net Legend
+      // Complete 16-node Net Legend (8x8 Matrix: 8 Rows x 8 Columns)
       const nets = [
-        { name: 'Row 5', color: '#f43f5e', desc: 'Row Bus 5 (C-Q) + 4 Key Jumpers' },
-        { name: 'Row 13', color: '#d946ef', desc: 'Row Bus 13 (C-Q) + 4 Key Jumpers' },
-        { name: 'Col 0A', color: '#38bdf8', desc: 'Bus B (Keys 1, 7)' },
-        { name: 'Col 0B', color: '#2563eb', desc: 'Bus D (Keys 4, *)' },
-        { name: 'Col 1A', color: '#06b6d4', desc: 'Bus F (Keys 2, 8)' },
-        { name: 'Col 1B', color: '#0d9488', desc: 'Bus H (Keys 5, 0)' },
-        { name: 'Col 2A', color: '#10b981', desc: 'Bus J (Keys 3, 9)' },
-        { name: 'Col 2B', color: '#84cc16', desc: 'Bus L (Keys 6, #)' },
-        { name: 'Col 3A', color: '#eab308', desc: 'Bus N (Keys A, C)' },
-        { name: 'Col 3B', color: '#8b5cf6', desc: 'Bus P (Keys B, D)' }
+        // 8 Row Nets
+        { name: 'Row 5', color: '#f43f5e', desc: 'Set 1 Row Bus (Cols C-Q)' },
+        { name: 'Row 13', color: '#d946ef', desc: 'Set 2 Row Bus (Cols C-Q)' },
+        { name: 'Row 21', color: '#ec4899', desc: 'Set 3 Row Bus (Cols C-Q)' },
+        { name: 'Row 29', color: '#f97316', desc: 'Set 4 Row Bus (Cols C-Q)' },
+        { name: 'Row 37', color: '#ef4444', desc: 'Set 5 Row Bus (Cols C-Q)' },
+        { name: 'Row 45', color: '#e11d48', desc: 'Set 6 Row Bus (Cols C-Q)' },
+        { name: 'Row 53', color: '#c026d3', desc: 'Set 7 Row Bus (Cols C-Q)' },
+        { name: 'Row 61', color: '#fb7185', desc: 'Set 8 Row Bus (Cols C-Q)' },
+        // 8 Column Nets
+        { name: 'Col 0A', color: '#38bdf8', desc: 'Bus B (Odd rows Col 0)' },
+        { name: 'Col 0B', color: '#2563eb', desc: 'Bus D (Even rows Col 0)' },
+        { name: 'Col 1A', color: '#06b6d4', desc: 'Bus F (Odd rows Col 1)' },
+        { name: 'Col 1B', color: '#0d9488', desc: 'Bus H (Even rows Col 1)' },
+        { name: 'Col 2A', color: '#10b981', desc: 'Bus J (Odd rows Col 2)' },
+        { name: 'Col 2B', color: '#84cc16', desc: 'Bus L (Even rows Col 2)' },
+        { name: 'Col 3A', color: '#eab308', desc: 'Bus N (Odd rows Col 3)' },
+        { name: 'Col 3B', color: '#8b5cf6', desc: 'Bus P (Even rows Col 3)' }
       ];
 
       let html = `
         <div style="margin-bottom: 12px; background:#0b111e; border:1px solid #1e293b; border-radius:6px; padding:10px;">
           <div style="font-weight:700; color:#fff; font-size:11px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-            <span>ELECTRICAL NETS (10 NODES)</span>
+            <span>ELECTRICAL NETS (16 NODES - 8×8)</span>
             <span style="color:#64748b; font-weight:400; font-size:10px;">Hover to isolate</span>
           </div>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 5px;">
@@ -769,12 +814,29 @@
     }
 
     function updateTransform() {
+      const cx = MARGIN_X - 40 + BOARD_W / 2;
+      const cy = MARGIN_Y - 40 + BOARD_H / 2;
+
       let t = `translate(${state.panX}, ${state.panY}) scale(${state.zoom})`;
+
+      // Center-based rotation
+      if (state.rotation) {
+        t += ` rotate(${state.rotation}, ${cx}, ${cy})`;
+      }
+
+      // Horizontal flip for solder back-view
       if (state.viewMode === 'bottom') {
-        const cx = MARGIN_X + BOARD_W / 2 - 40;
         t += ` translate(${cx * 2}, 0) scale(-1, 1)`;
       }
+
       document.getElementById('worldGroup').setAttribute('transform', t);
+    }
+
+    function rotateView(delta = 90) {
+      state.rotation = (state.rotation + delta + 360) % 360;
+      const badge = document.getElementById('rotAngleBadge');
+      if (badge) badge.innerText = `${state.rotation}°`;
+      fitView();
     }
 
     function fitView() {
@@ -784,8 +846,12 @@
 
       const bx = MARGIN_X - 40;
       const by = MARGIN_Y - 40;
-      const totalW = BOARD_W + 60;
-      const totalH = BOARD_H + 60;
+      const isSwapped = (state.rotation % 180 !== 0);
+      const effW = isSwapped ? BOARD_H : BOARD_W;
+      const effH = isSwapped ? BOARD_W : BOARD_H;
+
+      const totalW = effW + 60;
+      const totalH = effH + 60;
 
       const scaleX = w / totalW;
       const scaleY = h / totalH;
@@ -802,6 +868,10 @@
 
     function resetZoom() {
       state.zoom = 1.0;
+      state.rotation = 0;
+      const badge = document.getElementById('rotAngleBadge');
+      if (badge) badge.innerText = '0°';
+
       const container = document.getElementById('canvasContainer');
       const w = container.clientWidth || 800;
       const h = container.clientHeight || 600;
