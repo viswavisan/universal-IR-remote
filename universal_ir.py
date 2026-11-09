@@ -15,10 +15,10 @@ class UniversalIR:
     (NEC, Sony, Philips RC5/RC6, Samsung, LG, AC remotes, etc.).
     """
 
-    def __init__(self, rx_pin=11, tx_pin=14, carrier_freq=38000, duty_percent=33, storage_file="ir_codes.json"):
+    def __init__(self, rx_pin=27, tx_pin=28, carrier_freq=38000, duty_percent=33, storage_file="ir_codes.json"):
         """
-        :param rx_pin: GPIO pin connected to demodulating IR receiver (GP11 / Physical Pin 15, Active-LOW).
-        :param tx_pin: GPIO pin connected to 3-pin 5V IR transmitter module (GP14 / Physical Pin 19, 38kHz PWM).
+        :param rx_pin: GPIO pin connected to demodulating IR receiver (GP27 / Physical Pin 32, Active-LOW).
+        :param tx_pin: GPIO pin connected to IR transmitter module (GP28 / Physical Pin 34, 38kHz PWM).
         :param carrier_freq: Carrier frequency in Hz (typically 38000 Hz / 38 kHz).
         :param duty_percent: Carrier duty cycle percentage (33% is standard for IR LEDs).
         :param storage_file: Path to JSON database file on Pico flash filesystem.

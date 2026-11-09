@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universal IR Remote: Single-Board Direct Pico Controller (V2 Layout)</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --panel: #111827;
+      --border: #1f293d;
+      --accent: #38bdf8;
+      --text: #f3f4f6;
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Complete page cannot scroll */
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+    }
+
+    header {
+      flex: 0 0 auto; /* Fixed header at the top, NEVER scrollable */
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 1000;
+      position: relative;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .header-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-group h1 {
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+    }
+
+    .badge.single {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-group {
+      display: flex;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+    }
+
+    button {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    button.active {
+      color: #090d16;
+      background: var(--accent);
+    }
+
+    .main-container {
+      flex: 1 1 0; /* Strictly fills the exact height between header and footer */
+      min-height: 0; /* Prevents overflow from expanding body */
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #canvasContainer {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      cursor: grab;
+      overflow: hidden; /* SVG handles pan & zoom internally */
+      background-color: #0b0f19;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.3) 0%, rgba(9, 13, 22, 0.8) 100%),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 24px 24px, 24px 24px;
+    }
+
+    #canvasContainer:active {
+      cursor: grabbing;
+    }
+
+    #pcbSvg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .sidebar {
+      width: 320px;
+      flex: 0 0 320px;
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      z-index: 5;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar.collapsed {
+      display: none !important;
+    }
+
+    .sidebar-header {
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12.5px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-content {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto; /* ONLY the sidebar content is scrollable */
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    footer {
+      flex: 0 0 26px; /* Strictly locked at the bottom */
+      height: 26px;
+      background: #090d16;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 11px;
+      color: var(--muted);
+      z-index: 1000;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(4px);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #fff;
+      pointer-events: none;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Tactile button housing mode styles */
+    body.housing-hidden .btn-housing,
+    body.housing-hidden .btn-housing-inner {
+      display: none !important;
+    }
+    body.housing-opaque .btn-housing {
+      fill: #1e293b !important;
+    }
+    body.housing-opaque .btn-housing-inner {
+      fill: #0f172a !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <!-- Row 1: Brand Title, Badges & BOM Trigger -->
+    <div class="header-top">
+      <div class="title-group">
+        <h1>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+            <line x1="8" y1="6" x2="16" y2="6"></line>
+            <line x1="12" y1="18" x2="12" y2="18.01"></line>
+          </svg>
+          <span>Universal IR Remote: Single-Board Direct Pico (22×78)</span>
+        </h1>
+        <span class="badge" style="background:#7c3aed; color:#fff;">V2 Iteration</span>
+        <span class="badge single">Pico 90° Direct GPIO</span>
+        <span class="badge" style="background:#c084fc; color:#3b0764; font-weight:700;">WS2812B RGB</span>
+      </div>
+
+      <div class="btn-group">
+        <button id="btnOpenBom" style="background: linear-gradient(135deg, #0284c7, #2563eb); color: white; font-weight: 700; border: none; padding: 4px 12px; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path>
+            <rect x="9" y="3" width="6" height="4" rx="2"></rect>
+            <path d="M9 12h6m-6 4h6"></path>
+          </svg>
+          📋 Bill of Materials (BOM)
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 2: Interactive Controls & Section Jumps -->
+    <div class="header-bottom">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <!-- Hidden legacy view buttons so script never errors -->
+        <div style="display:none;">
+          <button id="btnBothBoards" class="active">Unified</button>
+          <button id="btnB1Only">Board 1</button>
+          <button id="btnB2Only">Board 2</button>
+        </div>
+
+        <!-- Active Layer Selectors -->
+        <div class="btn-group">
+          <button id="btnFront" class="active" title="Top / Component Side">Front (Top)</button>
+          <button id="btnBack" title="Back / Solder Side (Columns)">Back (Solder)</button>
+          <button id="btnXray" title="Composite X-Ray View">X-Ray</button>
+        </div>
+
+        <!-- Section Navigation Quick-Jumps -->
+        <div class="btn-group">
+          <button id="btnJumpTop" title="Scroll to Pico & Optics">🔭 Top (Pico)</button>
+          <button id="btnJumpKeys1" title="Scroll to Keys 1–32 (Sets 1–4)">🔢 Keys 1–32</button>
+          <button id="btnJumpKeys2" title="Scroll to Keys 33–64 (Sets 5–8)">🔢 Keys 33–64</button>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <!-- Fitting & Scaling -->
+        <div class="btn-group">
+          <button id="btnFitWindow" class="active" title="Fit entire board to window">🎯 Fit to Window</button>
+          <button id="btnFitWidth" title="Fit width comfortably (readable close-up)">↔ Fit Width</button>
+          <button id="btnRotate" title="Rotate board 90°">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+            <span id="rotAngleBadge">0°</span>
+          </button>
+          <button id="btnZoom100">100%</button>
+        </div>
+
+        <!-- Display Toggles -->
+        <div class="btn-group">
+          <button id="btnToggleHousing" title="Cycle Button Housing: Clear / Solid / Hidden">🔘 Buttons</button>
+          <button id="btnToggleSidebar" title="Toggle Sidebar Inspector">◀ Inspector</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <div id="canvasContainer">
+      <svg id="pcbSvg">
+        <defs>
+          <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.8" />
+          </filter>
+
+          <radialGradient id="padGrad" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#fef08a" />
+            <stop offset="60%" stop-color="#eab308" />
+            <stop offset="100%" stop-color="#a16207" />
+          </radialGradient>
+
+          <radialGradient id="solderGrad" cx="30%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="45%" stop-color="#cbd5e1" />
+            <stop offset="100%" stop-color="#475569" />
+          </radialGradient>
+
+          <linearGradient id="btnCap" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8" />
+            <stop offset="50%" stop-color="#2563eb" />
+            <stop offset="100%" stop-color="#1e3a8a" />
+          </linearGradient>
+
+          <linearGradient id="btnCapLearn" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fbbf24" />
+            <stop offset="50%" stop-color="#d97706" />
+            <stop offset="100%" stop-color="#78350f" />
+          </linearGradient>
+
+          <linearGradient id="btnCapMode" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#34d399" />
+            <stop offset="50%" stop-color="#059669" />
+            <stop offset="100%" stop-color="#064e3b" />
+          </linearGradient>
+
+          <linearGradient id="picoGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#065f46" />
+            <stop offset="60%" stop-color="#047857" />
+            <stop offset="100%" stop-color="#022c22" />
+          </linearGradient>
+
+          <pattern id="fiberglassPattern" width="16" height="16" patternUnits="userSpaceOnUse">
+            <path d="M 0 8 L 16 8 M 8 0 L 8 16" fill="none" stroke="rgba(255,255,255,0.015)" stroke-width="1" />
+          </pattern>
+        </defs>
+
+        <g id="worldGroup">
+          <!-- SINGLE UNIFIED BOARD (22×78) -->
+          <g id="board1Group">
+            <g id="b1_substrateLayer"></g>
+            <g id="b1_silkscreenLayer"></g>
+            <g id="b1_padLayer"></g>
+            <g id="b1_backCompLayer" style="display:none;"></g>
+            <g id="b1_backSolderLayer" style="display:none;"></g>
+            <g id="b1_frontWireLayer"></g>
+            <g id="b1_componentLayer"></g>
+            <g id="b1_headerLayer"></g>
+            <g id="b1_backInsulatorLayer" style="display:none;"></g>
+          </g>
+
+          <!-- Legacy groups kept empty & hidden so selectors never fail -->
+          <g id="board2Group" style="display:none;">
+            <g id="b2_substrateLayer"></g>
+            <g id="b2_silkscreenLayer"></g>
+            <g id="b2_padLayerTop"></g>
+            <g id="b2_padLayerBottom"></g>
+            <g id="b2_topWireLayer"></g>
+            <g id="b2_componentLayer"></g>
+            <g id="b2_backInsulatorLayer"></g>
+            <g id="b2_headerLayer"></g>
+          </g>
+          <g id="interconnectGroup" style="display:none;"></g>
+        </g>
+      </svg>
+
+      <div id="tooltip" class="tooltip"></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span>Wiring & Net Inspector</span>
+        <span class="badge single">Horizontal Pico (90°)</span>
+      </div>
+
+      <div class="sidebar-content" id="sidebarContent">
+        <!-- Architecture Card -->
+        <div class="card" style="border-left: 3px solid #10b981;">
+          <div class="card-title" style="color:#10b981;">
+            <span>DIRECT PICO ARCHITECTURE</span>
+            <span class="badge single">22×78 Perfboard</span>
+          </div>
+          <div style="font-size:11px; line-height:1.5; color:#cbd5e1;">
+            <div>• <strong>No PCF8575 Expander:</strong> Keypad column buses wire directly to RP2040 GPIOs.</div>
+            <div>• <strong>Horizontal Pico (90°):</strong> Spans Rows 5 to 12 (Cols B–U). USB-C port accessible on the
+              left edge.</div>
+            <div>• <strong>100% Direct Vertical Rails:</strong> All 8 column buses run straight up into Pico GPIOs
+              without a single bend!</div>
+            <div>• <strong>Symmetrical Keypad:</strong> Buttons 1–64 are mathematically centered across the 22 columns
+              with equal 2-col margins.</div>
+            <div>• <strong>Clear Internal Pin Labels:</strong> Labels are positioned inside the Pico PCB body for high
+              contrast and zero clutter.</div>
+            <div>• <strong>F19 Crossover Jumper:</strong> GP4 front-side lead hops over Row 19 bus at F19 with complete
+              electrical isolation.</div>
+            <div>• <strong>Dedicated System Keys:</strong> Button 2 = <strong>LEARN</strong> (Amber), Button 3 = <strong>MODE</strong> (Emerald).</div>
+          </div>
+        </div>
+
+        <!-- Bill of Materials Card -->
+        <div class="card" style="border-left: 3px solid #0284c7; background: #0b1329;">
+          <div class="card-title" style="color:#38bdf8;">
+            <span>BILL OF MATERIALS (BOM)</span>
+            <span class="badge single">7 Components</span>
+          </div>
+          <div style="font-size:11px; line-height:1.5; color:#cbd5e1;">
+            <div>Hardware components required for the 64-button Universal IR Remote:</div>
+            <div style="margin-top:6px; display:flex; flex-direction:column; gap:3px; font-size:10.5px; color:#94a3b8;">
+              <div>• 1× Raspberry Pi Pico (RP2040)</div>
+              <div>• 64× 6x6mm Tactile Pushbuttons</div>
+              <div>• 1× WS2812B RGB Strip (8 LEDs)</div>
+              <div>• 1× 940nm IR TX & 1× VS1838B IR RX</div>
+              <div>• 1× 22x78 Perfboard (≥ 20cm / 8in)</div>
+              <div>• 1× 30 AWG Insulated Jumper Wire</div>
+            </div>
+            <button id="btnSidebarBom" style="margin-top:10px; width:100%; padding:8px 10px; background:linear-gradient(135deg, #0284c7, #2563eb); border:none; border-radius:6px; color:#ffffff; font-weight:700; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 2px 6px rgba(2, 132, 199, 0.4);">
+              <span>📋 View & Edit Full BOM Table</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Net Legend Section -->
+        <div id="netLegendContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div id="statusCursor">Coordinates: pad --</div>
+    <div id="boardTitleFooter">Universal IR Remote: Single Board Direct Pico (22×78) • Horizontal 90° Pico • Direct GPIO
+      • 64 Buttons</div>
+  </footer>
+
+  <!-- Bill of Materials (BOM) & Sourcing Modal -->
+  <div id="bomModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(6px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#0f172a; border:1px solid #334155; border-radius:12px; width:100%; max-width:1050px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.85); overflow:hidden;">
+      <!-- Modal Header -->
+      <div style="padding:16px 24px; background:#1e293b; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:16px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:8px;">
+            <span>📋 BILL OF MATERIALS (BOM) & SOURCING</span>
+            <span style="font-size:11px; background:#0284c7; color:#fff; padding:2px 8px; border-radius:12px; font-weight:600;">Finalized V2 Design</span>
+          </div>
+          <div style="font-size:11.5px; color:#94a3b8; margin-top:4px;">Universal IR Remote (RP2040) • 64-Button Matrix • WS2812B RGB Backlight • 22×78 Perfboard (≥20cm)</div>
+        </div>
+        <button id="btnCloseBom" style="background:#334155; border:none; color:#cbd5e1; font-size:16px; width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700;">✕</button>
+      </div>
+
+      <!-- Modal Body (Table) -->
+      <div style="padding:16px 24px; overflow-y:auto; flex:1;">
+        <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#cbd5e1; text-align:left;">
+          <thead>
+            <tr style="background:#1e293b; color:#94a3b8; border-bottom:2px solid #334155; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">
+              <th style="padding:10px 8px; width:30px;">#</th>
+              <th style="padding:10px 8px; width:150px;">Component</th>
+              <th style="padding:10px 8px; width:220px;">Specification / Model</th>
+              <th style="padding:10px 8px; text-align:center; width:45px;">Qty</th>
+              <th style="padding:10px 8px; text-align:center; width:65px;">Designator</th>
+              <th style="padding:10px 8px; width:110px;">Price</th>
+              <th style="padding:10px 8px; width:140px;">Purchase Link</th>
+              <th style="padding:10px 8px;">Circuit Role / Notes</th>
+            </tr>
+          </thead>
+          <tbody id="bomTableBody">
+            <!-- Dynamically populated or static fallback rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="padding:14px 24px; background:#1e293b; border-top:1px solid #334155; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+        <div style="color:#94a3b8;">
+          Total: <strong style="color:#f8fafc;">7 Components (70 Parts)</strong> • Total Estimated Cost: <strong id="bomTotalCost" style="color:#10b981;">₹965.00</strong>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button id="btnCloseBomFooter" style="padding:7px 16px; background:#334155; border:none; border-radius:6px; color:#f8fafc; font-weight:600; font-size:11.5px; cursor:pointer;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // 1. BOARD CONSTANTS & DIMENSIONS (22 Cols × 78 Rows)
+    // -------------------------------------------------------------
+    const COLS = 22; // A through V
+    const ROWS = 78; // Rows 1-78 total
+    const COL_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'];
+    const PITCH = 24;
+    const MARGIN_X = 40;
+    const MARGIN_Y = 40;
+
+    const BOARD_W = (COLS - 1) * PITCH + 2 * MARGIN_X; // 584px
+    const BOARD_H = (ROWS - 1) * PITCH + 2 * MARGIN_Y; // 1928px
+
+    // Board position centered in SVG
+    const BOARD_X = 80;
+    const BOARD_Y = 60;
+
+    function getCoordPos(colLetter, rowNum) {
+      const c = COL_NAMES.indexOf(colLetter);
+      const r = rowNum - 1;
+      return {
+        x: BOARD_X + MARGIN_X + c * PITCH,
+        y: BOARD_Y + MARGIN_Y + r * PITCH
+      };
+    }
+    const getCoordPos1 = getCoordPos;
+    const getCoordPos2 = getCoordPos; // alias for compatibility
+
+    // -------------------------------------------------------------
+    // 2. HORIZONTAL PICO PIN DEFINITIONS (Rows 5 & 12, Cols B to U)
+    // -------------------------------------------------------------
+    const PICO_TOP_PINS = [
+      { pin: 40, col: 'B', row: 5, name: 'VBUS', net: 'NC', desc: 'Pin 40: USB 5V VBUS' },
+      { pin: 39, col: 'C', row: 5, name: 'VSYS', net: 'VSYS_BAT', desc: 'Pin 39: Battery Input (+)' },
+      { pin: 38, col: 'D', row: 5, name: 'GND', net: 'GND', desc: 'Pin 38: Ground (-)' },
+      { pin: 37, col: 'E', row: 5, name: '3V3_EN', net: 'NC', desc: 'Pin 37: 3.3V Regulator Enable' },
+      { pin: 36, col: 'F', row: 5, name: '3V3', net: 'VCC_3V3', desc: 'Pin 36: 3.3V System Output' },
+      { pin: 35, col: 'G', row: 5, name: 'ADC_REF', net: 'NC', desc: 'Pin 35: ADC Reference' },
+      { pin: 34, col: 'H', row: 5, name: 'GP28', net: 'IR_TX', desc: 'Pin 34: GP28 (IR TX Signal)' },
+      { pin: 33, col: 'I', row: 5, name: 'GND', net: 'GND', desc: 'Pin 33: Ground' },
+      { pin: 32, col: 'J', row: 5, name: 'GP27', net: 'IR_RX', desc: 'Pin 32: GP27 (IR RX Data)' },
+      { pin: 31, col: 'K', row: 5, name: 'GP26', net: 'NC', desc: 'Pin 31: GP26' },
+      { pin: 30, col: 'L', row: 5, name: 'RUN', net: 'NC', desc: 'Pin 30: Run / Reset' },
+      { pin: 29, col: 'M', row: 5, name: 'GP22', net: 'NC', desc: 'Pin 29: GP22' },
+      { pin: 28, col: 'N', row: 5, name: 'GND', net: 'GND', desc: 'Pin 28: Ground' },
+      { pin: 27, col: 'O', row: 5, name: 'GP21', net: 'NC', desc: 'Pin 27: GP21' },
+      { pin: 26, col: 'P', row: 5, name: 'GP20', net: 'NC', desc: 'Pin 26: GP20' },
+      { pin: 25, col: 'Q', row: 5, name: 'GP19', net: 'NC', desc: 'Pin 25: GP19' },
+      { pin: 24, col: 'R', row: 5, name: 'GP18', net: 'NC', desc: 'Pin 24: GP18' },
+      { pin: 23, col: 'S', row: 5, name: 'GND', net: 'GND', desc: 'Pin 23: Ground ➔ WS2812B RGB Strip (GND @ S1)' },
+      { pin: 22, col: 'T', row: 5, name: 'GP17', net: 'NC', desc: 'Pin 22: GP17' },
+      { pin: 21, col: 'U', row: 5, name: 'GP16', net: 'RGB_DIN', desc: 'Pin 21: GP16 ➔ WS2812B RGB Strip (DIN @ U1)' }
+    ];
+
+    const PICO_BOTTOM_PINS = [
+      { pin: 1, col: 'B', row: 12, name: 'GP0', net: 'Row 67', desc: 'Pin 1: GP0 ➔ Keypad Row 67 (B12 ➔ B15 ➔ A15 ➔ A67 [Backside] ➔ Row 67 Bus)' },
+      { pin: 2, col: 'C', row: 12, name: 'GP1', net: 'Col C', desc: 'Pin 2: GP1 ➔ Column C Rail (C12 ➔ C15)' },
+      { pin: 3, col: 'D', row: 12, name: 'GND', net: 'NC', desc: 'Pin 3: Ground' },
+      { pin: 4, col: 'E', row: 12, name: 'GP2', net: 'Col D', desc: 'Pin 4: GP2 ➔ Column D Rail (E12 ➔ E15 ➔ D15)' },
+      { pin: 5, col: 'F', row: 12, name: 'GP3', net: 'GP3', desc: 'Pin 5: GP3 ➔ Col F Rail (F12 ➔ F35) [Backside]' },
+      { pin: 6, col: 'G', row: 12, name: 'GP4', net: 'Row 27', desc: 'Pin 6: GP4 ➔ Keypad Row 27 (G12 ➔ G15 ➔ F15 ➔ [F19 Jumper] ➔ F27) [Top-Side Rail]' },
+      { pin: 7, col: 'H', row: 12, name: 'GP5', net: 'Col H', desc: 'Pin 7: GP5 ➔ Column H Rail (H12 ➔ H15)' },
+      { pin: 8, col: 'I', row: 12, name: 'GND', net: 'NC', desc: 'Pin 8: Ground' },
+      { pin: 9, col: 'J', row: 12, name: 'GP6', net: 'Col I', desc: 'Pin 9: GP6 ➔ Column I Rail (J12 ➔ J15 ➔ I15)' },
+      { pin: 10, col: 'K', row: 12, name: 'GP7', net: 'GP7', desc: 'Pin 10: GP7 ➔ Col K Rail (K12 ➔ K59) [Backside]' },
+      { pin: 11, col: 'L', row: 12, name: 'GP8', net: 'GP8', desc: 'Pin 11: GP8 ➔ Col L Rail (L12 ➔ L51) [Backside]' },
+      { pin: 12, col: 'M', row: 12, name: 'GP9', net: 'Col N', desc: 'Pin 12: GP9 ➔ Column N Rail (M12 ➔ M16 ➔ N16)' },
+      { pin: 13, col: 'N', row: 12, name: 'GND', net: 'NC', desc: 'Pin 13: Ground' },
+      { pin: 14, col: 'O', row: 12, name: 'GP10', net: 'Col O', desc: 'Pin 14: GP10 ➔ Column O Rail (O12 ➔ O15)' },
+      { pin: 15, col: 'P', row: 12, name: 'GP11', net: 'Row 19', desc: 'Pin 15: GP11 ➔ Keypad Row 19 (P12 ➔ P15 ➔ Q15 ➔ Q19) [Top-Side Rail]' },
+      { pin: 16, col: 'Q', row: 12, name: 'GP12', net: 'GP12', desc: 'Pin 16: GP12 ➔ Col Q Rail (Q12 ➔ Q43) [Backside]' },
+      { pin: 17, col: 'R', row: 12, name: 'GP13', net: 'Col S', desc: 'Pin 17: GP13 ➔ Column S Rail (R12 ➔ R16 ➔ S16)' },
+      { pin: 18, col: 'S', row: 12, name: 'GND', net: 'NC', desc: 'Pin 18: Ground' },
+      { pin: 19, col: 'T', row: 12, name: 'GP14', net: 'Col T', desc: 'Pin 19: GP14 ➔ Column T Rail (T12 ➔ T15)' },
+      { pin: 20, col: 'U', row: 12, name: 'GP15', net: 'Row 75', desc: 'Pin 20: GP15 ➔ Keypad Row 75 (U12 ➔ U15 ➔ V15 ➔ V75 [Backside] ➔ Row 75 Bus)' }
+    ];
+
+    // -------------------------------------------------------------
+    // 3. 4x3 HOLES TACTILE BUTTON KEYPAD MATRIX (64 BUTTONS: Rows 16 to 77)
+    // -------------------------------------------------------------
+    const SETS_COUNT = 8;
+    const ROW_COLOR = '#ef4444'; // Red for ALL row connections
+    const COL_COLOR = '#22c55e'; // Bright Green for ALL column connections
+    const ROW_COLORS = [
+      '#ef4444', '#ef4444', '#ef4444', '#ef4444',
+      '#ef4444', '#ef4444', '#ef4444', '#ef4444'
+    ];
+
+    // 4 Symmetrically spaced button columns (4 holes wide × 3 holes tall):
+    // Left margin: Col A (1 col)
+    // Btn 0: Cols B, C, D, E (Center between C & D)
+    // Gap: Col F (1 col)
+    // Btn 1: Cols G, H, I, J (Center between H & I)
+    // Center Gap: Cols K, L (2 cols)
+    // Btn 2: Cols M, N, O, P (Center between N & O)
+    // Gap: Col Q (1 col)
+    // Btn 3: Cols R, S, T, U (Center between S & T)
+    // Right margin: Col V (1 col)
+    const BUTTON_COL_PAIRS = [
+      { left: 'B', right: 'E', center: 'C' }, // Button Col 0 (Cols B..E: 4 holes)
+      { left: 'G', right: 'J', center: 'H' }, // Button Col 1 (Cols G..J: 4 holes)
+      { left: 'M', right: 'P', center: 'N' }, // Button Col 2 (Cols M..P: 4 holes)
+      { left: 'R', right: 'U', center: 'S' }  // Button Col 3 (Cols R..U: 4 holes)
+    ];
+    const BUTTON_ROW_PAIRS = [];
+
+    const b1_backSolderLines = [
+      // Btn Col 0 (Cols B..E) Center Rails (GREEN):
+      { fromCol: 'C', fromRow: 15, toCol: 'C', toRow: 78, from: 'C15', to: 'C78', net: 'Col C', color: COL_COLOR, desc: 'Column C Rail (C15 ➔ C78) [Backside - Green]' },
+      { fromCol: 'D', fromRow: 15, toCol: 'D', toRow: 78, from: 'D15', to: 'D78', net: 'Col D', color: COL_COLOR, desc: 'Column D Rail (D15 ➔ D78) [Backside - Green]' },
+
+      // Btn Col 1 (Cols G..J) Center Rails (GREEN):
+      { fromCol: 'H', fromRow: 15, toCol: 'H', toRow: 78, from: 'H15', to: 'H78', net: 'Col H', color: COL_COLOR, desc: 'Column H Rail (H15 ➔ H78) [Backside - Green]' },
+      { fromCol: 'I', fromRow: 15, toCol: 'I', toRow: 78, from: 'I15', to: 'I78', net: 'Col I', color: COL_COLOR, desc: 'Column I Rail (I15 ➔ I78) [Backside - Green]' },
+
+      // Btn Col 2 (Cols M..P) Center Rails (GREEN):
+      { fromCol: 'N', fromRow: 15, toCol: 'N', toRow: 78, from: 'N15', to: 'N78', net: 'Col N', color: COL_COLOR, desc: 'Column N Rail (N15 ➔ N78) [Backside - Green]' },
+      { fromCol: 'O', fromRow: 15, toCol: 'O', toRow: 78, from: 'O15', to: 'O78', net: 'Col O', color: COL_COLOR, desc: 'Column O Rail (O15 ➔ O78) [Backside - Green]' },
+
+      // Btn Col 3 (Cols R..U) Center Rails (GREEN):
+      { fromCol: 'S', fromRow: 15, toCol: 'S', toRow: 78, from: 'S15', to: 'S78', net: 'Col S', color: COL_COLOR, desc: 'Column S Rail (S15 ➔ S78) [Backside - Green]' },
+      { fromCol: 'T', fromRow: 15, toCol: 'T', toRow: 78, from: 'T15', to: 'T78', net: 'Col T', color: COL_COLOR, desc: 'Column T Rail (T15 ➔ T78) [Backside - Green]' },
+
+      // Pico GPIO Column Leads (GREEN):
+      { fromCol: 'C', fromRow: 12, toCol: 'C', toRow: 15, from: 'C12', to: 'C15', net: 'Col C', color: COL_COLOR, desc: 'Column C Rail Lead (C12 ➔ C15 into Pico Pin 2 GP1) [Backside - Green]' },
+      { fromCol: 'E', fromRow: 12, toCol: 'E', toRow: 15, from: 'E12', to: 'E15', net: 'Col D', color: COL_COLOR, desc: 'Column D Rail Lead (E12 ➔ E15 from Pico Pin 4 GP2) [Backside - Green]' },
+      { fromCol: 'D', fromRow: 15, toCol: 'E', toRow: 15, from: 'D15', to: 'E15', net: 'Col D', color: COL_COLOR, desc: 'Column D Jog (E15 ➔ D15 into Rail D) [Backside - Green]' },
+      { fromCol: 'H', fromRow: 12, toCol: 'H', toRow: 15, from: 'H12', to: 'H15', net: 'Col H', color: COL_COLOR, desc: 'Column H Rail Lead (H12 ➔ H15 into Pico Pin 7 GP5) [Backside - Green]' },
+      { fromCol: 'J', fromRow: 12, toCol: 'J', toRow: 15, from: 'J12', to: 'J15', net: 'Col I', color: COL_COLOR, desc: 'Column I Rail Lead (J12 ➔ J15 from Pico Pin 9 GP6) [Backside - Green]' },
+      { fromCol: 'I', fromRow: 15, toCol: 'J', toRow: 15, from: 'I15', to: 'J15', net: 'Col I', color: COL_COLOR, desc: 'Column I Jog (J15 ➔ I15 into Rail I) [Backside - Green]' },
+      { fromCol: 'M', fromRow: 12, toCol: 'M', toRow: 16, from: 'M12', to: 'M16', net: 'Col N', color: COL_COLOR, desc: 'Column N Rail Lead (M12 ➔ M16 from Pico Pin 12 GP9) [Backside - Green]' },
+      { fromCol: 'O', fromRow: 12, toCol: 'O', toRow: 15, from: 'O12', to: 'O15', net: 'Col O', color: COL_COLOR, desc: 'Column O Rail Lead (O12 ➔ O15 into Pico Pin 14 GP10) [Backside - Green]' },
+      { fromCol: 'R', fromRow: 12, toCol: 'R', toRow: 16, from: 'R12', to: 'R16', net: 'Col S', color: COL_COLOR, desc: 'Column S Rail Lead (R12 ➔ R16 from Pico Pin 17 GP13) [Backside - Green]' },
+      { fromCol: 'T', fromRow: 12, toCol: 'T', toRow: 15, from: 'T12', to: 'T15', net: 'Col T', color: COL_COLOR, desc: 'Column T Rail Lead (T12 ➔ T15 into Pico Pin 19 GP14) [Backside - Green]' },
+
+      // Pico GPIO Row Leads running through backside corridors (RED):
+      { fromCol: 'K', fromRow: 12, toCol: 'K', toRow: 59, from: 'K12', to: 'K59', net: 'Row 59', color: ROW_COLOR, desc: 'Pico Pin 10 GP7 Lead ➔ Row 59 (K12 ➔ K59) [Backside - Red]' },
+      { fromCol: 'L', fromRow: 12, toCol: 'L', toRow: 51, from: 'L12', to: 'L51', net: 'Row 51', color: ROW_COLOR, desc: 'Pico Pin 11 GP8 Lead ➔ Row 51 (L12 ➔ L51) [Backside - Red]' },
+      { fromCol: 'Q', fromRow: 12, toCol: 'Q', toRow: 43, from: 'Q12', to: 'Q43', net: 'Row 43', color: ROW_COLOR, desc: 'Pico Pin 16 GP12 Lead ➔ Row 43 (Q12 ➔ Q43) [Backside - Red]' },
+      { fromCol: 'F', fromRow: 12, toCol: 'F', toRow: 35, from: 'F12', to: 'F35', net: 'Row 35', color: ROW_COLOR, desc: 'Pico Pin 5 GP3 Lead ➔ Row 35 (F12 ➔ F35) [Backside - Red]' },
+
+      // Pico Pin 1 GP0 Lead ➔ Row 67 via Col A (RED):
+      { fromCol: 'B', fromRow: 12, toCol: 'B', toRow: 15, from: 'B12', to: 'B15', net: 'Row 67', color: ROW_COLOR, desc: 'Pico Pin 1 GP0 Lead (B12 ➔ B15) [Backside - Red]' },
+      { fromCol: 'A', fromRow: 15, toCol: 'B', toRow: 15, from: 'B15', to: 'A15', net: 'Row 67', color: ROW_COLOR, desc: 'Row 67 Jog (B15 ➔ A15) [Backside - Red]' },
+      { fromCol: 'A', fromRow: 15, toCol: 'A', toRow: 67, from: 'A15', to: 'A67', net: 'Row 67', color: ROW_COLOR, desc: 'Row 67 Outer Rail (A15 ➔ A67) [Backside - Red]' },
+
+      // Pico Pin 20 GP15 Lead ➔ Row 75 via Col V (RED):
+      { fromCol: 'U', fromRow: 12, toCol: 'U', toRow: 15, from: 'U12', to: 'U15', net: 'Row 75', color: ROW_COLOR, desc: 'Pico Pin 20 GP15 Lead (U12 ➔ U15) [Backside - Red]' },
+      { fromCol: 'U', fromRow: 15, toCol: 'V', toRow: 15, from: 'U15', to: 'V15', net: 'Row 75', color: ROW_COLOR, desc: 'Row 75 Jog (U15 ➔ V15) [Backside - Red]' },
+      { fromCol: 'V', fromRow: 15, toCol: 'V', toRow: 75, from: 'V15', to: 'V75', net: 'Row 75', color: ROW_COLOR, desc: 'Row 75 Outer Rail (V15 ➔ V75) [Backside - Red]' }
+    ];
+
+    // Unified Direct Traces (Power & IR TX/RX only - Keypad wiring cleared for fresh instruction)
+    const unifiedTraces = [
+      // 1. Battery JST ➔ Horizontal Pico Top Pins (Row 5)
+      { route: ['C1', 'C5'], net: 'VSYS_BAT', color: '#f59e0b', desc: 'Battery (+) C1 ➔ Pico Pin 39 (VSYS @ C5) [Straight]' },
+      { route: ['D1', 'D5'], net: 'GND', color: '#64748b', desc: 'Battery (-) D1 ➔ Pico Pin 38 (GND @ D5) [Straight]' },
+
+      // 3. IR Transmitter ➔ Horizontal Pico Top Pins (Row 5)
+      { route: ['G1', 'G2', 'D2', 'D5'], net: 'GND', color: '#64748b', desc: 'IR TX GND (G1) ➔ Pico Pin 38 (GND @ D5)' },
+      { route: ['H1', 'H5'], net: 'IR_TX', color: '#f97316', desc: 'IR TX SIG (H1) ➔ Pico Pin 34 (GP28 @ H5) [Straight]' },
+      { route: ['I1', 'I3', 'F3', 'F5'], net: 'VCC_3V3', color: '#fb923c', desc: 'IR TX VCC (I1) ➔ Pico Pin 36 (3V3 @ F5)' },
+
+      // 4. IR Receiver ➔ Horizontal Pico Top Pins (Row 5)
+      { route: ['L1', 'L3', 'I3'], net: 'VCC_3V3', color: '#fb923c', desc: 'IR RX VCC (L1) ➔ Pico Pin 36 (3V3 @ F5)' },
+      { route: ['M1', 'M5'], net: 'GND', color: '#64748b', desc: 'IR RX GND (M1) ➔ Pico Pin 28 (GND @ M5) [Straight]' },
+      { route: ['N1', 'N4', 'J4', 'J5'], net: 'IR_RX', color: '#06b6d4', desc: 'IR RX DAT (N1) ➔ Pico Pin 32 (GP27 @ J5)' },
+
+      // 5. WS2812B RGB Addressable LED Strip (Cols S, T, U @ Row 1)
+      { route: ['U1', 'U5'], net: 'RGB_DIN', color: '#c084fc', desc: 'RGB Strip DIN (U1) ➔ Pico Pin 21 (GP16 @ U5) [Straight]' },
+      { route: ['S1', 'S5'], net: 'GND', color: '#64748b', desc: 'RGB Strip GND (S1) ➔ Pico Pin 23 (GND @ S5) [Straight]' },
+      { route: ['T1', 'T3', 'L3'], net: 'VCC_3V3', color: '#fb923c', desc: 'RGB Strip VCC (T1) ➔ 3.3V System Rail (T3 ➔ L3 ➔ F5)' },
+
+      // 6. Keypad Matrix Row Leads & Feed Links (Top-Side - RED):
+      { route: ['G12', 'G15', 'F15', 'F27'], net: 'Row 27', color: ROW_COLOR, desc: 'Row 27 Rail (G12 ➔ G15 ➔ F15 ➔ [F19 Jumper] ➔ F27 from Pico Pin 6 GP4) [Top-Side - Red]' },
+      { route: ['P12', 'P15', 'Q15', 'Q19'], net: 'Row 19', color: ROW_COLOR, desc: 'Row 19 Rail (P12 ➔ P15 ➔ Q15 ➔ Q19 from Pico Pin 15 GP11) [Top-Side - Red]' },
+      { route: ['A67', 'E67'], net: 'Row 67', color: ROW_COLOR, desc: 'Row 67 Feed Link (A67 ➔ E67 from backside GP0 lead) [Front-Side - Red]' },
+      { route: ['R75', 'V75'], net: 'Row 75', color: ROW_COLOR, desc: 'Row 75 Feed Link (R75 ➔ V75 to backside GP15 lead) [Front-Side - Red]' }
+    ];
+
+    // Crossover Insulated Jumper Bridges (e.g. F19 crossing Row 19 bus - RED):
+    const crossoverBridges = [
+      { col: 'F', row: 19, netOver: 'Row 27', netUnder: 'Row 19', color: ROW_COLOR, desc: 'F19 Insulated Crossover Jumper: GP4 lead hops over Row 19 bus [Red Jumper Wire]' }
+    ];
+
+    const b1_frontRowWires = [];
+
+    // Setup 64-button matrix positions (8 Sets × 8 Buttons) and backside solder taps:
+    for (let s = 0; s < SETS_COUNT; s++) {
+      const o = 14 + s * 8;
+      const uTop = 2 + o, uBot = 4 + o, busRow = 5 + o, lTop = 6 + o, lBot = 8 + o;
+
+      BUTTON_ROW_PAIRS.push({ top: uTop, bottom: uBot, center: uTop + 1 });
+      BUTTON_ROW_PAIRS.push({ top: lTop, bottom: lBot, center: lTop + 1 });
+
+      // Upper button taps into Rail 1 (at row uTop - GREEN):
+      b1_backSolderLines.push(
+        { fromCol: 'B', fromRow: uTop, toCol: 'C', toRow: uTop, from: `B${uTop}`, to: `C${uTop}`, net: 'Col C', color: COL_COLOR, desc: `Set ${s + 1} Col 0 Upper Tap (B${uTop} ➔ C${uTop}) [Backside - Green]` },
+        { fromCol: 'G', fromRow: uTop, toCol: 'H', toRow: uTop, from: `G${uTop}`, to: `H${uTop}`, net: 'Col H', color: COL_COLOR, desc: `Set ${s + 1} Col 1 Upper Tap (G${uTop} ➔ H${uTop}) [Backside - Green]` },
+        { fromCol: 'M', fromRow: uTop, toCol: 'N', toRow: uTop, from: `M${uTop}`, to: `N${uTop}`, net: 'Col N', color: COL_COLOR, desc: `Set ${s + 1} Col 2 Upper Tap (M${uTop} ➔ N${uTop}) [Backside - Green]` },
+        { fromCol: 'R', fromRow: uTop, toCol: 'S', toRow: uTop, from: `R${uTop}`, to: `S${uTop}`, net: 'Col S', color: COL_COLOR, desc: `Set ${s + 1} Col 3 Upper Tap (R${uTop} ➔ S${uTop}) [Backside - Green]` }
+      );
+
+      // Lower button taps from Rail 2 (at row lBot, e.g. D22 ➔ E22 - GREEN):
+      b1_backSolderLines.push(
+        { fromCol: 'D', fromRow: lBot, toCol: 'E', toRow: lBot, from: `D${lBot}`, to: `E${lBot}`, net: 'Col D', color: COL_COLOR, desc: `Set ${s + 1} Col 0 Lower Tap (D${lBot} ➔ E${lBot}) [Backside - Green]` },
+        { fromCol: 'I', fromRow: lBot, toCol: 'J', toRow: lBot, from: `I${lBot}`, to: `J${lBot}`, net: 'Col I', color: COL_COLOR, desc: `Set ${s + 1} Col 1 Lower Tap (I${lBot} ➔ J${lBot}) [Backside - Green]` },
+        { fromCol: 'O', fromRow: lBot, toCol: 'P', toRow: lBot, from: `O${lBot}`, to: `P${lBot}`, net: 'Col O', color: COL_COLOR, desc: `Set ${s + 1} Col 2 Lower Tap (O${lBot} ➔ P${lBot}) [Backside - Green]` },
+        { fromCol: 'T', fromRow: lBot, toCol: 'U', toRow: lBot, from: `T${lBot}`, to: `U${lBot}`, net: 'Col T', color: COL_COLOR, desc: `Set ${s + 1} Col 3 Lower Tap (T${lBot} ➔ U${lBot}) [Backside - Green]` }
+      );
+
+      // Front Row Wire spanning Col E to Col R (on top of board):
+      const rowFeedPads = {
+        19: ['Q19'],
+        27: ['F27'],
+        35: ['F35'],
+        43: ['Q43'],
+        51: ['L51'],
+        59: ['K59'],
+        67: ['E67'],
+        75: ['R75']
+      };
+      const extraPad = rowFeedPads[busRow] || [];
+      const allRowPads = Array.from(new Set([`E${busRow}`, `J${busRow}`, `M${busRow}`, `R${busRow}`, ...extraPad]));
+
+      b1_frontRowWires.push({
+        setIdx: s + 1,
+        net: `Row ${busRow}`,
+        row: busRow,
+        color: ROW_COLORS[s],
+        fromCol: 'E',
+        toCol: 'R',
+        pads: allRowPads,
+        desc: `Set ${s + 1} Front Row Wire (Row ${busRow}: E${busRow} ➔ R${busRow}) [Top-Side - Red]`
+      });
+
+      // Backside Vertical Inter-button Jumpers (Cols E, J, M, R connecting uBot ➔ lTop - RED):
+      b1_backSolderLines.push(
+        { fromCol: 'E', fromRow: uBot, toCol: 'E', toRow: lTop, from: `E${uBot}`, to: `E${lTop}`, net: `Row ${busRow}`, color: ROW_COLOR, desc: `Set ${s + 1} Col 0 Jumper (E${uBot} ➔ E${lTop}) [Backside - Red]` },
+        { fromCol: 'J', fromRow: uBot, toCol: 'J', toRow: lTop, from: `J${uBot}`, to: `J${lTop}`, net: `Row ${busRow}`, color: ROW_COLOR, desc: `Set ${s + 1} Col 1 Jumper (J${uBot} ➔ J${lTop}) [Backside - Red]` },
+        { fromCol: 'M', fromRow: uBot, toCol: 'M', toRow: lTop, from: `M${uBot}`, to: `M${lTop}`, net: `Row ${busRow}`, color: ROW_COLOR, desc: `Set ${s + 1} Col 2 Jumper (M${uBot} ➔ M${lTop}) [Backside - Red]` },
+        { fromCol: 'R', fromRow: uBot, toCol: 'R', toRow: lTop, from: `R${uBot}`, to: `R${lTop}`, net: `Row ${busRow}`, color: ROW_COLOR, desc: `Set ${s + 1} Col 3 Jumper (R${uBot} ➔ R${lTop}) [Backside - Red]` }
+      );
+    }
+    const b1_i2cTraces = unifiedTraces; // alias for compatibility
+    const b2_controllerTraces = [];
+
+    // -------------------------------------------------------------
+    // 5. RENDER FUNCTIONS
+    // -------------------------------------------------------------
+    function renderSubstrates() {
+      const g = document.getElementById('b1_substrateLayer');
+      if (!g) return;
+      g.innerHTML = `
+        <!-- High-contrast matte obsidian perfboard chassis -->
+        <rect x="${BOARD_X}" y="${BOARD_Y}" width="${BOARD_W}" height="${BOARD_H}" rx="14" fill="#090e17" stroke="#1e293b" stroke-width="4" filter="url(#shadow)" />
+        <!-- Gold outer perimeter silkscreen rule -->
+        <rect x="${BOARD_X + 6}" y="${BOARD_Y + 6}" width="${BOARD_W - 12}" height="${BOARD_H - 12}" rx="10" fill="none" stroke="#ca8a04" stroke-width="1.2" stroke-opacity="0.65" />
+        <rect x="${BOARD_X}" y="${BOARD_Y}" width="${BOARD_W}" height="${BOARD_H}" rx="14" fill="url(#fiberglassPattern)" opacity="0.3" />
+        <text id="b1_titleText" x="${BOARD_X + BOARD_W / 2}" y="${BOARD_Y - 16}" fill="#38bdf8" font-size="13" font-weight="800" text-anchor="middle" font-family="monospace">UNIVERSAL IR REMOTE: SINGLE-BOARD DIRECT PICO (22×78)</text>
+      `;
+    }
+
+    function renderSilkscreen() {
+      const g = document.getElementById('b1_silkscreenLayer');
+      if (!g) return;
+
+      let html = '';
+      // Column letters at top AND bottom (Cols A through V)
+      for (let c = 0; c < COLS; c++) {
+        const x = BOARD_X + MARGIN_X + c * PITCH;
+        html += `<text x="${x}" y="${BOARD_Y + 22}" fill="#38bdf8" font-size="11.5" font-weight="800" font-family="monospace" text-anchor="middle">${COL_NAMES[c]}</text>`;
+        html += `<text x="${x}" y="${BOARD_Y + BOARD_H - 12}" fill="#38bdf8" font-size="11.5" font-weight="800" font-family="monospace" text-anchor="middle">${COL_NAMES[c]}</text>`;
+      }
+
+      // Row numbers along left margin AND right margin
+      const busRows = [19, 27, 35, 43, 51, 59, 67, 75];
+      for (let r = 1; r <= ROWS; r += (r <= 20 ? 1 : 2)) {
+        const y = BOARD_Y + MARGIN_Y + (r - 1) * PITCH + 3.5;
+        const isBus = busRows.includes(r);
+        const color = isBus ? '#f59e0b' : '#64748b';
+        const fw = isBus ? '900' : '600';
+        html += `<text x="${BOARD_X + 24}" y="${y}" fill="${color}" font-size="8.5" font-weight="${fw}" font-family="monospace" text-anchor="end">${r}</text>`;
+        html += `<text x="${BOARD_X + BOARD_W - 24}" y="${y}" fill="${color}" font-size="8.5" font-weight="${fw}" font-family="monospace" text-anchor="start">${r}</text>`;
+      }
+
+      // Subtle horizontal divider guides between the 8 keypad sets
+      for (let s = 1; s < SETS_COUNT; s++) {
+        const splitRow = 14 + s * 8; // rows 22, 30, 38, 46, 54, 62, 70
+        const y = BOARD_Y + MARGIN_Y + (splitRow - 1) * PITCH + PITCH / 2;
+        html += `
+          <line x1="${BOARD_X + 32}" y1="${y}" x2="${BOARD_X + BOARD_W - 32}" y2="${y}" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1" stroke-dasharray="4 4" />
+          <rect x="${BOARD_X + BOARD_W - 84}" y="${y - 7}" width="54" height="14" rx="3" fill="#0f172a" stroke="#334155" stroke-width="0.8" />
+          <text x="${BOARD_X + BOARD_W - 57}" y="${y + 3.5}" fill="#94a3b8" font-size="7.5" font-weight="700" font-family="monospace" text-anchor="middle">SET ${s + 1} ▼</text>
+        `;
+      }
+
+      // 1. Top Section Silkscreen
+      const pBat = getCoordPos('C', 1);
+      html += `<rect x="${pBat.x - 8}" y="${pBat.y - 12}" width="${PITCH + 16}" height="24" rx="4" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+      html += `<text x="${pBat.x + PITCH / 2}" y="${pBat.y - 16}" fill="#f59e0b" font-size="9.5" font-weight="700" font-family="monospace" text-anchor="middle">BATTERY</text>`;
+
+      const pTX = getCoordPos('H', 1);
+      html += `<rect x="${pTX.x - 8}" y="${pTX.y - 12}" width="${2 * PITCH + 16}" height="24" rx="4" fill="none" stroke="#f97316" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+      html += `<text x="${pTX.x + PITCH}" y="${pTX.y - 16}" fill="#f97316" font-size="9.5" font-weight="700" font-family="monospace" text-anchor="middle">IR TRANSMITTER</text>`;
+
+      const pRX = getCoordPos('M', 1);
+      html += `<rect x="${pRX.x - 8}" y="${pRX.y - 12}" width="${2 * PITCH + 16}" height="24" rx="4" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+      html += `<text x="${pRX.x + PITCH}" y="${pRX.y - 16}" fill="#10b981" font-size="9.5" font-weight="700" font-family="monospace" text-anchor="middle">IR RECEIVER</text>`;
+
+      const pRGB = getCoordPos('S', 1);
+      html += `<rect x="${pRGB.x - 8}" y="${pRGB.y - 12}" width="${2 * PITCH + 16}" height="24" rx="4" fill="none" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+      html += `<text x="${pRGB.x + PITCH}" y="${pRGB.y - 16}" fill="#c084fc" font-size="9.5" font-weight="700" font-family="monospace" text-anchor="middle">RGB STRIP</text>`;
+
+      // 2. Banner for Keypad Matrix (Placed cleanly in Row 14/15 space)
+      const pMidX = (getCoordPos('C', 15).x + getCoordPos('T', 15).x) / 2;
+      const pMidY = getCoordPos('A', 14).y + PITCH / 2;
+      html += `
+        <rect x="${pMidX - 180}" y="${pMidY - 11}" width="360" height="22" rx="5" fill="#0f172a" stroke="#0284c7" stroke-width="1.2" />
+        <text x="${pMidX}" y="${pMidY + 4}" fill="#38bdf8" font-size="10.5" font-weight="800" font-family="monospace" text-anchor="middle">▼ 64-BUTTON KEYPAD MATRIX (DIRECT GPIO) ▼</text>
+      `;
+
+      g.innerHTML = html;
+    }
+
+    function renderPads() {
+      const g = document.getElementById('b1_padLayer');
+      if (!g) return;
+
+      let html = '';
+      for (let r = 1; r <= ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const colLetter = COL_NAMES[c];
+          const p = getCoordPos(colLetter, r);
+          html += `
+            <circle cx="${p.x}" cy="${p.y}" r="6.5" fill="url(#padGrad)" stroke="#78350f" stroke-width="0.8" class="pad" data-coord="${colLetter}${r}" />
+            <circle cx="${p.x}" cy="${p.y}" r="2.8" fill="#090d16" />
+          `;
+        }
+      }
+      g.innerHTML = html;
+    }
+
+    function renderBackSolder() {
+      const g = document.getElementById('b1_backSolderLayer');
+      if (!g) return;
+
+      let html = '';
+
+      // 1. Backside copper tracks & bus lines
+      b1_backSolderLines.forEach(line => {
+        const p1 = getCoordPos(line.fromCol, line.fromRow);
+        const p2 = getCoordPos(line.toCol, line.toRow);
+        html += `
+          <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${line.color}" stroke-width="4.5" stroke-linecap="round" opacity="0.9" data-net="${line.net}">
+            <title>${line.desc || line.net}</title>
+          </line>
+          <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.6" data-net="${line.net}" pointer-events="none" />
+        `;
+      });
+
+      const solderMounds = new Map();
+
+      function addSolder(col, row, r = 6.4) {
+        const coord = `${col}${row}`;
+        if (!solderMounds.has(coord) || solderMounds.get(coord).r < r) {
+          solderMounds.set(coord, { col, row, r });
+        }
+      }
+
+      // 2. All 4 Terminal Solder Joints on Backside for ALL 64 Buttons (256 solder mounds)
+      for (let s = 0; s < SETS_COUNT; s++) {
+        const o = 14 + s * 8;
+        const uTop = 2 + o, uBot = 4 + o;
+        const lTop = 6 + o, lBot = 8 + o;
+
+        BUTTON_COL_PAIRS.forEach((colPair) => {
+          // 4 corner terminals for upper button
+          addSolder(colPair.left, uTop);
+          addSolder(colPair.right, uTop);
+          addSolder(colPair.left, uBot);
+          addSolder(colPair.right, uBot);
+
+          // 4 corner terminals for lower button
+          addSolder(colPair.left, lTop);
+          addSolder(colPair.right, lTop);
+          addSolder(colPair.left, lBot);
+          addSolder(colPair.right, lBot);
+        });
+
+        // 3. Backside Tap-to-Rail Solder Joints (64 T-junctions)
+        addSolder('C', uTop, 6.2);
+        addSolder('H', uTop, 6.2);
+        addSolder('N', uTop, 6.2);
+        addSolder('S', uTop, 6.2);
+
+        addSolder('D', lBot, 6.2);
+        addSolder('I', lBot, 6.2);
+        addSolder('O', lBot, 6.2);
+        addSolder('T', lBot, 6.2);
+      }
+
+      // 4. Pico Header Pins Solder Joints on Backside (Pins 1..40)
+      PICO_BOTTOM_PINS.forEach(p => addSolder(p.col, p.row, 6.6));
+      PICO_TOP_PINS.forEach(p => addSolder(p.col, p.row, 6.6));
+
+      // 5. Pico Column Rail Leads & Jog Joints
+      const extraJoints = [
+        'C15', 'E15', 'D15', 'H15', 'J15', 'I15', 'M16', 'N16', 'O15', 'R16', 'S16', 'T15',
+        // Corridor lead through-hole connection pads:
+        'F35', 'Q43', 'L51', 'K59',
+        // Backside outer rail lead pads (GP0 ➔ A67 & GP15 ➔ V75):
+        'B15', 'A15', 'A67',
+        'U15', 'V15', 'V75'
+      ];
+      extraJoints.forEach(c => addSolder(c[0], parseInt(c.slice(1)), 6.2));
+
+      // Render all solder mounds
+      solderMounds.forEach(({ col, row, r }, coord) => {
+        const p = getCoordPos(col, row);
+        html += `
+          <g class="btn-solder-joint" data-coord="${coord}">
+            <circle cx="${p.x}" cy="${p.y}" r="${r}" fill="url(#solderGrad)" stroke="#94a3b8" stroke-width="1.2" />
+            <circle cx="${p.x}" cy="${p.y}" r="${r * 0.33}" fill="#334155" opacity="0.4" />
+            <circle cx="${p.x - 1.8}" cy="${p.y - 1.8}" r="1.8" fill="#ffffff" opacity="0.85" />
+          </g>
+        `;
+      });
+
+      g.innerHTML = html;
+    }
+
+    function renderFrontWires() {
+      const g = document.getElementById('b1_frontWireLayer');
+      if (!g) return;
+
+      let html = '';
+
+      // 1. Keypad Row Wires (Row 19, 27, 35, 43, 51, 59, 67, 75)
+      b1_frontRowWires.forEach(w => {
+        const pLeft = getCoordPos(w.fromCol || 'C', w.row);
+        const pRight = getCoordPos(w.toCol || 'U', w.row);
+        html += `
+          <line x1="${pLeft.x}" y1="${pLeft.y}" x2="${pRight.x}" y2="${pRight.y}" stroke="${w.color}" stroke-width="3" stroke-linecap="round" opacity="0.85" />
+        `;
+        w.pads.forEach(coord => {
+          const p = getCoordPos(coord[0], parseInt(coord.slice(1)));
+          html += `
+            <g class="joint-pad" data-coord="${coord}">
+              <circle cx="${p.x}" cy="${p.y}" r="5.2" fill="url(#solderGrad)" stroke="${w.color}" stroke-width="1.8" />
+              <circle cx="${p.x}" cy="${p.y}" r="1.8" fill="#090d16" />
+              <circle cx="${p.x - 1.3}" cy="${p.y - 1.3}" r="1.2" fill="#ffffff" opacity="0.9" />
+            </g>
+          `;
+        });
+      });
+
+      // 2. All Direct Unified Traces (100% strictly orthogonal)
+      unifiedTraces.forEach(t => {
+        const pts = t.route.map(c => getCoordPos(c[0], parseInt(c.slice(1))));
+        for (let i = 0; i < pts.length - 1; i++) {
+          const p1 = pts[i];
+          const p2 = pts[i + 1];
+          html += `
+            <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${t.color}" stroke-width="3.6" stroke-linecap="round" opacity="0.95" data-net="${t.net}">
+              <title>${t.desc}</title>
+            </line>
+          `;
+        }
+        pts.forEach((p, idx) => {
+          const coord = t.route[idx];
+          html += `
+            <g class="joint-pad" data-coord="${coord}">
+              <circle cx="${p.x}" cy="${p.y}" r="5.0" fill="url(#solderGrad)" stroke="${t.color}" stroke-width="1.6" />
+              <circle cx="${p.x}" cy="${p.y}" r="1.8" fill="#090d16" />
+              <circle cx="${p.x - 1.2}" cy="${p.y - 1.2}" r="1.2" fill="#ffffff" opacity="0.9" />
+            </g>
+          `;
+        });
+      });
+
+      // 3. Insulated Crossover Bridge Jumpers (e.g. F19)
+      crossoverBridges.forEach(br => {
+        const p = getCoordPos(br.col, br.row);
+        const archLen = 13;
+        html += `
+          <g class="bridge-arch" data-net="${br.netOver}" transform="translate(${p.x}, ${p.y})">
+            <title>${br.desc}</title>
+            <!-- Occlusion backing to visually clear under-trace -->
+            <path d="M 0 ${-archLen} C 8 ${-archLen / 2}, 8 ${archLen / 2}, 0 ${archLen}" fill="none" stroke="#090d16" stroke-width="7" stroke-linecap="round" />
+            <!-- Shadow onto row track -->
+            <ellipse cx="-2" cy="0" rx="3.5" ry="7" fill="rgba(0,0,0,0.6)" />
+            <!-- Insulated arch body -->
+            <path d="M 0 ${-archLen} C 8 ${-archLen / 2}, 8 ${archLen / 2}, 0 ${archLen}" fill="none" stroke="${br.color}" stroke-width="4.2" stroke-linecap="round" />
+            <path d="M 0 ${-archLen} C 8 ${-archLen / 2}, 8 ${archLen / 2}, 0 ${archLen}" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.85" />
+            <!-- Clearance ring -->
+            <circle cx="0" cy="0" r="7.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" stroke-dasharray="2 2" />
+            <!-- Jumper Tag Badge -->
+            <rect x="9" y="-7.5" width="44" height="15" rx="3.5" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.2" />
+            <text x="31" y="3" fill="#c7d2fe" font-size="7.5" font-weight="800" font-family="monospace" text-anchor="middle">JUMPER</text>
+          </g>
+        `;
+      });
+
+      g.innerHTML = html;
+    }
+
+    function renderComponents() {
+      const g = document.getElementById('b1_componentLayer');
+      if (!g) return;
+
+      let html = '';
+
+      // 1. Battery JST (Cols C, D @ Row 1)
+      const pBat = getCoordPos('C', 1);
+      html += `
+        <rect x="${pBat.x - 4}" y="${pBat.y - 10}" width="32" height="20" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1.5" />
+        <text x="${pBat.x + 12}" y="${pBat.y + 4}" fill="#fef3c7" font-size="8.5" font-weight="800" font-family="monospace" text-anchor="middle">JST-BAT</text>
+      `;
+
+      // 2. IR TX Module (Cols G, H, I @ Row 1)
+      const pTX = getCoordPos('H', 1);
+      html += `
+        <rect x="${pTX.x - 30}" y="${pTX.y - 12}" width="60" height="24" rx="4" fill="#7c2d12" stroke="#ea580c" stroke-width="1.5" />
+        <circle cx="${pTX.x - 16}" cy="${pTX.y}" r="7" fill="#fbbf24" stroke="#d97706" stroke-width="1.5" />
+        <text x="${pTX.x + 8}" y="${pTX.y + 4}" fill="#ffedd5" font-size="9" font-weight="800" font-family="monospace">IR-TX</text>
+      `;
+
+      // 3. IR RX Module (Cols L, M, N @ Row 1)
+      const pRX = getCoordPos('M', 1);
+      html += `
+        <rect x="${pRX.x - 30}" y="${pRX.y - 12}" width="60" height="24" rx="4" fill="#065f46" stroke="#059669" stroke-width="1.5" />
+        <rect x="${pRX.x - 22}" y="${pRX.y - 6}" width="12" height="12" rx="2" fill="#1e293b" stroke="#34d399" stroke-width="1" />
+        <text x="${pRX.x + 6}" y="${pRX.y + 4}" fill="#d1fae5" font-size="9" font-weight="800" font-family="monospace">TSOP-RX</text>
+      `;
+
+      // 4. WS2812B RGB Addressable LED Strip (Cols S, T, U @ Row 1)
+      const pRGB = getCoordPos('T', 1);
+      html += `
+        <rect x="${pRGB.x - 30}" y="${pRGB.y - 12}" width="60" height="24" rx="4" fill="#3b0764" stroke="#c084fc" stroke-width="1.5" />
+        <circle cx="${pRGB.x - 14}" cy="${pRGB.y}" r="4" fill="#ec4899" stroke="#f43f5e" stroke-width="1" />
+        <circle cx="${pRGB.x}" cy="${pRGB.y}" r="4" fill="#06b6d4" stroke="#0284c7" stroke-width="1" />
+        <circle cx="${pRGB.x + 14}" cy="${pRGB.y}" r="4" fill="#eab308" stroke="#ca8a04" stroke-width="1" />
+        <text x="${pRGB.x}" y="${pRGB.y + 19}" fill="#f3e8ff" font-size="8.5" font-weight="800" font-family="monospace" text-anchor="middle">RGB-STRIP</text>
+      `;
+
+      function generatePicoSvg(isBack = false) {
+        const pB5 = getCoordPos('B', 5);
+        const pU12 = getCoordPos('U', 12);
+        const picoW = pU12.x - pB5.x + 40;
+        const picoH = pU12.y - pB5.y + 40;
+        const picoCX = (pB5.x + pU12.x) / 2;
+        const picoCY = (pB5.y + pU12.y) / 2;
+
+        let pHtml = `
+          <g class="pico-comp" transform="translate(${picoCX}, ${picoCY})">
+            <!-- Green PCB body with gradient and drop shadow -->
+            <rect x="${-picoW / 2}" y="${-picoH / 2}" width="${picoW}" height="${picoH}" rx="8" fill="url(#picoGrad)" stroke="#10b981" stroke-width="2" filter="url(#shadow)" opacity="${isBack ? '0.92' : '1'}" />
+            
+            <!-- Inner silkscreen border -->
+            <rect x="${-picoW / 2 + 10}" y="${-picoH / 2 + 8}" width="${picoW - 20}" height="${picoH - 16}" rx="5" fill="#022c22" stroke="#059669" stroke-width="1" />
+            
+            <!-- Realistic Metallic RP2040 Chip at Center -->
+            <rect x="-24" y="-24" width="48" height="48" rx="4" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+            <rect x="-20" y="-20" width="40" height="40" rx="3" fill="#0f172a" />
+            <circle cx="-14" cy="-14" r="2.5" fill="#94a3b8" />
+            <text x="0" y="4" fill="#f8fafc" font-size="10.5" font-weight="900" font-family="monospace" text-anchor="middle">RP2040</text>
+            
+            <!-- USB-C Port on Left Edge -->
+            <rect x="${-picoW / 2 - 12}" y="-16" width="16" height="32" rx="4" fill="#cbd5e1" stroke="#475569" stroke-width="1.5" />
+            <rect x="${-picoW / 2 - 8}" y="-11" width="8" height="22" rx="2" fill="#0f172a" />
+
+            <!-- Boot Switch Button -->
+            <circle cx="80" cy="0" r="6" fill="#f8fafc" stroke="#64748b" stroke-width="1.5" />
+            <text x="80" y="-10" fill="#94a3b8" font-size="7.5" font-weight="700" font-family="monospace" text-anchor="middle">BOOT</text>
+
+            <!-- Pico Branding Silkscreen -->
+            <text x="-95" y="-3" fill="#6ee7b7" font-size="13.5" font-weight="900" font-family="monospace" text-anchor="middle">Raspberry Pi Pico</text>
+            <text x="-95" y="12" fill="#a7f3d0" font-size="8.5" font-weight="700" font-family="monospace" text-anchor="middle">ROTATED 90° • DIRECT GPIO${isBack ? ' [BACKSIDE]' : ''}</text>
+          </g>
+        `;
+
+        // Draw Top Pins of Horizontal Pico (Labels Placed Inside Green Body Below Row 5)
+        PICO_TOP_PINS.forEach(p => {
+          const pos = getCoordPos(p.col, p.row);
+          const isConn = p.net !== 'NC';
+          const strokeColor = isConn ? '#fbbf24' : '#475569';
+          pHtml += `
+            <g class="pico-pin">
+              <circle cx="${pos.x}" cy="${pos.y}" r="6.2" fill="url(#solderGrad)" stroke="${strokeColor}" stroke-width="${isConn ? 2.2 : 1}" />
+              <circle cx="${pos.x}" cy="${pos.y}" r="2" fill="#090d16" />
+              <!-- Pin label inside the Pico PCB body -->
+              <text x="${pos.x}" y="${pos.y + 17}" fill="${isConn ? '#fef08a' : '#059669'}" font-size="${isConn ? 9 : 7.5}" font-weight="${isConn ? 900 : 600}" font-family="monospace" text-anchor="middle">${p.name}</text>
+            </g>
+          `;
+        });
+
+        // Draw Bottom Pins of Horizontal Pico (Labels Placed Inside Green Body Above Row 12)
+        PICO_BOTTOM_PINS.forEach(p => {
+          const pos = getCoordPos(p.col, p.row);
+          const isConn = p.net !== 'NC';
+          const strokeColor = isConn ? '#38bdf8' : '#475569';
+          pHtml += `
+            <g class="pico-pin">
+              <circle cx="${pos.x}" cy="${pos.y}" r="6.2" fill="url(#solderGrad)" stroke="${strokeColor}" stroke-width="${isConn ? 2.2 : 1}" />
+              <circle cx="${pos.x}" cy="${pos.y}" r="2" fill="#090d16" />
+              <!-- Pin label inside the Pico PCB body -->
+              <text x="${pos.x}" y="${pos.y - 12}" fill="${isConn ? '#38bdf8' : '#059669'}" font-size="${isConn ? 9 : 7.5}" font-weight="${isConn ? 900 : 600}" font-family="monospace" text-anchor="middle">${p.name}</text>
+            </g>
+          `;
+        });
+        return pHtml;
+      }
+
+      // Pico is mounted horizontally across Rows 5 to 12
+      html += generatePicoSvg(false);
+
+      if (b1_backComp) {
+        b1_backComp.innerHTML = generatePicoSvg(true);
+      }
+
+      // 5. 64 Tactile Push Buttons (8 Sets × 8 Buttons) - 4×3 Holes Footprint (84×60px)
+      // Numbered sequentially: 1, 2, 3, 4 in upper row, then 5, 6, 7, 8 in lower row
+      // Special System Buttons: Button 2 = LEARN (Amber), Button 3 = MODE (Emerald)
+      function renderSingleBtn(btnIdx, midX, midY, pL, pR, pTop, pBot) {
+        let capFill = 'url(#btnCap)';
+        let capStroke = '#0284c7';
+        let labelHtml = `<text x="${midX}" y="${midY + 4.5}" fill="#ffffff" font-size="11.5" font-weight="900" font-family="monospace" text-anchor="middle">${btnIdx}</text>`;
+        let badgeHtml = '';
+        let titleText = `Button ${btnIdx}`;
+
+        if (btnIdx === 2) {
+          capFill = 'url(#btnCapLearn)';
+          capStroke = '#f59e0b';
+          titleText = 'Button 2: LEARN (Row 19 GP11 × Col H GP5)';
+          labelHtml = `
+            <text x="${midX}" y="${midY - 2}" fill="#fef08a" font-size="8.5" font-weight="900" font-family="monospace" text-anchor="middle">2</text>
+            <text x="${midX}" y="${midY + 7}" fill="#ffffff" font-size="6.8" font-weight="900" font-family="monospace" text-anchor="middle">LEARN</text>
+          `;
+          badgeHtml = `
+            <rect x="${midX - 22}" y="${midY - 29}" width="44" height="10" rx="2" fill="#78350f" stroke="#f59e0b" stroke-width="0.8" />
+            <text x="${midX}" y="${midY - 21.5}" fill="#fef08a" font-size="7" font-weight="900" font-family="monospace" text-anchor="middle">LEARN</text>
+          `;
+        } else if (btnIdx === 3) {
+          capFill = 'url(#btnCapMode)';
+          capStroke = '#10b981';
+          titleText = 'Button 3: MODE (Row 19 GP11 × Col N GP9)';
+          labelHtml = `
+            <text x="${midX}" y="${midY - 2}" fill="#a7f3d0" font-size="8.5" font-weight="900" font-family="monospace" text-anchor="middle">3</text>
+            <text x="${midX}" y="${midY + 7}" fill="#ffffff" font-size="7.2" font-weight="900" font-family="monospace" text-anchor="middle">MODE</text>
+          `;
+          badgeHtml = `
+            <rect x="${midX - 19}" y="${midY - 29}" width="38" height="10" rx="2" fill="#064e3b" stroke="#10b981" stroke-width="0.8" />
+            <text x="${midX}" y="${midY - 21.5}" fill="#a7f3d0" font-size="7" font-weight="900" font-family="monospace" text-anchor="middle">MODE</text>
+          `;
+        }
+
+        return `
+          <g class="tactile-btn" data-btn="${btnIdx}">
+            <title>${titleText}</title>
+            <!-- 4x3 Hole Base Body (84x60px covering 4 cols x 3 rows) -->
+            <rect class="btn-housing" x="${midX - 42}" y="${midY - 30}" width="84" height="60" rx="7" fill="rgba(30, 41, 59, 0.78)" stroke="#475569" stroke-width="1.6" filter="url(#shadow)" />
+            <rect class="btn-housing-inner" x="${midX - 36}" y="${midY - 24}" width="72" height="48" rx="4" fill="rgba(15, 23, 42, 0.65)" stroke="#334155" stroke-width="1" />
+            ${badgeHtml}
+            <!-- 4 Corner Terminal Leads seated in corner holes -->
+            <circle cx="${pL.x}" cy="${pTop.y}" r="4.5" fill="url(#solderGrad)" stroke="#cbd5e1" stroke-width="1.2" />
+            <circle cx="${pR.x}" cy="${pTop.y}" r="4.5" fill="url(#solderGrad)" stroke="#cbd5e1" stroke-width="1.2" />
+            <circle cx="${pL.x}" cy="${pBot.y}" r="4.5" fill="url(#solderGrad)" stroke="#cbd5e1" stroke-width="1.2" />
+            <circle cx="${pR.x}" cy="${pBot.y}" r="4.5" fill="url(#solderGrad)" stroke="#cbd5e1" stroke-width="1.2" />
+            <!-- Large Tactile Cap Button Plunger -->
+            <circle cx="${midX}" cy="${midY}" r="15" fill="${capFill}" stroke="${capStroke}" stroke-width="1.8" />
+            <circle cx="${midX}" cy="${midY}" r="11" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
+            ${labelHtml}
+          </g>
+        `;
+      }
+
+      for (let s = 0; s < SETS_COUNT; s++) {
+        const o = 14 + s * 8;
+        const uTop = 2 + o, uBot = 4 + o, lTop = 6 + o, lBot = 8 + o;
+
+        BUTTON_COL_PAIRS.forEach((colPair, cIdx) => {
+          const uBtnIdx = 8 * s + cIdx + 1; // 1, 2, 3, 4 across upper row
+          const lBtnIdx = 8 * s + cIdx + 5; // 5, 6, 7, 8 across lower row
+
+          // Upper button (Covers 4x3 holes from colPair.left..colPair.right and uTop..uBot)
+          const pL_u = getCoordPos(colPair.left, uTop);
+          const pR_u = getCoordPos(colPair.right, uTop);
+          const pTop_u = getCoordPos(colPair.left, uTop);
+          const pBot_u = getCoordPos(colPair.left, uBot);
+          const pC_u = getCoordPos(colPair.left, uTop + 1);
+          const midX_u = (pL_u.x + pR_u.x) / 2;
+          const midY_u = pC_u.y;
+
+          html += renderSingleBtn(uBtnIdx, midX_u, midY_u, pL_u, pR_u, pTop_u, pBot_u);
+
+          // Lower button (Covers 4x3 holes from colPair.left..colPair.right and lTop..lBot)
+          const pL_l = getCoordPos(colPair.left, lTop);
+          const pR_l = getCoordPos(colPair.right, lTop);
+          const pTop_l = getCoordPos(colPair.left, lTop);
+          const pBot_l = getCoordPos(colPair.left, lBot);
+          const pC_l = getCoordPos(colPair.left, lTop + 1);
+          const midX_l = (pL_l.x + pR_l.x) / 2;
+          const midY_l = pC_l.y;
+
+          html += renderSingleBtn(lBtnIdx, midX_l, midY_l, pL_l, pR_l, pTop_l, pBot_l);
+        });
+      }
+
+      g.innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // 6. NET INSPECTOR & LEGEND
+    // -------------------------------------------------------------
+    function renderLegend() {
+      const container = document.getElementById('netLegendContainer');
+      if (!container) return;
+
+      const nets = [
+        // Matrix Color-Coded Nets:
+        { name: 'Rows (19..75)', color: '#ef4444', desc: 'All 8 Matrix Row Buses & Inter-button Jumpers [Top-Side - Red]' },
+        { name: 'Col C', color: '#22c55e', desc: 'Column C Rail (C15 ➔ C78) [Backside - Green]' },
+        { name: 'Col D', color: '#22c55e', desc: 'Column D Rail (D15 ➔ D78) [Backside - Green]' },
+        { name: 'Col H', color: '#22c55e', desc: 'Column H Rail (H15 ➔ H78) [Backside - Green]' },
+        { name: 'Col I', color: '#22c55e', desc: 'Column I Rail (I15 ➔ I78) [Backside - Green]' },
+        { name: 'Col N', color: '#22c55e', desc: 'Column N Rail (N15 ➔ N78) [Backside - Green]' },
+        { name: 'Col O', color: '#22c55e', desc: 'Column O Rail (O15 ➔ O78) [Backside - Green]' },
+        { name: 'Col S', color: '#22c55e', desc: 'Column S Rail (S15 ➔ S78) [Backside - Green]' },
+        { name: 'Col T', color: '#22c55e', desc: 'Column T Rail (T15 ➔ T78) [Backside - Green]' },
+
+        // Power & Peripheral Nets
+        { name: 'VSYS_BAT', color: '#f59e0b', desc: 'Battery JST (+) C1 ➔ Pico Pin 39 (VSYS @ C5) [Straight]' },
+        { name: 'GND', color: '#64748b', desc: 'System Ground (Pico, Battery, IR Modules, RGB)' },
+        { name: 'VCC_3V3', color: '#fb923c', desc: 'Pico Pin 36 (3V3 @ F5) ➔ IR TX & RX & RGB Modules' },
+        { name: 'IR_TX', color: '#f97316', desc: 'Pico Pin 34 (GP28 @ H5) ➔ IR TX Module (H1 SIG) [Straight]' },
+        { name: 'IR_RX', color: '#06b6d4', desc: 'Pico Pin 32 (GP27 @ J5) ➔ IR RX Module (N1 DAT)' },
+        { name: 'RGB_DIN', color: '#c084fc', desc: 'Pico Pin 21 (GP16 @ U5) ➔ WS2812B RGB Strip (U1 DIN) [Indicator & Backlight]' }
+      ];
+
+      let html = `
+        <div class="card">
+          <div class="card-title">
+            <span>ACTIVE NETS & TRACES</span>
+            <span style="font-size:10px; color:#64748b;">Hover to highlight</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px; max-height:360px; overflow-y:auto;">
+      `;
+
+      nets.forEach(n => {
+        html += `
+          <div class="net-item" data-net="${n.name}">
+            <div style="display:flex; align-items:center;">
+              <span class="net-swatch" style="background:${n.color};"></span>
+              <span style="font-weight:700;">${n.name}</span>
+            </div>
+            <span class="net-desc">${n.desc}</span>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+
+      document.querySelectorAll('.net-item').forEach(item => {
+        const netName = item.getAttribute('data-net');
+        item.addEventListener('mouseenter', () => highlightNet(netName));
+        item.addEventListener('mouseleave', () => clearHighlight());
+      });
+    }
+
+    function highlightNet(net) {
+      document.querySelectorAll('[data-net]').forEach(el => {
+        if (el.getAttribute('data-net') === net) {
+          el.style.opacity = '1';
+          el.style.strokeWidth = '5px';
+        } else if (el.tagName === 'line') {
+          el.style.opacity = '0.2';
+        }
+      });
+    }
+
+    function clearHighlight() {
+      document.querySelectorAll('[data-net]').forEach(el => {
+        el.style.opacity = '';
+        el.style.strokeWidth = '';
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 7. PAN & ZOOM & INTERACTION
+    // -------------------------------------------------------------
+    let currentScale = 0.46;
+    let currentX = 420;
+    let currentY = 15;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let currentRotation = 0;
+
+    const svg = document.getElementById('pcbSvg');
+    const world = document.getElementById('worldGroup');
+    const container = document.getElementById('canvasContainer');
+    const tooltip = document.getElementById('tooltip');
+
+    const BOARD_CX = BOARD_X + BOARD_W / 2; // 80 + 292 = 372
+    const BOARD_CY = BOARD_Y + BOARD_H / 2; // 60 + 964 = 1024
+
+    function updateTransform() {
+      if (!world) return;
+      world.setAttribute('transform', `translate(${currentX}, ${currentY}) scale(${currentScale}) rotate(${currentRotation}, ${BOARD_CX}, ${BOARD_CY})`);
+    }
+
+    function fitToWindow() {
+      const cW = container ? container.clientWidth || 1000 : 1000;
+      const cH = container ? container.clientHeight || 700 : 700;
+
+      const isRotated = (currentRotation === 90 || currentRotation === 270);
+      const effectiveW = isRotated ? BOARD_H : BOARD_W;
+      const effectiveH = isRotated ? BOARD_W : BOARD_H;
+
+      const scaleX = (cW - 40) / effectiveW;
+      const scaleY = (cH - 40) / effectiveH;
+      currentScale = Math.min(scaleX, scaleY);
+
+      currentX = cW / 2 - BOARD_CX * currentScale;
+      currentY = cH / 2 - BOARD_CY * currentScale;
+
+      const btnFitWin = document.getElementById('btnFitWindow');
+      const btnFitW = document.getElementById('btnFitWidth');
+      if (btnFitWin) btnFitWin.classList.add('active');
+      if (btnFitW) btnFitW.classList.remove('active');
+
+      updateTransform();
+    }
+
+    function fitWidth() {
+      const cW = container ? container.clientWidth || 1000 : 1000;
+      currentScale = Math.min((cW - 60) / BOARD_W, 1.05);
+      if (currentScale < 0.6) currentScale = 0.85;
+
+      currentX = cW / 2 - BOARD_CX * currentScale;
+      currentY = 25 - BOARD_Y * currentScale;
+      currentRotation = 0;
+      if (rotBadge) rotBadge.textContent = '0°';
+
+      const btnFitWin = document.getElementById('btnFitWindow');
+      const btnFitW = document.getElementById('btnFitWidth');
+      if (btnFitWin) btnFitWin.classList.remove('active');
+      if (btnFitW) btnFitW.classList.add('active');
+
+      updateTransform();
+    }
+
+    const fitView = fitToWindow;
+    const fitAll = fitToWindow;
+
+    function jumpToSection(section) {
+      const cW = container ? container.clientWidth || 1000 : 1000;
+      if (currentScale < 0.75) currentScale = 0.95;
+      currentX = cW / 2 - BOARD_CX * currentScale;
+
+      if (section === 'top') {
+        currentY = 25 - BOARD_Y * currentScale;
+      } else if (section === 'keys1') {
+        const p16 = getCoordPos('A', 16);
+        currentY = 30 - p16.y * currentScale;
+      } else if (section === 'keys2') {
+        const p46 = getCoordPos('A', 46);
+        currentY = 30 - p46.y * currentScale;
+      }
+      updateTransform();
+    }
+
+    if (container) {
+      container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX - currentX;
+        startY = e.clientY - currentY;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        currentX = e.clientX - startX;
+        currentY = e.clientY - startY;
+        updateTransform();
+      });
+
+      window.addEventListener('mouseup', () => { isDragging = false; });
+
+      container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+        const rect = container.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        currentX = mx - (mx - currentX) * zoomFactor;
+        currentY = my - (my - currentY) * zoomFactor;
+        currentScale *= zoomFactor;
+        updateTransform();
+      }, { passive: false });
+    }
+
+    // View toggles: Front, Back, X-Ray
+    const btnFront = document.getElementById('btnFront');
+    const btnBack = document.getElementById('btnBack');
+    const btnXray = document.getElementById('btnXray');
+
+    const b1_comp = document.getElementById('b1_componentLayer');
+    const b1_backComp = document.getElementById('b1_backCompLayer');
+    const b1_front = document.getElementById('b1_frontWireLayer');
+    const b1_back = document.getElementById('b1_backSolderLayer');
+
+    function setLayerMode(mode) {
+      [btnFront, btnBack, btnXray].forEach(b => b && b.classList.remove('active'));
+
+      if (mode === 'front') {
+        btnFront && btnFront.classList.add('active');
+        if (b1_comp) { b1_comp.style.display = ''; b1_comp.style.opacity = '1'; }
+        if (b1_backComp) { b1_backComp.style.display = 'none'; }
+        if (b1_front) { b1_front.style.display = ''; b1_front.style.opacity = '1'; }
+        if (b1_back) { b1_back.style.display = 'none'; }
+      } else if (mode === 'back') {
+        btnBack && btnBack.classList.add('active');
+        if (b1_comp) { b1_comp.style.display = 'none'; }
+        if (b1_backComp) { b1_backComp.style.display = ''; b1_backComp.style.opacity = '1'; }
+        if (b1_front) { b1_front.style.display = 'none'; }
+        if (b1_back) { b1_back.style.display = ''; b1_back.style.opacity = '1'; }
+      } else if (mode === 'xray') {
+        btnXray && btnXray.classList.add('active');
+        if (b1_comp) { b1_comp.style.display = ''; b1_comp.style.opacity = '0.5'; }
+        if (b1_backComp) { b1_backComp.style.display = ''; b1_backComp.style.opacity = '0.4'; }
+        if (b1_front) { b1_front.style.display = ''; b1_front.style.opacity = '0.85'; }
+        if (b1_back) { b1_back.style.display = ''; b1_back.style.opacity = '0.85'; }
+      }
+    }
+
+    if (btnFront) btnFront.addEventListener('click', () => setLayerMode('front'));
+    if (btnBack) btnBack.addEventListener('click', () => setLayerMode('back'));
+    if (btnXray) btnXray.addEventListener('click', () => setLayerMode('xray'));
+
+    // Rotate Button
+    const btnRotate = document.getElementById('btnRotate');
+    const rotBadge = document.getElementById('rotAngleBadge');
+    if (btnRotate) {
+      btnRotate.addEventListener('click', () => {
+        currentRotation = (currentRotation + 90) % 360;
+        if (rotBadge) rotBadge.textContent = `${currentRotation}°`;
+        fitToWindow();
+      });
+    }
+
+    // Fit Window & Fit Width
+    const btnFitWindow = document.getElementById('btnFitWindow');
+    if (btnFitWindow) btnFitWindow.addEventListener('click', fitToWindow);
+
+    const btnFitWidth = document.getElementById('btnFitWidth');
+    if (btnFitWidth) btnFitWidth.addEventListener('click', fitWidth);
+
+    const btnZoom100 = document.getElementById('btnZoom100');
+    if (btnZoom100) {
+      btnZoom100.addEventListener('click', () => {
+        currentScale = 1.0;
+        updateTransform();
+      });
+    }
+
+    // Section Jump Buttons
+    const btnJumpTop = document.getElementById('btnJumpTop');
+    if (btnJumpTop) btnJumpTop.addEventListener('click', () => jumpToSection('top'));
+
+    const btnJumpKeys1 = document.getElementById('btnJumpKeys1');
+    if (btnJumpKeys1) btnJumpKeys1.addEventListener('click', () => jumpToSection('keys1'));
+
+    const btnJumpKeys2 = document.getElementById('btnJumpKeys2');
+    if (btnJumpKeys2) btnJumpKeys2.addEventListener('click', () => jumpToSection('keys2'));
+
+    // Toggle Sidebar Inspector
+    const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+    const sidebar = document.querySelector('.sidebar');
+    if (btnToggleSidebar && sidebar) {
+      btnToggleSidebar.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        btnToggleSidebar.textContent = sidebar.classList.contains('collapsed') ? '▶ Inspector' : '◀ Inspector';
+        setTimeout(fitToWindow, 60);
+      });
+    }
+
+    // Auto-fit to window on resize
+    window.addEventListener('resize', fitToWindow);
+
+    // Button Housing Mode Toggle (Translucent -> Solid -> Hidden)
+    let housingMode = 0;
+    const btnToggleHousing = document.getElementById('btnToggleHousing');
+    if (btnToggleHousing) {
+      btnToggleHousing.addEventListener('click', () => {
+        housingMode = (housingMode + 1) % 3;
+        document.body.classList.remove('housing-hidden', 'housing-opaque');
+        if (housingMode === 0) {
+          btnToggleHousing.textContent = '🔘 Buttons';
+        } else if (housingMode === 1) {
+          document.body.classList.add('housing-opaque');
+          btnToggleHousing.textContent = '🔘 Solid';
+        } else if (housingMode === 2) {
+          document.body.classList.add('housing-hidden');
+          btnToggleHousing.textContent = '🔘 Pure Wire';
+        }
+      });
+    }
+
+    // Hover tooltip on pads & buttons
+    if (svg && tooltip) {
+      svg.addEventListener('mousemove', (e) => {
+        const target = e.target;
+        const btnElem = target.closest && target.closest('.tactile-btn');
+        if (btnElem) {
+          const btnNum = btnElem.getAttribute('data-btn');
+          let extra = '';
+          if (btnNum === '2') extra = ' [LEARN Button: Record/Store IR Signal]';
+          if (btnNum === '3') extra = ' [MODE Button: Switch Target Appliance]';
+          tooltip.style.display = 'block';
+          tooltip.style.left = (e.clientX + 14) + 'px';
+          tooltip.style.top = (e.clientY + 14) + 'px';
+          tooltip.textContent = `Button ${btnNum}${extra}`;
+          const stat = document.getElementById('statusCursor');
+          if (stat) stat.textContent = `Button ${btnNum}${extra}`;
+          return;
+        }
+
+        const lineElem = target.closest && (target.closest('line[data-net]') || target.closest('[data-net]'));
+        if (lineElem) {
+          const title = lineElem.querySelector('title');
+          const desc = (title && title.textContent) || lineElem.getAttribute('data-net');
+          tooltip.style.display = 'block';
+          tooltip.style.left = (e.clientX + 14) + 'px';
+          tooltip.style.top = (e.clientY + 14) + 'px';
+          tooltip.textContent = desc;
+          const stat = document.getElementById('statusCursor');
+          if (stat) stat.textContent = desc;
+          return;
+        }
+
+        if (target && target.classList && target.classList.contains('pad')) {
+          const coord = target.getAttribute('data-coord');
+          let extra = '';
+          if (coord === 'F19') extra = ' (Crossover Jumper: GP4 wire hops over Row 19 bus)';
+          tooltip.style.display = 'block';
+          tooltip.style.left = (e.clientX + 14) + 'px';
+          tooltip.style.top = (e.clientY + 14) + 'px';
+          tooltip.textContent = `Pad: ${coord}${extra}`;
+          const stat = document.getElementById('statusCursor');
+          if (stat) stat.textContent = `Coordinates: Pad ${coord}${extra}`;
+        } else {
+          tooltip.style.display = 'none';
+        }
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 8. BILL OF MATERIALS (BOM) DATA & CONTROLLER
+    // -------------------------------------------------------------
+    const BOM_ITEMS = [
+      {
+        id: 1,
+        component: "Microcontroller Board",
+        spec: "Raspberry Pi Pico (RP2040, 2MB Flash, Dual-Core 133MHz)",
+        qty: 1,
+        designator: "U1",
+        price: "₹500",
+        link: "https://robu.in/product/raspberry-pi-pico/",
+        role: "Main controller: captures raw IR pulses, scans 8x8 matrix, drives 38kHz PWM"
+      },
+      {
+        id: 2,
+        component: "Tactile Pushbuttons",
+        spec: "6x6x5mm 4-pin through-hole momentary tactile switches",
+        qty: 64,
+        designator: "SW1–SW64",
+        price: "₹50",
+        link: "",
+        role: "Full 64-button matrix (Buttons 1 to 64)"
+      },
+      {
+        id: 3,
+        component: "Addressable RGB LED Strip",
+        spec: "WS2812B / NeoPixel 5050 RGB LED strip (8 LEDs)",
+        qty: 1,
+        designator: "RGB1",
+        price: "₹25",
+        link: "",
+        role: "Status indicator (TV, AC, Soundbar, Projector) and keypad backlight"
+      },
+      {
+        id: 4,
+        component: "IR Transmitter Module",
+        spec: "940nm High-Power 3-Pin IR LED Module (with onboard driver transistor)",
+        qty: 1,
+        designator: "TX1",
+        price: "₹50",
+        link: "",
+        role: "High-intensity 38kHz PWM transmitter for 10–15m range"
+      },
+      {
+        id: 5,
+        component: "IR Receiver Sensor",
+        spec: "VS1838B (or TSOP38238) 38kHz Demodulating IR Receiver",
+        qty: 1,
+        designator: "RX1",
+        price: "₹30",
+        link: "",
+        role: "Demodulates incoming raw 38kHz codes from original remotes for learning"
+      },
+      {
+        id: 6,
+        component: "Double-Sided FR4 Perfboard",
+        spec: "2.54mm (0.1\") pitch protoboard (10x20 cm or 10x22 cm, ≥ 22x78 holes)",
+        qty: 1,
+        designator: "PCB",
+        price: "₹260",
+        link: "",
+        role: "Main dual-sided chassis board holding Pico, matrix, optics, and RGB strip"
+      },
+      {
+        id: 7,
+        component: "Insulated Jumper Wire",
+        spec: "30 AWG Kynar / PTFE wire wrap spool (Red & Green)",
+        qty: 1,
+        designator: "W_JUMP",
+        price: "₹50",
+        link: "",
+        role: "Red for Matrix Rows, Green for Matrix Columns, insulated crossover at F19"
+      }
+    ];
+
+    function renderBomTable() {
+      const tbody = document.getElementById('bomTableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      let totalNumeric = 0;
+      let hasPrices = false;
+
+      BOM_ITEMS.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #1e293b';
+        tr.style.background = index % 2 === 0 ? 'rgba(15, 23, 42, 0.6)' : 'rgba(30, 41, 59, 0.3)';
+        tr.onmouseenter = () => tr.style.background = 'rgba(51, 65, 85, 0.4)';
+        tr.onmouseleave = () => tr.style.background = index % 2 === 0 ? 'rgba(15, 23, 42, 0.6)' : 'rgba(30, 41, 59, 0.3)';
+
+        // Price formatting
+        let priceHtml = '<span style="color:#eab308; font-style:italic;">Pending</span>';
+        if (item.price && item.price.trim() !== '') {
+          priceHtml = `<span style="color:#10b981; font-weight:700;">${item.price}</span>`;
+          const num = parseFloat(item.price.replace(/[^0-9.]/g, ''));
+          if (!isNaN(num)) {
+            totalNumeric += num;
+            hasPrices = true;
+          }
+        }
+
+        // Link formatting
+        let linkHtml = '<span style="color:#64748b; font-style:italic;">Pending</span>';
+        if (item.link && item.link.trim() !== '') {
+          linkHtml = `<a href="${item.link}" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:4px; padding:3px 8px; background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); border-radius:4px;">Buy / View ↗</a>`;
+        }
+
+        tr.innerHTML = `
+          <td style="padding:10px 8px; text-align:center; color:#64748b; font-weight:700;">${item.id}</td>
+          <td style="padding:10px 8px; font-weight:700; color:#f8fafc;">${item.component}</td>
+          <td style="padding:10px 8px; color:#cbd5e1; font-family:monospace; font-size:11px;">${item.spec}</td>
+          <td style="padding:10px 8px; text-align:center;"><span style="background:#0284c7; color:#fff; font-weight:700; padding:2px 7px; border-radius:10px; font-size:11px;">${item.qty}</span></td>
+          <td style="padding:10px 8px; text-align:center;"><code style="background:#1e293b; color:#93c5fd; padding:2px 6px; border-radius:4px; font-size:10.5px;">${item.designator}</code></td>
+          <td style="padding:10px 8px;">${priceHtml}</td>
+          <td style="padding:10px 8px;">${linkHtml}</td>
+          <td style="padding:10px 8px; color:#94a3b8; font-size:11px; line-height:1.4;">${item.role}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const totalCostElem = document.getElementById('bomTotalCost');
+      if (totalCostElem) {
+        if (hasPrices) {
+          totalCostElem.textContent = `₹${totalNumeric.toFixed(2)}`;
+          totalCostElem.style.color = '#10b981';
+        } else {
+          totalCostElem.textContent = '[Pending User Input]';
+          totalCostElem.style.color = '#38bdf8';
+        }
+      }
+    }
+
+    // Modal open / close wiring
+    const bomModal = document.getElementById('bomModal');
+    const btnOpenBom = document.getElementById('btnOpenBom');
+    const btnSidebarBom = document.getElementById('btnSidebarBom');
+    const btnCloseBom = document.getElementById('btnCloseBom');
+    const btnCloseBomFooter = document.getElementById('btnCloseBomFooter');
+
+    function openBomModal() {
+      if (bomModal) {
+        renderBomTable();
+        bomModal.style.display = 'flex';
+      }
+    }
+
+    function closeBomModal() {
+      if (bomModal) bomModal.style.display = 'none';
+    }
+
+    if (btnOpenBom) btnOpenBom.addEventListener('click', openBomModal);
+    if (btnSidebarBom) btnSidebarBom.addEventListener('click', openBomModal);
+    if (btnCloseBom) btnCloseBom.addEventListener('click', closeBomModal);
+    if (btnCloseBomFooter) btnCloseBomFooter.addEventListener('click', closeBomModal);
+
+    if (bomModal) {
+      bomModal.addEventListener('click', (e) => {
+        if (e.target === bomModal) closeBomModal();
+      });
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && bomModal && bomModal.style.display === 'flex') {
+        closeBomModal();
+      }
+    });
+
+    // -------------------------------------------------------------
+    // 9. INITIALIZATION
+    // -------------------------------------------------------------
+    function init() {
+      renderSubstrates();
+      renderSilkscreen();
+      renderPads();
+      renderBackSolder();
+      renderFrontWires();
+      renderComponents();
+      renderLegend();
+      renderBomTable();
+      setLayerMode('front');
+      fitView();
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
