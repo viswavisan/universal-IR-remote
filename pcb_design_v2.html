@@ -315,15 +315,12 @@
 
         <!-- Section Navigation Quick-Jumps -->
         <div class="btn-group">
-          <button id="btnJumpTop" title="Scroll to Pico & Optics">🔭 Top (Pico)</button>
+          <button id="btnJumpTop" title="Scroll to Pico & Optics">🔭 Top (Pico & Optics)</button>
           <button id="btnJumpKeys1" title="Scroll to Keys 1–32 (Sets 1–4)">🔢 Keys 1–32</button>
           <button id="btnJumpKeys2" title="Scroll to Keys 33–64 (Sets 5–8)">🔢 Keys 33–64</button>
-          <button id="btnJumpBattery" title="Zoom to 18650 Battery & TP4056 Charger"
+          <button id="btnJumpBattery" title="Zoom to 14500 (AA Size) Battery & TP4056 Charger"
             style="background:rgba(16, 185, 129, 0.15); color:#6ee7b7; border-color:#059669; font-weight:700;">🔋
             Battery & Charger</button>
-          <button id="btnJumpIrModule" title="Zoom to 3-Row IR Transceiver Daughterboard"
-            style="background:rgba(168, 85, 247, 0.15); color:#d8b4fe; border-color:#a855f7; font-weight:700;">📡 IR
-            Daughterboard</button>
         </div>
       </div>
 
@@ -394,12 +391,12 @@
             <stop offset="100%" stop-color="#022c22" />
           </linearGradient>
 
-          <!-- 18650 3D Cylindrical Li-ion Gradient -->
-          <linearGradient id="battery18650Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <!-- 14500 (AA Size) 3D Horizontal Cylindrical Li-ion Gradient (Vertical curvature) -->
+          <linearGradient id="battery14500Grad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stop-color="#14532d" />
             <stop offset="12%" stop-color="#16a34a" />
-            <stop offset="35%" stop-color="#4ade80" />
-            <stop offset="55%" stop-color="#22c55e" />
+            <stop offset="30%" stop-color="#86efac" />
+            <stop offset="50%" stop-color="#22c55e" />
             <stop offset="85%" stop-color="#15803d" />
             <stop offset="100%" stop-color="#052e16" />
           </linearGradient>
@@ -470,11 +467,10 @@
             <g id="b1_backInsulatorLayer" style="display:none;"></g>
           </g>
 
-          <!-- REAL-SCALE POWER SUBSYSTEM (1:1 Physical Size: TP4056 + 18650 Battery + Switch) -->
+          <!-- REAL-SCALE POWER SUBSYSTEM (1:1 Physical Size: TP4056 + 14500 AA Battery + Switch) -->
           <g id="powerModuleGroup"></g>
 
-          <!-- DEDICATED OPTICAL & IR TRANSCEIVER DAUGHTERBOARD MODULE (3-ROW ULTRA-COMPACT) -->
-          <g id="irDaughterboardGroup"></g>
+
           <g id="board2Group" style="display:none;">
             <g id="b2_substrateLayer"></g>
             <g id="b2_silkscreenLayer"></g>
@@ -519,7 +515,7 @@
               electrical isolation.</div>
             <div>• <strong>Dedicated System Keys:</strong> Button 2 = <strong>LEARN</strong> (Amber), Button 3 =
               <strong>MODE</strong> (Emerald).</div>
-            <div>• <strong>Rechargeable Power Architecture:</strong> 3.7V 18650 Li-ion cell (2000mAh) + TP4056 USB-C
+            <div>• <strong>Rechargeable Power Architecture:</strong> 3.7V 14500 Li-ion cell (AA Size) + TP4056 USB-C
               charger module directly powering Pico VSYS with DW01A protection.</div>
           </div>
         </div>
@@ -534,7 +530,7 @@
             <div>Hardware components required for the 64-button Universal IR Remote:</div>
             <div style="margin-top:6px; display:flex; flex-direction:column; gap:3px; font-size:10.5px; color:#94a3b8;">
               <div>• 1× Raspberry Pi Pico (RP2040)</div>
-              <div>• 1× 18650 3.7V 2000mAh Li-ion Battery</div>
+              <div>• 1× 14500 3.7V 1000mAh Li-ion Battery (AA Size)</div>
               <div>• 1× TP4056 Type-C Charger + Protection Module</div>
               <div>• 1× SPST Miniature Power Slide Switch</div>
               <div>• 64× 4.5×4.5mm Tactile Buttons (3×2 holes)</div>
@@ -559,7 +555,7 @@
 
   <footer>
     <div id="statusCursor">Coordinates: pad --</div>
-    <div id="boardTitleFooter">Universal IR Remote: Single Board Direct Pico (22×67) • 3.7V 18650 (2000mAh) + TP4056
+    <div id="boardTitleFooter">Universal IR Remote: Single Board Direct Pico (22×67) • 3.7V 14500 AA Li-ion + TP4056
       Type-C • 64 Buttons (3×2 Holes)</div>
   </footer>
 
@@ -579,7 +575,7 @@
               V2 Design</span>
           </div>
           <div style="font-size:11.5px; color:#94a3b8; margin-top:4px;">Universal IR Remote (RP2040) • 64-Button Matrix
-            • 3.7V 18650 2000mAh + TP4056 USB-C • 22×67 Perfboard</div>
+            • 3.7V 14500 (AA Size) Li-ion + TP4056 USB-C • 22×67 Perfboard</div>
         </div>
         <button id="btnCloseBom"
           style="background:#334155; border:none; color:#cbd5e1; font-size:16px; width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700;">✕</button>
@@ -769,7 +765,7 @@
 
     // Unified Direct Traces (Top Power & Keypad Matrix Row Leads)
     const unifiedTraces = [
-      // Top Power & 5-Pin IR Daughterboard Socket Connections:
+      // Unified Motherboard Top Power & Optical IR Transceiver Connections (Rows 1–3):
       { route: ['A1', 'A2'], net: 'VSYS_BAT', color: '#f59e0b', desc: 'Power Bus Rail: A1 (+VSYS Battery Input) ➔ A2 [Straight Vertical Top-Side]' },
       { route: ['A1', 'B1'], net: 'VSYS_BAT', color: '#f59e0b', desc: 'R2 Power Feed: A1 ➔ B1 (Feeds R2 22Ω Limiter Input) [Straight Horizontal Top-Side]' },
       { route: ['A2', 'F2'], net: 'VSYS_BAT', color: '#f59e0b', desc: 'R3 Power Feed: A2 ➔ F2 (Feeds R3 22Ω Limiter Input @ F2) [Straight Horizontal Top-Side]' },
@@ -1591,19 +1587,22 @@
     }
 
     // -------------------------------------------------------------
-    // 5B. REAL-SCALE POWER SUBSYSTEM (TP4056 + 18650 BATTERY + SWITCH)
+    // 5B. REAL-SCALE HORIZONTAL AA / 14500 LI-ION POWER SUBSYSTEM
+    // 1:1 PHYSICAL SIZE: AA CELL (50.5 × 14.5 mm) ALIGNED HORIZONTALLY WITH 22-COL WIDTH (53.3 mm)
     // -------------------------------------------------------------
     function renderPowerModule() {
       const g = document.getElementById('powerModuleGroup');
       if (!g) return;
 
       const pBat = getCoordPos('A', 1); // A1: +VSYS Battery Wire Input
-      const pV1 = getCoordPos('V', 1); // V1: Battery GND Input Rail
+      const pV1 = getCoordPos('V', 1);  // V1: Battery GND Input Rail
 
-      const pwrX = -360;
-      const pwrY = 60;
-      const pwrW = 380;
-      const pwrH = BOARD_H;
+      // Bottom Power Subsystem Tray: sits directly below Row 67
+      // Matches EXACT width of perfboard (BOARD_W = 584 px)
+      const pwrX = BOARD_X;                         // 80
+      const pwrY = BOARD_Y + BOARD_H + 20;          // 60 + 1664 + 20 = 1744
+      const pwrW = BOARD_W;                         // 584
+      const pwrH = 430;                             // 1744 to 2174
 
       let html = `
         <!-- Power Subsystem Chassis Plate -->
@@ -1613,122 +1612,103 @@
           <rect x="${pwrX}" y="${pwrY}" width="${pwrW}" height="${pwrH}" rx="14" fill="url(#fiberglassPattern)" opacity="0.25" />
 
           <!-- Header Title & Physical Scale Notes -->
-          <text x="${pwrX + pwrW / 2}" y="${pwrY - 16}" fill="#10b981" font-size="13" font-weight="800" text-anchor="middle" font-family="monospace">RECHARGEABLE POWER SUBSYSTEM (1:1 REAL SCALE)</text>
+          <text x="${pwrX + pwrW / 2}" y="${pwrY + 24}" fill="#10b981" font-size="12" font-weight="900" text-anchor="middle" font-family="monospace">RECHARGEABLE POWER SUBSYSTEM (AA / 14500 HORIZONTAL)</text>
           
-          <rect x="${pwrX + 20}" y="${pwrY + 16}" width="${pwrW - 40}" height="42" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
-          <text x="${pwrX + pwrW / 2}" y="${pwrY + 34}" fill="#38bdf8" font-size="11" font-weight="900" font-family="monospace" text-anchor="middle">3.7V 18650 LI-ION + TP4056 USB-C CHARGER</text>
-          <text x="${pwrX + pwrW / 2}" y="${pwrY + 49}" fill="#94a3b8" font-size="8.5" font-family="monospace" text-anchor="middle">1:1 Physical Dimensions (1 mm = 9.45 px) • Matched to Perfboard Pitch</text>
+          <rect x="${pwrX + 24}" y="${pwrY + 34}" width="${pwrW - 48}" height="28" rx="5" fill="#0f172a" stroke="#334155" stroke-width="1" />
+          <text x="${pwrX + pwrW / 2}" y="${pwrY + 52}" fill="#38bdf8" font-size="8.5" font-weight="800" font-family="monospace" text-anchor="middle">1× AA / 14500 Li-ion (50.5 × 14.5 mm) • 1:1 Matched Across 22 Cols (53.3 mm Width)</text>
 
           <!-- ========================================================= -->
-          <!-- 1. TP4056 USB-C CHARGING MODULE (28.0 mm × 17.3 mm)       -->
-          <!-- 28.0 mm * 9.45 = 265 px, 17.3 mm * 9.45 = 164 px           -->
+          <!-- 1. 14500 AA BATTERY HOLDER TRAY (HORIZONTAL: 54mm × 16.5mm) -->
+          <!-- 54.0 mm * 9.45 = 510 px, 16.5 mm * 9.45 = 156 px          -->
+          <!-- Aligns from Col A (x=120) to Col V (x=624)                 -->
           <!-- ========================================================= -->
           ${(() => {
-          const tpW = 265;
-          const tpH = 164;
-          const tpX = pwrX + (pwrW - tpW) / 2; // 720 + (380-265)/2 = 777.5
-          const tpY = pwrY + 85;               // 145
+            const hW = 510;
+            const hH = 156;
+            const hX = pwrX + (pwrW - hW) / 2; // 80 + (584 - 510)/2 = 117 px (Col A=120, Col V=624)
+            const hY = pwrY + 74;
 
-          return `
-              <!-- TP4056 Module Container -->
-              <g class="comp-tp4056-real" data-net="VSYS_BAT">
-                <title>TP4056 1A Linear Li-ion Charger with DW01A/8205A Protection (Real Size: 28.0mm × 17.3mm)</title>
-                
-                <!-- Dimension Tag above module -->
-                <rect x="${tpX}" y="${tpY - 24}" width="124" height="16" rx="3" fill="#1e293b" stroke="#3b82f6" stroke-width="0.8" />
-                <text x="${tpX + 62}" y="${tpY - 13}" fill="#93c5fd" font-size="7.5" font-weight="800" font-family="monospace" text-anchor="middle">TP4056: 28.0 × 17.3 mm</text>
+            // 14500 Cell dimensions: 50.5 mm * 9.45 = 477 px, 14.5 mm * 9.45 = 137 px
+            const cW = 477;
+            const cH = 137;
+            const cX = hX + (hW - cW) / 2;     // 117 + 16.5 = 133.5 px
+            const cY = hY + (hH - cH) / 2;     // seated inside holder
 
-                <!-- Deep Blue FR4 PCB Body with rounded corners -->
-                <rect x="${tpX}" y="${tpY}" width="${tpW}" height="${tpH}" rx="8" fill="url(#tp4056PcbGrad)" stroke="#3b82f6" stroke-width="2.2" filter="url(#shadow)" />
-                <rect x="${tpX + 6}" y="${tpY + 6}" width="${tpW - 12}" height="${tpH - 12}" rx="5" fill="none" stroke="#60a5fa" stroke-width="0.8" opacity="0.6" />
-                
-                <!-- 4 Corner Mounting Holes (d = 3.0mm ~ 28px) -->
-                <circle cx="${tpX + 16}" cy="${tpY + 16}" r="6" fill="#090e17" stroke="#3b82f6" stroke-width="1" />
-                <circle cx="${tpX + tpW - 16}" cy="${tpY + 16}" r="6" fill="#090e17" stroke="#3b82f6" stroke-width="1" />
-                <circle cx="${tpX + 16}" cy="${tpY + tpH - 16}" r="6" fill="#090e17" stroke="#3b82f6" stroke-width="1" />
-                <circle cx="${tpX + tpW - 16}" cy="${tpY + tpH - 16}" r="6" fill="#090e17" stroke="#3b82f6" stroke-width="1" />
+            return `
+              <g class="comp-14500-real" data-net="VSYS_BAT">
+                <title>14500 3.7V 1000mAh Li-ion Cell (AA Size: 50.5mm × 14.5mm) in Horizontal AA Battery Holder</title>
 
-                <!-- Type-C Receptacle (8.9 mm wide x 3.2 mm thick) -->
-                <rect x="${tpX + tpW / 2 - 44}" y="${tpY - 22}" width="88" height="34" rx="8" fill="url(#metallicCapGrad)" stroke="#475569" stroke-width="2" />
-                <rect x="${tpX + tpW / 2 - 38}" y="${tpY - 17}" width="76" height="18" rx="5" fill="#090d16" />
-                <!-- Type-C Gold Pins -->
-                <rect x="${tpX + tpW / 2 - 24}" y="${tpY - 9}" width="48" height="2" fill="#fbbf24" opacity="0.8" />
-                <text x="${tpX + tpW / 2}" y="${tpY - 27}" fill="#94a3b8" font-size="7.5" font-weight="700" font-family="monospace" text-anchor="middle">5V TYPE-C IN (1A)</text>
+                <!-- Holder Dimension Callout -->
+                <rect x="${hX + hW / 2 - 120}" y="${hY - 14}" width="240" height="13" rx="3" fill="#1e293b" stroke="#10b981" stroke-width="0.8" />
+                <text x="${hX + hW / 2}" y="${hY - 4.5}" fill="#a7f3d0" font-size="7" font-weight="800" font-family="monospace" text-anchor="middle">Horizontal AA Holder: 54.0 × 16.5 mm (Span Col A ➔ Col V)</text>
 
-                <!-- TP4056 ESOP-8 Controller IC -->
-                <rect x="${tpX + 68}" y="${tpY + 54}" width="56" height="48" rx="4" fill="#0f172a" stroke="#475569" stroke-width="1.2" />
-                <circle cx="${tpX + 76}" cy="${tpY + 62}" r="2" fill="#94a3b8" />
-                <text x="${tpX + 96}" y="${tpY + 76}" fill="#f8fafc" font-size="9" font-weight="900" font-family="monospace" text-anchor="middle">TP4056</text>
-                <text x="${tpX + 96}" y="${tpY + 89}" fill="#64748b" font-size="6.5" font-family="monospace" text-anchor="middle">1.0A CC/CV</text>
+                <!-- Injection-Molded ABS Battery Holder Tray (Horizontal) -->
+                <rect x="${hX}" y="${hY}" width="${hW}" height="${hH}" rx="10" fill="#090d16" stroke="#334155" stroke-width="2.5" filter="url(#shadow)" />
+                <rect x="${hX + 9}" y="${hY + 9}" width="${hW - 18}" height="${hH - 18}" rx="7" fill="#030712" />
 
-                <!-- DW01A Battery Protection IC (SOT-23-6) -->
-                <rect x="${tpX + 152}" y="${tpY + 48}" width="32" height="24" rx="2" fill="#0f172a" stroke="#334155" stroke-width="1" />
-                <text x="${tpX + 168}" y="${tpY + 63}" fill="#cbd5e1" font-size="6.5" font-weight="900" font-family="monospace" text-anchor="middle">DW01A</text>
+                <!-- Left Positive Nickel-Plated Leaf Contact Button -->
+                <rect x="${hX + 6}" y="${hY + hH / 2 - 24}" width="14" height="48" rx="3" fill="url(#metallicCapGrad)" stroke="#94a3b8" stroke-width="1" />
+                <circle id="holder_pos_eyelet" cx="${hX + 13}" cy="${hY + 16}" r="5" fill="url(#solderGrad)" stroke="#ef4444" stroke-width="1.2" />
+                <text x="${hX + 24}" y="${hY + 20}" fill="#fca5a5" font-size="7.5" font-weight="900" font-family="monospace">[+]</text>
 
-                <!-- FS8205A Dual N-MOSFET (TSSOP-8) -->
-                <rect x="${tpX + 150}" y="${tpY + 84}" width="36" height="28" rx="2" fill="#0f172a" stroke="#334155" stroke-width="1" />
-                <text x="${tpX + 168}" y="${tpY + 101}" fill="#cbd5e1" font-size="7" font-weight="900" font-family="monospace" text-anchor="middle">8205A</text>
+                <!-- Right Negative Conical Spring Contact -->
+                <g transform="translate(${hX + hW - 16}, ${hY + hH / 2}) rotate(90)">
+                  <path d="M -24 0 C -16 -12, 16 -12, 24 0 C 16 8, -16 8, -12 0 C -8 -4, 8 -4, 12 0" fill="none" stroke="#cbd5e1" stroke-width="2.5" />
+                </g>
+                <circle id="holder_neg_eyelet" cx="${hX + hW - 13}" cy="${hY + 16}" r="5" fill="url(#solderGrad)" stroke="#38bdf8" stroke-width="1.2" />
+                <text x="${hX + hW - 36}" y="${hY + 20}" fill="#7dd3fc" font-size="7.5" font-weight="900" font-family="monospace">[-]</text>
 
-                <!-- Dual SMD LEDs -->
-                <!-- Red Charging LED -->
-                <rect x="${tpX + 32}" y="${tpY + 46}" width="16" height="22" rx="2" fill="#450a0a" stroke="#dc2626" stroke-width="0.8" />
-                <circle cx="${tpX + 40}" cy="${tpY + 57}" r="5" fill="#ef4444" stroke="#f87171" stroke-width="1.2" />
-                <text x="${tpX + 40}" y="${tpY + 76}" fill="#fca5a5" font-size="6" font-weight="800" font-family="monospace" text-anchor="middle">CHG</text>
+                <!-- ===================================================== -->
+                <!-- 14500 (AA SIZE) LI-ION BATTERY CELL (50.5 × 14.5 mm)  -->
+                <!-- ===================================================== -->
+                <!-- Positive Raised Metallic Nipple (Left Cathode +) -->
+                <rect x="${cX - 14}" y="${cY + (cH - 40) / 2}" width="14" height="40" rx="3" fill="url(#metallicCapGrad)" stroke="#94a3b8" stroke-width="1.2" />
+                <!-- Insulator Ring underneath nipple -->
+                <rect x="${cX - 3}" y="${cY + (cH - 54) / 2}" width="3" height="54" rx="1" fill="#ffffff" />
 
-                <!-- Blue Standby / Full LED -->
-                <rect x="${tpX + 32}" y="${tpY + 90}" width="16" height="22" rx="2" fill="#172554" stroke="#2563eb" stroke-width="0.8" />
-                <circle cx="${tpX + 40}" cy="${tpY + 101}" r="5" fill="#3b82f6" stroke="#93c5fd" stroke-width="1.2" />
-                <text x="${tpX + 40}" y="${tpY + 120}" fill="#93c5fd" font-size="6" font-weight="800" font-family="monospace" text-anchor="middle">FULL</text>
+                <!-- 14500 Horizontal Cylindrical Battery Body -->
+                <rect x="${cX}" y="${cY}" width="${cW}" height="${cH}" rx="10" fill="url(#battery14500Grad)" stroke="#16a34a" stroke-width="2" filter="url(#shadow)" />
+                <!-- 3D Cylindrical Highlight Bar (Horizontal) -->
+                <line x1="${cX + 12}" y1="${cY + cH * 0.28}" x2="${cX + cW - 12}" y2="${cY + cH * 0.28}" stroke="#ffffff" stroke-width="7" opacity="0.38" stroke-linecap="round" />
 
-                <!-- 6 Large Heavy-Duty Solder Eyelet Pads -->
-                <!-- IN+ Pad -->
-                <circle cx="${tpX + 16}" cy="${tpY + 40}" r="8" fill="url(#solderGrad)" stroke="#e2e8f0" stroke-width="1.5" />
-                <circle cx="${tpX + 16}" cy="${tpY + 40}" r="3" fill="#0f172a" />
-                <text x="${tpX + 16}" y="${tpY + 28}" fill="#94a3b8" font-size="7" font-weight="900" font-family="monospace" text-anchor="middle">IN+</text>
+                <!-- Negative Metallic Base Plate (Right Anode -) -->
+                <rect x="${cX + cW - 6}" y="${cY + 8}" width="10" height="${cH - 16}" rx="3" fill="url(#metallicCapGrad)" stroke="#64748b" stroke-width="1.2" />
 
-                <!-- IN- Pad -->
-                <circle cx="${tpX + tpW - 16}" cy="${tpY + 40}" r="8" fill="url(#solderGrad)" stroke="#e2e8f0" stroke-width="1.5" />
-                <circle cx="${tpX + tpW - 16}" cy="${tpY + 40}" r="3" fill="#0f172a" />
-                <text x="${tpX + tpW - 16}" y="${tpY + 28}" fill="#94a3b8" font-size="7" font-weight="900" font-family="monospace" text-anchor="middle">IN-</text>
+                <!-- Realistic Metallic Battery Label Badge -->
+                <g transform="translate(${cX + cW / 2}, ${cY + cH / 2})">
+                  <rect x="-130" y="-48" width="260" height="96" rx="6" fill="rgba(15, 23, 42, 0.94)" stroke="#eab308" stroke-width="1.2" />
+                  
+                  <text x="0" y="-28" fill="#fef08a" font-size="9.5" font-weight="900" font-family="monospace" text-anchor="middle">ORANGE / PKCELL 14500</text>
+                  <text x="0" y="-13" fill="#38bdf8" font-size="11.5" font-weight="900" font-family="monospace" text-anchor="middle">3.7V Li-ion (AA Size)</text>
+                  <rect x="-90" y="-6" width="180" height="1.5" fill="#eab308" />
 
-                <!-- B+ Pad (to 18650 positive terminal) -->
-                <circle id="tp_pad_bplus" cx="${tpX + 16}" cy="${tpY + 84}" r="9" fill="url(#solderGrad)" stroke="#ef4444" stroke-width="2" />
-                <circle cx="${tpX + 16}" cy="${tpY + 84}" r="3.5" fill="#0f172a" />
-                <text x="${tpX + 16}" y="${tpY + 104}" fill="#fca5a5" font-size="8" font-weight="900" font-family="monospace" text-anchor="middle">B+</text>
+                  <text x="0" y="11" fill="#ffffff" font-size="12" font-weight="900" font-family="monospace" text-anchor="middle">1000 mAh • 3.7 Wh</text>
+                  <text x="0" y="26" fill="#a7f3d0" font-size="7.5" font-weight="700" font-family="monospace" text-anchor="middle">Ø 14.5 mm × 50.5 mm • Aligned Across 22-Col Width</text>
+                  <text x="0" y="40" fill="#f59e0b" font-size="7" font-weight="800" font-family="monospace" text-anchor="middle">4.2V CUTOFF • PROTECTED VIA TP4056</text>
 
-                <!-- B- Pad (to 18650 negative terminal) -->
-                <circle id="tp_pad_bminus" cx="${tpX + tpW - 16}" cy="${tpY + 84}" r="9" fill="url(#solderGrad)" stroke="#38bdf8" stroke-width="2" />
-                <circle cx="${tpX + tpW - 16}" cy="${tpY + 84}" r="3.5" fill="#0f172a" />
-                <text x="${tpX + tpW - 16}" y="${tpY + 104}" fill="#7dd3fc" font-size="8" font-weight="900" font-family="monospace" text-anchor="middle">B-</text>
-
-                <!-- OUT+ Pad (to Switch -> Perfboard Pad C1 VSYS) -->
-                <circle id="tp_pad_outplus" cx="${tpX + 16}" cy="${tpY + tpH - 16}" r="9" fill="url(#solderGrad)" stroke="#f59e0b" stroke-width="2" />
-                <circle cx="${tpX + 16}" cy="${tpY + tpH - 16}" r="3.5" fill="#0f172a" />
-                <text x="${tpX + 16}" y="${tpY + tpH - 30}" fill="#fde047" font-size="8" font-weight="900" font-family="monospace" text-anchor="middle">OUT+</text>
-
-                <!-- OUT- Pad (to Perfboard Pad D1 GND) -->
-                <circle id="tp_pad_outminus" cx="${tpX + tpW - 16}" cy="${tpY + tpH - 16}" r="9" fill="url(#solderGrad)" stroke="#64748b" stroke-width="2" />
-                <circle cx="${tpX + tpW - 16}" cy="${tpY + tpH - 16}" r="3.5" fill="#0f172a" />
-                <text x="${tpX + tpW - 16}" y="${tpY + tpH - 30}" fill="#cbd5e1" font-size="8" font-weight="900" font-family="monospace" text-anchor="middle">OUT-</text>
+                  <!-- Polarity Badges -->
+                  <text x="-112" y="3" fill="#ef4444" font-size="9" font-weight="900" font-family="monospace" text-anchor="middle">◀ [+]</text>
+                  <text x="112" y="3" fill="#38bdf8" font-size="9" font-weight="900" font-family="monospace" text-anchor="middle">[-] ▶</text>
+                </g>
               </g>
             `;
-        })()}
+          })()}
 
           <!-- ========================================================= -->
           <!-- 2. SPST MINIATURE SLIDE SWITCH (POWER ON/OFF)             -->
           <!-- 8.5 mm * 9.45 = 80 px, 4.0 mm * 9.45 = 38 px              -->
           <!-- ========================================================= -->
           ${(() => {
-          const swW = 84;
-          const swH = 38;
-          const swX = pwrX + (pwrW - swW) / 2;
-          const swY = pwrY + 285;
+            const swW = 84;
+            const swH = 38;
+            const swX = pwrX + 40;             // 120 (aligned with Column A)
+            const swY = pwrY + 258;
 
-          return `
+            return `
               <g class="comp-switch" data-net="VSYS_BAT">
                 <title>Master Power Slide Switch (SPST Miniature, Real Size: 8.5mm × 4.0mm)</title>
                 <!-- Switch Label -->
-                <text x="${swX + swW / 2}" y="${swY - 10}" fill="#cbd5e1" font-size="7.5" font-weight="800" font-family="monospace" text-anchor="middle">POWER SWITCH (ON / OFF)</text>
+                <text x="${swX + swW / 2}" y="${swY - 8}" fill="#cbd5e1" font-size="7.5" font-weight="800" font-family="monospace" text-anchor="middle">POWER SWITCH</text>
                 
                 <!-- Metallic Switch Casing -->
                 <rect x="${swX}" y="${swY}" width="${swW}" height="${swH}" rx="4" fill="url(#metallicCapGrad)" stroke="#334155" stroke-width="1.6" filter="url(#shadow)" />
@@ -1744,202 +1724,144 @@
                 <circle id="sw_pin_out" cx="${swX + 38}" cy="${swY + swH + 8}" r="5" fill="url(#solderGrad)" stroke="#f59e0b" stroke-width="1.2" />
               </g>
             `;
-        })()}
+          })()}
 
           <!-- ========================================================= -->
-          <!-- 3. 18650 BATTERY HOLDER TRAY (76.0 mm × 21.5 mm)          -->
-          <!-- 76.0 mm * 9.45 = 718 px, 21.5 mm * 9.45 = 203 px          -->
+          <!-- 3. TP4056 USB-C CHARGING MODULE (28.0 mm × 17.3 mm)       -->
+          <!-- 28.0 mm * 9.45 = 265 px, 17.3 mm * 9.45 = 164 px          -->
+          <!-- Facing DOWNWARDS: USB-C port at bottom of remote chassis  -->
           <!-- ========================================================= -->
           ${(() => {
-          const hW = 203;
-          const hH = 718;
-          const hX = pwrX + (pwrW - hW) / 2; // 720 + (380 - 203)/2 = 808.5
-          const hY = pwrY + 365;
+            const tpW = 265;
+            const tpH = 135;
+            const tpX = pwrX + pwrW - tpW - 40; // 80 + 584 - 265 - 40 = 359 px
+            const tpY = pwrY + 245;
 
-          // 18650 Cell dimensions: 65.0 mm * 9.45 = 614 px, 18.2 mm * 9.45 = 172 px
-          const cW = 172;
-          const cH = 614;
-          const cX = hX + (hW - cW) / 2;     // 808.5 + (203-172)/2 = 824
-          const cY = hY + (hH - cH) / 2 + 6; // seated inside holder
+            return `
+              <g class="comp-tp4056-real" data-net="VSYS_BAT">
+                <title>TP4056 1A Linear Li-ion Charger with DW01A/8205A Protection (Real Size: 28.0mm × 17.3mm)</title>
+                
+                <!-- Dimension Tag above module -->
+                <rect x="${tpX}" y="${tpY - 18}" width="124" height="14" rx="3" fill="#1e293b" stroke="#3b82f6" stroke-width="0.8" />
+                <text x="${tpX + 62}" y="${tpY - 8}" fill="#93c5fd" font-size="7" font-weight="800" font-family="monospace" text-anchor="middle">TP4056: 28.0 × 17.3 mm</text>
 
-          return `
-              <g class="comp-18650-real" data-net="VSYS_BAT">
-                <title>18650 3.7V 2000mAh Li-ion Cell seated in 76mm × 21.5mm Battery Holder (Real Size)</title>
+                <!-- Deep Blue FR4 PCB Body with rounded corners -->
+                <rect x="${tpX}" y="${tpY}" width="${tpW}" height="${tpH}" rx="8" fill="url(#tp4056PcbGrad)" stroke="#3b82f6" stroke-width="2.2" filter="url(#shadow)" />
+                <rect x="${tpX + 6}" y="${tpY + 6}" width="${tpW - 12}" height="${tpH - 12}" rx="5" fill="none" stroke="#60a5fa" stroke-width="0.8" opacity="0.6" />
+                
+                <!-- 4 Corner Mounting Holes (d = 3.0mm ~ 28px) -->
+                <circle cx="${tpX + 16}" cy="${tpY + 16}" r="5" fill="#090e17" stroke="#3b82f6" stroke-width="1" />
+                <circle cx="${tpX + tpW - 16}" cy="${tpY + 16}" r="5" fill="#090e17" stroke="#3b82f6" stroke-width="1" />
+                <circle cx="${tpX + 16}" cy="${tpY + tpH - 16}" r="5" fill="#090e17" stroke="#3b82f6" stroke-width="1" />
+                <circle cx="${tpX + tpW - 16}" cy="${tpY + tpH - 16}" r="5" fill="#090e17" stroke="#3b82f6" stroke-width="1" />
 
-                <!-- Holder Dimension Tag -->
-                <rect x="${hX}" y="${hY - 20}" width="146" height="15" rx="3" fill="#1e293b" stroke="#10b981" stroke-width="0.8" />
-                <text x="${hX + 73}" y="${hY - 10}" fill="#a7f3d0" font-size="7.5" font-weight="800" font-family="monospace" text-anchor="middle">Holder: 76.0 × 21.5 mm</text>
+                <!-- Bottom Accessible Type-C Receptacle (pointing down at base) -->
+                <rect x="${tpX + tpW / 2 - 40}" y="${tpY + tpH - 10}" width="80" height="28" rx="6" fill="url(#metallicCapGrad)" stroke="#475569" stroke-width="1.8" />
+                <rect x="${tpX + tpW / 2 - 34}" y="${tpY + tpH - 5}" width="68" height="16" rx="4" fill="#090d16" />
+                <rect x="${tpX + tpW / 2 - 20}" y="${tpY + tpH + 2}" width="40" height="2" fill="#fbbf24" opacity="0.8" />
+                <text x="${tpX + tpW / 2}" y="${tpY + tpH + 30}" fill="#94a3b8" font-size="7" font-weight="800" font-family="monospace" text-anchor="middle">5V TYPE-C (BOTTOM ACCESSIBLE)</text>
 
-                <!-- Injection-Molded ABS Battery Holder Tray -->
-                <rect x="${hX}" y="${hY}" width="${hW}" height="${hH}" rx="12" fill="#090d16" stroke="#334155" stroke-width="3" filter="url(#shadow)" />
-                <rect x="${hX + 11}" y="${hY + 11}" width="${hW - 22}" height="${hH - 22}" rx="8" fill="#030712" />
+                <!-- TP4056 Controller IC -->
+                <rect x="${tpX + 54}" y="${tpY + 36}" width="50" height="42" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1.2" />
+                <text x="${tpX + 79}" y="${tpY + 56}" fill="#f8fafc" font-size="8" font-weight="900" font-family="monospace" text-anchor="middle">TP4056</text>
+                <text x="${tpX + 79}" y="${tpY + 68}" fill="#64748b" font-size="6" font-family="monospace" text-anchor="middle">1.0A CC/CV</text>
 
-                <!-- Top Positive Nickel-Plated Leaf Contact Button -->
-                <rect x="${hX + hW / 2 - 28}" y="${hY + 6}" width="56" height="16" rx="3" fill="url(#metallicCapGrad)" stroke="#94a3b8" stroke-width="1" />
-                <circle id="holder_pos_eyelet" cx="${hX + 22}" cy="${hY + 14}" r="5" fill="url(#solderGrad)" stroke="#ef4444" stroke-width="1.2" />
-                <text x="${hX + 34}" y="${hY + 18}" fill="#fca5a5" font-size="7" font-weight="900" font-family="monospace">[+]</text>
+                <!-- DW01A + 8205A Protection Chips -->
+                <rect x="${tpX + 124}" y="${tpY + 34}" width="28" height="22" rx="2" fill="#0f172a" stroke="#334155" stroke-width="1" />
+                <text x="${tpX + 138}" y="${tpY + 48}" fill="#cbd5e1" font-size="6" font-weight="900" font-family="monospace" text-anchor="middle">DW01</text>
+                <rect x="${tpX + 122}" y="${tpY + 62}" width="32" height="24" rx="2" fill="#0f172a" stroke="#334155" stroke-width="1" />
+                <text x="${tpX + 138}" y="${tpY + 77}" fill="#cbd5e1" font-size="6" font-weight="900" font-family="monospace" text-anchor="middle">8205A</text>
 
-                <!-- Bottom Negative Conical Spring Contact -->
-                <g transform="translate(${hX + hW / 2}, ${hY + hH - 18})">
-                  <path d="M -30 0 C -20 -14, 20 -14, 30 0 C 20 10, -20 10, -15 0 C -10 -6, 10 -6, 15 0" fill="none" stroke="#cbd5e1" stroke-width="3" />
-                </g>
-                <circle id="holder_neg_eyelet" cx="${hX + hW - 22}" cy="${hY + hH - 14}" r="5" fill="url(#solderGrad)" stroke="#38bdf8" stroke-width="1.2" />
-                <text x="${hX + hW - 42}" y="${hY + hH - 10}" fill="#7dd3fc" font-size="7" font-weight="900" font-family="monospace">[-]</text>
+                <!-- Status LEDs -->
+                <circle cx="${tpX + 30}" cy="${tpY + 46}" r="4" fill="#ef4444" stroke="#f87171" stroke-width="1" />
+                <text x="${tpX + 30}" y="${tpY + 60}" fill="#fca5a5" font-size="5.5" font-weight="800" font-family="monospace" text-anchor="middle">CHG</text>
+                <circle cx="${tpX + 30}" cy="${tpY + 74}" r="4" fill="#3b82f6" stroke="#93c5fd" stroke-width="1" />
+                <text x="${tpX + 30}" y="${tpY + 88}" fill="#93c5fd" font-size="5.5" font-weight="800" font-family="monospace" text-anchor="middle">FULL</text>
 
-                <!-- ===================================================== -->
-                <!-- 18650 LI-ION BATTERY CELL (65.0 mm × 18.2 mm)         -->
-                <!-- ===================================================== -->
-                <!-- Positive Raised Metallic Nipple (Cathode +) -->
-                <rect x="${cX + cW / 2 - 28}" y="${cY - 16}" width="56" height="18" rx="4" fill="url(#metallicCapGrad)" stroke="#94a3b8" stroke-width="1.4" />
-                <!-- Insulator Ring underneath nipple -->
-                <rect x="${cX + cW / 2 - 40}" y="${cY - 2}" width="80" height="4" rx="1" fill="#ffffff" />
+                <!-- Solder Eyelet Pads -->
+                <!-- B+ Pad (to 14500 positive terminal) -->
+                <circle id="tp_pad_bplus" cx="${tpX + 16}" cy="${tpY + 20}" r="8" fill="url(#solderGrad)" stroke="#ef4444" stroke-width="1.8" />
+                <text x="${tpX + 16}" y="${tpY + 12}" fill="#fca5a5" font-size="7" font-weight="900" font-family="monospace" text-anchor="middle">B+</text>
 
-                <!-- 18650 Cylindrical Battery Body -->
-                <rect x="${cX}" y="${cY}" width="${cW}" height="${cH}" rx="12" fill="url(#battery18650Grad)" stroke="#16a34a" stroke-width="2.2" filter="url(#shadow)" />
-                <!-- 3D Cylindrical Highlight Bar -->
-                <line x1="${cX + cW * 0.32}" y1="${cY + 12}" x2="${cX + cW * 0.32}" y2="${cY + cH - 12}" stroke="#ffffff" stroke-width="8" opacity="0.35" stroke-linecap="round" />
+                <!-- B- Pad (to 14500 negative terminal) -->
+                <circle id="tp_pad_bminus" cx="${tpX + tpW - 16}" cy="${tpY + 20}" r="8" fill="url(#solderGrad)" stroke="#38bdf8" stroke-width="1.8" />
+                <text x="${tpX + tpW - 16}" y="${tpY + 12}" fill="#7dd3fc" font-size="7" font-weight="900" font-family="monospace" text-anchor="middle">B-</text>
 
-                <!-- Negative Metallic Base Plate (Anode -) -->
-                <rect x="${cX + 8}" y="${cY + cH - 4}" width="${cW - 16}" height="14" rx="3" fill="url(#metallicCapGrad)" stroke="#64748b" stroke-width="1.2" />
+                <!-- OUT+ Pad (to Switch -> Motherboard A1 VSYS) -->
+                <circle id="tp_pad_outplus" cx="${tpX + 16}" cy="${tpY + tpH - 24}" r="8" fill="url(#solderGrad)" stroke="#f59e0b" stroke-width="1.8" />
+                <text x="${tpX + 32}" y="${tpY + tpH - 22}" fill="#fde047" font-size="7" font-weight="900" font-family="monospace" text-anchor="start">OUT+</text>
 
-                <!-- Realistic Metallic Battery Label -->
-                <g transform="translate(${cX + cW / 2}, ${cY + cH / 2})">
-                  <!-- Central Label Wrap Badge -->
-                  <rect x="-72" y="-140" width="144" height="280" rx="8" fill="rgba(15, 23, 42, 0.92)" stroke="#eab308" stroke-width="1.5" />
-                  
-                  <text x="0" y="-112" fill="#fef08a" font-size="12" font-weight="900" font-family="monospace" text-anchor="middle">ORANGE</text>
-                  <text x="0" y="-94" fill="#38bdf8" font-size="15" font-weight="900" font-family="monospace" text-anchor="middle">ICR 18650</text>
-                  
-                  <rect x="-60" y="-82" width="120" height="2" fill="#eab308" />
-
-                  <text x="0" y="-62" fill="#ffffff" font-size="16" font-weight="900" font-family="monospace" text-anchor="middle">2000 mAh</text>
-                  <text x="0" y="-44" fill="#a7f3d0" font-size="12" font-weight="800" font-family="monospace" text-anchor="middle">3.7V • 7.4 Wh</text>
-                  
-                  <rect x="-60" y="-32" width="120" height="1" fill="#334155" />
-
-                  <text x="0" y="-14" fill="#94a3b8" font-size="7" font-weight="700" font-family="monospace" text-anchor="middle">RECHARGEABLE LI-ION CELL</text>
-                  <text x="0" y="2" fill="#94a3b8" font-size="7" font-family="monospace" text-anchor="middle">STANDARD CHARGE: 1.0A CC/CV</text>
-                  <text x="0" y="18" fill="#94a3b8" font-size="7" font-family="monospace" text-anchor="middle">4.2V CUTOFF • 2.75V DISCHARGE</text>
-                  <text x="0" y="34" fill="#94a3b8" font-size="7" font-family="monospace" text-anchor="middle">MAX DISCHARGE: 6.0A (3C)</text>
-
-                  <rect x="-60" y="46" width="120" height="1" fill="#334155" />
-
-                  <text x="0" y="66" fill="#f59e0b" font-size="7.5" font-weight="800" font-family="monospace" text-anchor="middle">PROTECTED VIA TP4056</text>
-                  <text x="0" y="82" fill="#34d399" font-size="8" font-weight="900" font-family="monospace" text-anchor="middle">100+ HRS RUNTIME</text>
-
-                  <!-- Polarity Arrows -->
-                  <text x="0" y="-124" fill="#ef4444" font-size="11" font-weight="900" font-family="monospace" text-anchor="middle">▲ [+] POSITIVE ▲</text>
-                  <text x="0" y="118" fill="#38bdf8" font-size="11" font-weight="900" font-family="monospace" text-anchor="middle">▼ [-] NEGATIVE ▼</text>
-                </g>
-
-                <!-- Battery Cell Real Size Callout -->
-                <rect x="${cX}" y="${cY + cH + 8}" width="172" height="18" rx="4" fill="#0f172a" stroke="#22c55e" stroke-width="1" />
-                <text x="${cX + cW / 2}" y="${cY + cH + 20}" fill="#86efac" font-size="8" font-weight="800" font-family="monospace" text-anchor="middle">Cell: Ø 18.2 mm × 65.0 mm</text>
+                <!-- OUT- Pad (to Motherboard Pad V1 GND) -->
+                <circle id="tp_pad_outminus" cx="${tpX + tpW - 16}" cy="${tpY + tpH - 24}" r="8" fill="url(#solderGrad)" stroke="#64748b" stroke-width="1.8" />
+                <text x="${tpX + tpW - 32}" y="${tpY + tpH - 22}" fill="#cbd5e1" font-size="7" font-weight="900" font-family="monospace" text-anchor="end">OUT-</text>
               </g>
             `;
-        })()}
+          })()}
 
           <!-- ========================================================= -->
           <!-- 4. REAL INTERCONNECTING SILICONE WIRING HARNESS           -->
           <!-- ========================================================= -->
           ${(() => {
-          const tpX = pwrX + (pwrW - 265) / 2; // 777.5
-          const tpY = pwrY + 85;               // 145
-          const tpW = 265, tpH = 164;
-          const hX = pwrX + (pwrW - 203) / 2;  // 808.5
-          const hY = pwrY + 365;
-          const hW = 203, hH = 718;
-          const swX = pwrX + (pwrW - 84) / 2;
-          const swY = pwrY + 285;
+            const hW = 510;
+            const hH = 156;
+            const hX = pwrX + (pwrW - hW) / 2; // 117 px
+            const hY = pwrY + 74;
 
-          // Wire 1: 18650 (+) button at (hX + 22, hY + 14) -> TP4056 B+ pad at (tpX + 16, tpY + 84)
-          const w1_start = { x: hX + 22, y: hY + 14 };
-          const w1_end = { x: tpX + 16, y: tpY + 84 };
+            const tpW = 265, tpH = 135;
+            const tpX = pwrX + pwrW - tpW - 40; // 359 px
+            const tpY = pwrY + 245;
 
-          // Wire 2: 18650 (-) spring at (hX + hW - 22, hY + hH - 14) -> TP4056 B- pad at (tpX + tpW - 16, tpY + 84)
-          const w2_start = { x: hX + hW - 22, y: hY + hH - 14 };
-          const w2_end = { x: tpX + tpW - 16, y: tpY + 84 };
+            const swW = 84, swH = 38;
+            const swX = pwrX + 40;              // 120 px
+            const swY = pwrY + 258;
 
-          // Wire 3: TP4056 OUT+ at (tpX + 16, tpY + tpH - 16) -> Switch In at (swX + 16, swY + 38 + 8)
-          const w3_start = { x: tpX + 16, y: tpY + tpH - 16 };
-          const w3_end = { x: swX + 16, y: swY + 38 + 8 };
+            // Wire 1: 14500 (+) eyelet -> TP4056 B+
+            const w1_start = { x: hX + 13, y: hY + 16 };
+            const w1_end = { x: tpX + 16, y: tpY + 20 };
 
-          // Wire 4: Switch Out at (swX + 38, swY + 38 + 8) -> curves across into Perfboard B3 VSYS at (pBat.x, pBat.y)
-          const w4_start = { x: swX + 38, y: swY + 38 + 8 };
-          const w4_end = { x: pBat.x, y: pBat.y };
+            // Wire 2: 14500 (-) eyelet -> TP4056 B-
+            const w2_start = { x: hX + hW - 13, y: hY + 16 };
+            const w2_end = { x: tpX + tpW - 16, y: tpY + 20 };
 
-          // Wire 5: TP4056 OUT- at (tpX + tpW - 16, tpY + tpH - 16) -> curves gracefully across into Perfboard Pad V1 (-GND)
-          const w5_start = { x: tpX + tpW - 16, y: tpY + tpH - 16 };
-          const w5_end = { x: pV1.x, y: pV1.y };
+            // Wire 3: TP4056 OUT+ -> Switch In
+            const w3_start = { x: tpX + 16, y: tpY + tpH - 24 };
+            const w3_end = { x: swX + 16, y: swY + swH + 8 };
 
-          return `
+            // Wire 4: Switch Out -> Up left chassis duct into Motherboard Pad A1 (+VSYS IN)
+            const w4_start = { x: swX + 38, y: swY + swH + 8 };
+            const w4_end = { x: pBat.x, y: pBat.y };
+
+            // Wire 5: TP4056 OUT- -> Up right chassis duct into Motherboard Pad V1 (GND)
+            const w5_start = { x: tpX + tpW - 16, y: tpY + tpH - 24 };
+            const w5_end = { x: pV1.x, y: pV1.y };
+
+            return `
               <g class="power-wiring-harness">
-                <!-- Wire 1: 18650 (+) Red to TP4056 B+ -->
-                <path d="M ${w1_start.x} ${w1_start.y} C ${w1_start.x - 35} ${w1_start.y - 40}, ${w1_end.x - 35} ${w1_end.y + 40}, ${w1_end.x} ${w1_end.y}" fill="none" stroke="#ef4444" stroke-width="4.2" stroke-linecap="round" />
-                <path d="M ${w1_start.x} ${w1_start.y} C ${w1_start.x - 35} ${w1_start.y - 40}, ${w1_end.x - 35} ${w1_end.y + 40}, ${w1_end.x} ${w1_end.y}" fill="none" stroke="#fca5a5" stroke-width="1.2" stroke-linecap="round" opacity="0.6" />
+                <!-- Wire 1: 14500 (+) Red to TP4056 B+ -->
+                <path d="M ${w1_start.x} ${w1_start.y} C ${w1_start.x - 20} ${w1_start.y + 60}, ${w1_end.x - 40} ${w1_end.y - 40}, ${w1_end.x} ${w1_end.y}" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round" />
+                <path d="M ${w1_start.x} ${w1_start.y} C ${w1_start.x - 20} ${w1_start.y + 60}, ${w1_end.x - 40} ${w1_end.y - 40}, ${w1_end.x} ${w1_end.y}" fill="none" stroke="#fca5a5" stroke-width="1" stroke-linecap="round" opacity="0.6" />
 
-                <!-- Wire 2: 18650 (-) Black to TP4056 B- -->
-                <path d="M ${w2_start.x} ${w2_start.y} C ${w2_start.x + 55} ${w2_start.y - 120}, ${w2_end.x + 55} ${w2_end.y + 80}, ${w2_end.x} ${w2_end.y}" fill="none" stroke="#1e293b" stroke-width="5" stroke-linecap="round" />
-                <path d="M ${w2_start.x} ${w2_start.y} C ${w2_start.x + 55} ${w2_start.y - 120}, ${w2_end.x + 55} ${w2_end.y + 80}, ${w2_end.x} ${w2_end.y}" fill="none" stroke="#0ea5e9" stroke-width="3.2" stroke-linecap="round" />
+                <!-- Wire 2: 14500 (-) Black to TP4056 B- -->
+                <path d="M ${w2_start.x} ${w2_start.y} C ${w2_start.x + 20} ${w2_start.y + 60}, ${w2_end.x + 40} ${w2_end.y - 40}, ${w2_end.x} ${w2_end.y}" fill="none" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round" />
+                <path d="M ${w2_start.x} ${w2_start.y} C ${w2_start.x + 20} ${w2_start.y + 60}, ${w2_end.x + 40} ${w2_end.y - 40}, ${w2_end.x} ${w2_end.y}" fill="none" stroke="#38bdf8" stroke-width="1.2" stroke-linecap="round" opacity="0.7" />
 
-                <!-- Wire 3: TP4056 OUT+ Amber to Switch In -->
-                <path d="M ${w3_start.x} ${w3_start.y} C ${w3_start.x - 20} ${w3_start.y + 25}, ${w3_end.x - 20} ${w3_end.y - 25}, ${w3_end.x} ${w3_end.y}" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" />
+                <!-- Wire 3: TP4056 OUT+ to Switch In -->
+                <path d="M ${w3_start.x} ${w3_start.y} C ${w3_start.x - 40} ${w3_start.y + 50}, ${w3_end.x + 40} ${w3_end.y + 50}, ${w3_end.x} ${w3_end.y}" fill="none" stroke="#f59e0b" stroke-width="3.2" stroke-linecap="round" />
 
-                <!-- Wire 4: Switch Out Amber/Red Flying across to Perfboard Pad A1 (+VSYS) -->
-                <path d="M ${w4_start.x} ${w4_start.y} C ${w4_start.x + 120} ${w4_start.y - 80}, ${w4_end.x - 80} ${w4_end.y + 100}, ${w4_end.x} ${w4_end.y}" fill="none" stroke="#f59e0b" stroke-width="4.5" stroke-linecap="round" data-net="VSYS_BAT">
-                  <title>Flying Lead: Protected 3.7V Power from Switch ➔ Perfboard Pad A1 (+VSYS)</title>
+                <!-- Wire 4: Switch Out -> Up left side duct to Motherboard Pad A1 (+VSYS IN) -->
+                <path d="M ${w4_start.x} ${w4_start.y} C ${w4_start.x - 40} ${w4_start.y + 40}, 50 ${pwrY + 100}, 50 ${BOARD_Y + BOARD_H} L 50 120 C 50 80, ${w4_end.x - 20} 80, ${w4_end.x} ${w4_end.y}" fill="none" stroke="#f59e0b" stroke-width="3.8" stroke-linecap="round" data-net="VSYS_BAT">
+                  <title>Switched Battery Power Rail: Runs up left chassis margin duct directly into Pad A1 (+VSYS IN)</title>
                 </path>
-                <path d="M ${w4_start.x} ${w4_start.y} C ${w4_start.x + 120} ${w4_start.y - 80}, ${w4_end.x - 80} ${w4_end.y + 100}, ${w4_end.x} ${w4_end.y}" fill="none" stroke="#fef08a" stroke-width="1.2" stroke-linecap="round" opacity="0.7" pointer-events="none" />
+                <path d="M ${w4_start.x} ${w4_start.y} C ${w4_start.x - 40} ${w4_start.y + 40}, 50 ${pwrY + 100}, 50 ${BOARD_Y + BOARD_H} L 50 120 C 50 80, ${w4_end.x - 20} 80, ${w4_end.x} ${w4_end.y}" fill="none" stroke="#fef08a" stroke-width="1.2" stroke-linecap="round" opacity="0.75" pointer-events="none" />
 
-                <!-- Wire 5: TP4056 OUT- Perimeter Silicone Wire (Routed completely around/above the board without disturbing components) -->
-                <path d="M ${w5_start.x} ${w5_start.y} C ${w5_start.x + 30} ${w5_start.y - 120}, 20 28, 70 28 L ${w5_end.x - 18} 28 C ${w5_end.x} 28, ${w5_end.x} 48, ${w5_end.x} ${w5_end.y}" fill="none" stroke="#334155" stroke-width="5.2" stroke-linecap="round" />
-                <path d="M ${w5_start.x} ${w5_start.y} C ${w5_start.x + 30} ${w5_start.y - 120}, 20 28, 70 28 L ${w5_end.x - 18} 28 C ${w5_end.x} 28, ${w5_end.x} 48, ${w5_end.x} ${w5_end.y}" fill="none" stroke="#475569" stroke-width="3.8" stroke-linecap="round" data-net="GND">
-                  <title>External Perimeter Wire: Ground from TP4056 OUT- ➔ Routed around top chassis edge into Pad V1 (Zero board obstruction)</title>
+                <!-- Wire 5: TP4056 OUT- -> Up right side duct to Motherboard Pad V1 (GND) -->
+                <path d="M ${w5_start.x} ${w5_start.y} C ${w5_start.x + 40} ${w5_start.y + 40}, ${BOARD_X + BOARD_W + 30} ${pwrY + 100}, ${BOARD_X + BOARD_W + 30} ${BOARD_Y + BOARD_H} L ${BOARD_X + BOARD_W + 30} 120 C ${BOARD_X + BOARD_W + 30} 80, ${w5_end.x + 20} 80, ${w5_end.x} ${w5_end.y}" fill="none" stroke="#475569" stroke-width="3.8" stroke-linecap="round" data-net="GND">
+                  <title>Battery Ground Rail: Runs up right chassis margin duct directly into Pad V1 (Row 1 Master Ground)</title>
                 </path>
-                <path d="M ${w5_start.x} ${w5_start.y} C ${w5_start.x + 30} ${w5_start.y - 120}, 20 28, 70 28 L ${w5_end.x - 18} 28 C ${w5_end.x} 28, ${w5_end.x} 48, ${w5_end.x} ${w5_end.y}" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" opacity="0.75" pointer-events="none" />
-                
-                <!-- Wire Duct Tag above board -->
-                <rect x="${(70 + w5_end.x) / 2 - 80}" y="18" width="160" height="15" rx="3" fill="#0f172a" stroke="#475569" stroke-width="0.8" />
-                <text x="${(70 + w5_end.x) / 2}" y="28.5" fill="#94a3b8" font-size="7" font-weight="800" font-family="monospace" text-anchor="middle">CHASSIS WIRE DUCT (GND ➔ V1)</text>
+                <path d="M ${w5_start.x} ${w5_start.y} C ${w5_start.x + 40} ${w5_start.y + 40}, ${BOARD_X + BOARD_W + 30} ${pwrY + 100}, ${BOARD_X + BOARD_W + 30} ${BOARD_Y + BOARD_H} L ${BOARD_X + BOARD_W + 30} 120 C ${BOARD_X + BOARD_W + 30} 80, ${w5_end.x + 20} 80, ${w5_end.x} ${w5_end.y}" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" opacity="0.75" pointer-events="none" />
               </g>
             `;
-        })()}
-
-          <!-- ========================================================= -->
-          <!-- 5. SPECIFICATIONS & BATTERY MANAGEMENT INFO CARD          -->
-          <!-- ========================================================= -->
-          <g transform="translate(${pwrX + 20}, ${pwrY + 1150})">
-            <rect x="0" y="0" width="${pwrW - 40}" height="410" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
-            
-            <text x="14" y="26" fill="#38bdf8" font-size="10.5" font-weight="900" font-family="monospace">⚡ BATTERY & CHARGING SYSTEM SPECS</text>
-            <line x1="14" y1="36" x2="${pwrW - 54}" y2="36" stroke="#1e293b" stroke-width="1.2" />
-
-            <text x="14" y="60" fill="#f8fafc" font-size="9" font-weight="800" font-family="monospace">• Battery Chemistry:</text>
-            <text x="28" y="76" fill="#cbd5e1" font-size="8.5" font-family="monospace">Rechargeable Li-ion (ICR 18650, 2000mAh)</text>
-
-            <text x="14" y="100" fill="#f8fafc" font-size="9" font-weight="800" font-family="monospace">• Operating Voltages:</text>
-            <text x="28" y="116" fill="#cbd5e1" font-size="8.5" font-family="monospace">Nominal: 3.7V | Full: 4.2V | Cutoff: 2.75V</text>
-
-            <text x="14" y="140" fill="#f8fafc" font-size="9" font-weight="800" font-family="monospace">• Charging Interface:</text>
-            <text x="28" y="156" fill="#cbd5e1" font-size="8.5" font-family="monospace">USB Type-C (5V @ 1.0A Constant Current)</text>
-
-            <text x="14" y="180" fill="#f8fafc" font-size="9" font-weight="800" font-family="monospace">• Dual Charge Indicator LEDs:</text>
-            <text x="28" y="196" fill="#f87171" font-size="8.5" font-weight="700" font-family="monospace">Red CHG: Fast charging in progress</text>
-            <text x="28" y="210" fill="#60a5fa" font-size="8.5" font-weight="700" font-family="monospace">Blue FULL: Fully charged (4.20V cutoff)</text>
-
-            <text x="14" y="234" fill="#f8fafc" font-size="9" font-weight="800" font-family="monospace">• Built-In Hardware Protection:</text>
-            <text x="28" y="250" fill="#cbd5e1" font-size="8.5" font-family="monospace">DW01A + 8205A Over-discharge (2.5V cutoff),</text>
-            <text x="28" y="264" fill="#cbd5e1" font-size="8.5" font-family="monospace">Over-charge (4.2V cutoff), Short-circuit (3A)</text>
-
-            <text x="14" y="290" fill="#f8fafc" font-size="9" font-weight="800" font-family="monospace">• Pico Voltage Compatibility:</text>
-            <text x="28" y="306" fill="#cbd5e1" font-size="8.5" font-family="monospace">Pico Pin 39 (VSYS) accepts 1.8V to 5.5V.</text>
-            <text x="28" y="320" fill="#a7f3d0" font-size="8.5" font-weight="700" font-family="monospace">Onboard RT6150 regulates 3.7V down to 3.3V.</text>
-
-            <text x="14" y="346" fill="#f8fafc" font-size="9" font-weight="800" font-family="monospace">• Software Battery Monitoring:</text>
-            <text x="28" y="362" fill="#fef08a" font-size="8.5" font-weight="800" font-family="monospace">Pico internal ADC3 (GP29) samples VSYS / 3</text>
-            <text x="28" y="376" fill="#cbd5e1" font-size="8" font-family="monospace">Vbat = ADC(29).read_u16() * 3.3 / 65535 * 3</text>
-            <text x="28" y="392" fill="#38bdf8" font-size="8.5" font-weight="800" font-family="monospace">Runtime: 100+ Hours Active / Months Standby</text>
-          </g>
+          })()}
         </g>
       `;
 
@@ -1947,388 +1869,7 @@
     }
 
 
-    // -------------------------------------------------------------
-    // 5C. ULTRA-COMPACT 3-ROW OPTICAL & IR DAUGHTERBOARD BREAKOUT MODULE
-    // REDESIGNED: 16 COLS × 3 ROWS WITH 4-HOLE HORIZONTAL RESISTORS
-    // -------------------------------------------------------------
-    function renderIrDaughterboard() {
-      const g = document.getElementById('irDaughterboardGroup');
-      if (!g) return;
 
-      const irX = 740;
-      const irY = 60;
-      const irW = 460;
-      const irH = 500;
-
-      // 16 Columns x 3 Rows Mini-Perfboard grid:
-      // Resistors (R1, R2, R3) each consume 4 holes horizontally (3 pitch increments = 72px)
-      const pitch = 24;
-      const x0 = 790; // Centered across irW: 740 + (460 - 15*24)/2 = 790
-      const y0 = 190; // Row 1 at 190, Row 2 at 214, Row 3 at 238
-
-      function cx(col) { return x0 + (col - 1) * pitch; }
-      function cy(row) { return y0 + (row - 1) * pitch; }
-
-      let html = `
-        <!-- Daughterboard Chassis Plate -->
-        <g class="ir-daughterboard-chassis">
-          <!-- Dark obsidian outer mounting tray -->
-          <rect x="${irX}" y="${irY}" width="${irW}" height="${irH}" rx="14" fill="#090e17" stroke="#1e293b" stroke-width="4" filter="url(#shadow)" />
-          <!-- Neon purple perimeter silkscreen rule -->
-          <rect x="${irX + 6}" y="${irY + 6}" width="${irW - 12}" height="${irH - 12}" rx="10" fill="none" stroke="#a855f7" stroke-width="1.2" stroke-opacity="0.65" />
-          <rect x="${irX}" y="${irY}" width="${irW}" height="${irH}" rx="14" fill="url(#fiberglassPattern)" opacity="0.25" />
-
-          <!-- Header Title & Architecture Badges -->
-          <text x="${irX + irW / 2}" y="${irY - 16}" fill="#a855f7" font-size="13" font-weight="800" text-anchor="middle" font-family="monospace">IR TRANSCEIVER DAUGHTERBOARD (16×3 • 4-HOLE RESISTORS)</text>
-
-          <rect x="${irX + 16}" y="${irY + 16}" width="${irW - 32}" height="42" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
-          <text x="${irX + irW / 2}" y="${irY + 34}" fill="#38bdf8" font-size="10" font-weight="900" font-family="monospace" text-anchor="middle">16 COLS × 3 ROWS PERFBOARD BREAKOUT (4-HOLE AXIAL RESISTORS)</text>
-          <text x="${irX + irW / 2}" y="${irY + 49}" fill="#94a3b8" font-size="8" font-family="monospace" text-anchor="middle">R1, R2, R3 Lie Flat Across 4 Holes • 100% Orthogonal • Dual 940nm LEDs + VS1838B</text>
-
-          <!-- ========================================================= -->
-          <!-- MINI PERFBOARD SUBSTRATE (16 COLS × 3 ROWS)               -->
-          <!-- ========================================================= -->
-          <!-- Substrate Plate (Matte Forest Green FR4) -->
-          <rect x="${x0 - 20}" y="${y0 - 26}" width="${15 * pitch + 40}" height="${2 * pitch + 52}" rx="8" fill="#062e1e" stroke="#059669" stroke-width="2" filter="url(#shadow)" />
-          <rect x="${x0 - 16}" y="${y0 - 22}" width="${15 * pitch + 32}" height="${2 * pitch + 44}" rx="5" fill="none" stroke="#ca8a04" stroke-width="0.9" opacity="0.8" />
-
-          <!-- Column Numbers Silkscreen at Top (Cols 1 through 16) -->
-          ${Array.from({ length: 16 }, (_, i) => `
-            <text x="${cx(i + 1)}" y="${y0 - 13}" fill="#38bdf8" font-size="7.5" font-weight="800" font-family="monospace" text-anchor="middle">${i + 1}</text>
-          `).join('')}
-
-          <!-- Row Identifiers Silkscreen at Left -->
-          <text x="${x0 - 24}" y="${cy(1) + 3}" fill="#38bdf8" font-size="7" font-weight="800" font-family="monospace" text-anchor="end">R1 (Optics)</text>
-          <text x="${x0 - 24}" y="${cy(2) + 3}" fill="#f59e0b" font-size="7" font-weight="800" font-family="monospace" text-anchor="end">R2 (R2, Q1, R3)</text>
-          <text x="${x0 - 24}" y="${cy(3) + 3}" fill="#a855f7" font-size="7" font-weight="800" font-family="monospace" text-anchor="end">R3 (R1, Header)</text>
-
-          <!-- Annular Ring Through-Hole Copper Pads (48 Holes) -->
-          ${Array.from({ length: 3 }, (_, r) => Array.from({ length: 16 }, (_, c) => `
-            <circle cx="${cx(c + 1)}" cy="${cy(r + 1)}" r="4.4" fill="url(#solderGrad)" stroke="#f59e0b" stroke-width="1.1" />
-            <circle cx="${cx(c + 1)}" cy="${cy(r + 1)}" r="1.5" fill="#090d16" />
-          `).join('')).join('')}
-
-          <!-- ========================================================= -->
-          <!-- STRICTLY ORTHOGONAL COPPER TRACES ON DAUGHTERBOARD       -->
-          <!-- ========================================================= -->
-          <!-- 1. VSYS Bus (+3.7V - 5V) [Gold #f59e0b]: Pin 1 (Row 3 Col 1) -> Row 2 Col 1 -> R3 Col 16 -->
-          <line x1="${cx(1)}" y1="${cy(3)}" x2="${cx(1)}" y2="${cy(2)}" stroke="#f59e0b" stroke-width="2.6" stroke-linecap="round" />
-          <path d="M ${cx(1)} ${cy(2)} L ${cx(1)} ${cy(2) + 12} L ${cx(16)} ${cy(2) + 12} L ${cx(16)} ${cy(2)}" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-
-          <!-- 2. Cathode Bus [Cyan #38bdf8]: Ties LED 1 Cathode & LED 2 Cathode to Q1 Collector @ Row 2 Col 5 -->
-          <!-- LED 1 Cathode (Row 1 Col 5) straight vertical drop to Q1 Collector (Row 2 Col 5) -->
-          <line x1="${cx(5)}" y1="${cy(1)}" x2="${cx(5)}" y2="${cy(2)}" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" />
-          <!-- LED 2 Cathode (Row 1 Col 12) orthogonal link to Col 5 -->
-          <path d="M ${cx(12)} ${cy(1)} L ${cx(12)} ${cy(1) + 12} L ${cx(5)} ${cy(1) + 12}" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-
-          <!-- 3. GND Bus [Slate #94a3b8]: Ties Q1 Emitter & TSOP GND to Header Pin 3 @ Row 3 Col 7 -->
-          <!-- Q1 Emitter (Row 2 Col 7) straight vertical drop to Header Pin 3 (Row 3 Col 7) -->
-          <line x1="${cx(7)}" y1="${cy(2)}" x2="${cx(7)}" y2="${cy(3)}" stroke="#94a3b8" stroke-width="2.6" stroke-linecap="round" />
-          <!-- TSOP GND (Row 1 Col 10) orthogonal link to Col 7 -->
-          <path d="M ${cx(10)} ${cy(1)} L ${cx(10)} ${cy(2) + 2} L ${cx(7)} ${cy(2) + 2}" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-
-          <!-- 4. 3V3 Line [Amber #fb923c]: TSOP VCC (Row 1 Col 11) straight vertical to Header Pin 5 (Row 3 Col 11) -->
-          <line x1="${cx(11)}" y1="${cy(1)}" x2="${cx(11)}" y2="${cy(3)}" stroke="#fb923c" stroke-width="2.6" stroke-linecap="round" />
-
-          <!-- 5. IR_RX Signal [Teal #10b981]: TSOP OUT (Row 1 Col 9) straight vertical to Header Pin 4 (Row 3 Col 9) -->
-          <line x1="${cx(9)}" y1="${cy(1)}" x2="${cx(9)}" y2="${cy(3)}" stroke="#10b981" stroke-width="2.6" stroke-linecap="round" />
-
-          <!-- 6. IR_TX Signal [Orange #f97316]: Q1 Base (Row 2 Col 6) drops to R1 Lead B (Row 3 Col 6) -->
-          <line x1="${cx(6)}" y1="${cy(2)}" x2="${cx(6)}" y2="${cy(3)}" stroke="#f97316" stroke-width="2.6" stroke-linecap="round" />
-
-          <!-- 7. LED 1 Anode Feed: R2 Lead B (Row 2 Col 4) straight up to LED 1 Anode (Row 1 Col 4) -->
-          <line x1="${cx(4)}" y1="${cy(2)}" x2="${cx(4)}" y2="${cy(1)}" stroke="#f59e0b" stroke-width="2.6" stroke-linecap="round" />
-
-          <!-- 8. LED 2 Anode Feed: R3 Lead A (Row 2 Col 13) straight up to LED 2 Anode (Row 1 Col 13) -->
-          <line x1="${cx(13)}" y1="${cy(2)}" x2="${cx(13)}" y2="${cy(1)}" stroke="#f59e0b" stroke-width="2.6" stroke-linecap="round" />
-
-          <!-- ========================================================= -->
-          <!-- PHYSICAL COMPONENTS ON DAUGHTERBOARD                      -->
-          <!-- ========================================================= -->
-
-          <!-- A. RESISTOR R2 (22 Ω, Row 2: Col 1 to Col 4 Horizontal — EXACTLY 4 HOLES) -->
-          ${(() => {
-          const midR2X = (cx(1) + cx(4)) / 2;
-          const r2BodyW = 34;
-          const r2BodyH = 10;
-          return `
-              <g class="daughter-r2" data-net="R2_LED1">
-                <title>IR LED 1 Current Limiter R2: 22 Ω (Horizontal Col 1 to Col 4: EXACTLY 4 HOLES SPAN, 7.62mm pitch)</title>
-                <!-- Axial Leads spanning Col 1 to Col 4 -->
-                <line x1="${cx(1)}" y1="${cy(2)}" x2="${cx(4)}" y2="${cy(2)}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <line x1="${cx(1)}" y1="${cy(2)}" x2="${cx(4)}" y2="${cy(2)}" stroke="#f8fafc" stroke-width="0.8" stroke-linecap="round" opacity="0.85" />
-
-                <!-- Ceramic Resistor Cylindrical Body covering Holes 2 and 3 -->
-                <rect x="${midR2X - r2BodyW / 2}" y="${cy(2) - r2BodyH / 2}" width="${r2BodyW}" height="${r2BodyH}" rx="3.5" fill="url(#resistorBodyGrad)" stroke="#78350f" stroke-width="1.1" filter="url(#shadow)" />
-
-                <!-- Color Bands: Red (2), Red (2), Black (x1), Gold (5%) -->
-                <rect x="${midR2X - 10}" y="${cy(2) - r2BodyH / 2}" width="2.4" height="${r2BodyH}" fill="#dc2626" />
-                <rect x="${midR2X - 5}" y="${cy(2) - r2BodyH / 2}" width="2.4" height="${r2BodyH}" fill="#dc2626" />
-                <rect x="${midR2X}" y="${cy(2) - r2BodyH / 2}" width="2.4" height="${r2BodyH}" fill="#0f172a" />
-                <rect x="${midR2X + 6}" y="${cy(2) - r2BodyH / 2}" width="2.2" height="${r2BodyH}" fill="#eab308" />
-
-                <!-- 4-Hole Span Indicators -->
-                <text x="${midR2X}" y="${cy(2) - 8}" fill="#fda4af" font-size="5.5" font-weight="900" font-family="monospace" text-anchor="middle">R2 (22Ω) • 4-HOLES</text>
-              </g>
-            `;
-        })()}
-
-          <!-- B. RIGHT-ANGLE IR LED 1 (Row 1: Col 4 [Anode +], Col 5 [Cathode -] facing North) -->
-          ${(() => {
-          const midLed1X = (cx(4) + cx(5)) / 2;
-          return `
-              <g class="daughter-led1" data-net="IR_LED1">
-                <title>IR LED 1 (940nm High-Power Emitter): Anode @ Col 4, Cathode @ Col 5 (Facing North)</title>
-                <!-- Optical Radiation Beam Cone -->
-                <polygon points="${midLed1X - 6},${cy(1) - 15} ${midLed1X - 28},${cy(1) - 52} ${midLed1X + 28},${cy(1) - 52} ${midLed1X + 6},${cy(1) - 15}" fill="url(#irBeamGrad)" />
-                <path d="M ${midLed1X - 12} ${cy(1) - 22} Q ${midLed1X} ${cy(1) - 30}, ${midLed1X + 12} ${cy(1) - 22}" fill="none" stroke="#f97316" stroke-width="1.2" stroke-linecap="round" opacity="0.8" />
-                <path d="M ${midLed1X - 20} ${cy(1) - 32} Q ${midLed1X} ${cy(1) - 42}, ${midLed1X + 20} ${cy(1) - 32}" fill="none" stroke="#fb923c" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="2 2" opacity="0.6" />
-
-                <!-- Metallic Right-Angle Leads into Col 4 & Col 5 -->
-                <path d="M ${cx(4)} ${cy(1)} L ${cx(4)} ${cy(1) - 8} L ${midLed1X - 4} ${cy(1) - 8}" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <path d="M ${cx(5)} ${cy(1)} L ${cx(5)} ${cy(1) - 8} L ${midLed1X + 4} ${cy(1) - 8}" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-
-                <!-- LED Base Flange Collar -->
-                <rect x="${midLed1X - 9}" y="${cy(1) - 10}" width="18" height="3.5" rx="1.5" fill="#1e1b4b" stroke="#7e22ce" stroke-width="1" />
-                <!-- 5mm Translucent Purple Resin Cylindrical Body -->
-                <rect x="${midLed1X - 7.5}" y="${cy(1) - 26}" width="15" height="16" rx="1.5" fill="url(#irLedGrad)" stroke="#a855f7" stroke-width="1.3" filter="url(#shadow)" />
-                <!-- Hemispherical Dome Facing North -->
-                <path d="M ${midLed1X - 7.5} ${cy(1) - 26} C ${midLed1X - 7.5} ${cy(1) - 37}, ${midLed1X + 7.5} ${cy(1) - 37}, ${midLed1X + 7.5} ${cy(1) - 26} Z" fill="url(#irLedGrad)" stroke="#c084fc" stroke-width="1.3" />
-
-                <!-- Silkscreen label -->
-                <text x="${midLed1X}" y="${cy(1) + 11}" fill="#fb923c" font-size="6" font-weight="900" font-family="monospace" text-anchor="middle">LED 1</text>
-              </g>
-            `;
-        })()}
-
-          <!-- C. TRANSISTOR Q1 (2N2222 NPN, Row 2: Col 5=C, Col 6=B, Col 7=E) -->
-          ${(() => {
-          const qX = cx(6);
-          return `
-              <g class="daughter-q1" data-net="Q1_2N2222">
-                <title>2N2222 NPN Transistor (TO-92): Col 5=Collector, Col 6=Base, Col 7=Emitter</title>
-                <!-- Metallic Leads into Col 5, 6, 7 -->
-                <line x1="${cx(5)}" y1="${cy(2)}" x2="${cx(5)}" y2="${cy(2) + 9}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <line x1="${cx(6)}" y1="${cy(2)}" x2="${cx(6)}" y2="${cy(2) + 9}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <line x1="${cx(7)}" y1="${cy(2)}" x2="${cx(7)}" y2="${cy(2) + 9}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-
-                <!-- TO-92 Molded Body: Flat North Face, Curved South Back -->
-                <path d="M ${qX - 11} ${cy(2) + 7} L ${qX + 11} ${cy(2) + 7} A 11 11 0 0 1 ${qX - 11} ${cy(2) + 7} Z" fill="#0f172a" stroke="#38bdf8" stroke-width="1.3" filter="url(#shadow)" />
-                <text x="${qX}" y="${cy(2) + 13}" fill="#e2e8f0" font-size="4.5" font-weight="900" font-family="monospace" text-anchor="middle">2N2222</text>
-                <text x="${qX}" y="${cy(2) + 17}" fill="#38bdf8" font-size="3.8" font-weight="800" font-family="monospace" text-anchor="middle">NPN</text>
-
-                <!-- Terminal Badges -->
-                <text x="${cx(5)}" y="${cy(2) - 6}" fill="#bae6fd" font-size="5" font-weight="900" font-family="monospace" text-anchor="middle">C</text>
-                <text x="${cx(6)}" y="${cy(2) - 6}" fill="#bae6fd" font-size="5" font-weight="900" font-family="monospace" text-anchor="middle">B</text>
-                <text x="${cx(7)}" y="${cy(2) - 6}" fill="#bae6fd" font-size="5" font-weight="900" font-family="monospace" text-anchor="middle">E</text>
-              </g>
-            `;
-        })()}
-
-          <!-- D. RESISTOR R1 (1 kΩ Base Resistor, Row 3: Col 3 to Col 6 Horizontal — EXACTLY 4 HOLES) -->
-          <!-- D. RESISTOR R1 (220 Ω Base Resistor, Row 3: Col 3 to Col 6 Horizontal — EXACTLY 4 HOLES) -->
-          ${(() => {
-          const midR1X = (cx(3) + cx(6)) / 2;
-          const r1BodyW = 34;
-          const r1BodyH = 10;
-          return `
-              <g class="daughter-r1" data-net="R1_BASE">
-                <title>Base Resistor R1: 1 kΩ (Horizontal Col 3 to Col 6: EXACTLY 4 HOLES SPAN, 7.62mm pitch)</title>
-                <title>Base Resistor R1: 220 Ω (Horizontal Col 3 to Col 6: EXACTLY 4 HOLES SPAN, 7.62mm pitch)</title>
-                <!-- Axial Leads spanning Col 3 to Col 6 -->
-                <line x1="${cx(3)}" y1="${cy(3)}" x2="${cx(6)}" y2="${cy(3)}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <line x1="${cx(3)}" y1="${cy(3)}" x2="${cx(6)}" y2="${cy(3)}" stroke="#f8fafc" stroke-width="0.8" stroke-linecap="round" opacity="0.85" />
-
-                <!-- Ceramic Body covering Holes 4 and 5 on Row 3 -->
-                <rect x="${midR1X - r1BodyW / 2}" y="${cy(3) - r1BodyH / 2}" width="${r1BodyW}" height="${r1BodyH}" rx="3.5" fill="url(#resistorBodyGrad)" stroke="#78350f" stroke-width="1.1" filter="url(#shadow)" />
-
-                <!-- Color Bands: Brown (1), Black (0), Red (x100), Gold (5%) -->
-                <rect x="${midR1X - 10}" y="${cy(3) - r1BodyH / 2}" width="2.4" height="${r1BodyH}" fill="#78350f" />
-                <rect x="${midR1X - 5}" y="${cy(3) - r1BodyH / 2}" width="2.4" height="${r1BodyH}" fill="#0f172a" />
-                <rect x="${midR1X}" y="${cy(3) - r1BodyH / 2}" width="2.4" height="${r1BodyH}" fill="#dc2626" />
-                <!-- Color Bands: Red (2), Red (2), Brown (x10), Gold (5%) -->
-                <rect x="${midR1X - 10}" y="${cy(3) - r1BodyH / 2}" width="2.4" height="${r1BodyH}" fill="#dc2626" />
-                <rect x="${midR1X - 5}" y="${cy(3) - r1BodyH / 2}" width="2.4" height="${r1BodyH}" fill="#dc2626" />
-                <rect x="${midR1X}" y="${cy(3) - r1BodyH / 2}" width="2.4" height="${r1BodyH}" fill="#78350f" />
-                <rect x="${midR1X + 6}" y="${cy(3) - r1BodyH / 2}" width="2.2" height="${r1BodyH}" fill="#eab308" />
-
-                <!-- 4-Hole Span Indicator -->
-                <text x="${midR1X}" y="${cy(3) - 7}" fill="#fde68a" font-size="5.5" font-weight="900" font-family="monospace" text-anchor="middle">R1 (1kΩ) • 4-HOLES</text>
-                <text x="${midR1X}" y="${cy(3) - 7}" fill="#fde68a" font-size="5.5" font-weight="900" font-family="monospace" text-anchor="middle">R1 (220Ω) • 4-HOLES</text>
-              </g>
-            `;
-        })()}
-
-          <!-- E. VS1838B IR DEMODULATING RECEIVER (Row 1: Col 9 [OUT], Col 10 [GND], Col 11 [VCC] facing North) -->
-          ${(() => {
-          const rxX = cx(10);
-          const rxW = 2 * pitch + 16; // 64px
-          const rxH = 20;
-          return `
-              <g class="daughter-tsop-rx" data-net="IR_RX">
-                <title>VS1838B / TSOP38238 38kHz IR Demodulator: Pin 1 (OUT) @ Col 9, Pin 2 (GND) @ Col 10, Pin 3 (VCC) @ Col 11</title>
-                <!-- Metallic Leads into Col 9, 10, 11 -->
-                <line x1="${cx(9)}" y1="${cy(1)}" x2="${cx(9)}" y2="${cy(1) - 8}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <line x1="${cx(10)}" y1="${cy(1)}" x2="${cx(10)}" y2="${cy(1) - 8}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <line x1="${cx(11)}" y1="${cy(1)}" x2="${cx(11)}" y2="${cy(1) - 8}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-
-                <!-- Cast Dark Epoxy Body with Metallic Shield -->
-                <rect x="${rxX - rxW / 2}" y="${cy(1) - 27}" width="${rxW}" height="${rxH}" rx="3.5" fill="#022c22" stroke="#10b981" stroke-width="1.5" filter="url(#shadow)" />
-                <rect x="${rxX - rxW / 2 + 4}" y="${cy(1) - 24}" width="${rxW - 8}" height="${rxH - 6}" rx="2" fill="#0f172a" stroke="#334155" stroke-width="0.9" />
-
-                <!-- Hemispherical Optical Sensor Pickup Bulb Pointing North -->
-                <circle cx="${rxX}" cy="${cy(1) - 27}" r="7" fill="#1e1b4b" stroke="#38bdf8" stroke-width="1.3" />
-                <circle cx="${rxX}" cy="${cy(1) - 27}" r="4.6" fill="#0369a1" />
-                <circle cx="${rxX - 1.6}" cy="${cy(1) - 28.5}" r="1.6" fill="#ffffff" opacity="0.85" />
-
-                <!-- Silkscreen label -->
-                <text x="${rxX}" y="${cy(1) + 11}" fill="#34d399" font-size="6" font-weight="900" font-family="monospace" text-anchor="middle">TSOP RX</text>
-              </g>
-            `;
-        })()}
-
-          <!-- F. RIGHT-ANGLE IR LED 2 (Row 1: Col 12 [Cathode -], Col 13 [Anode +] facing North) -->
-          ${(() => {
-          const midLed2X = (cx(12) + cx(13)) / 2;
-          return `
-              <g class="daughter-led2" data-net="IR_LED2">
-                <title>IR LED 2 (940nm High-Power Emitter): Cathode @ Col 12, Anode @ Col 13 (Facing North)</title>
-                <!-- Optical Radiation Beam Cone -->
-                <polygon points="${midLed2X - 6},${cy(1) - 15} ${midLed2X - 28},${cy(1) - 52} ${midLed2X + 28},${cy(1) - 52} ${midLed2X + 6},${cy(1) - 15}" fill="url(#irBeamGrad)" />
-                <path d="M ${midLed2X - 12} ${cy(1) - 22} Q ${midLed2X} ${cy(1) - 30}, ${midLed2X + 12} ${cy(1) - 22}" fill="none" stroke="#f97316" stroke-width="1.2" stroke-linecap="round" opacity="0.8" />
-                <path d="M ${midLed2X - 20} ${cy(1) - 32} Q ${midLed2X} ${cy(1) - 42}, ${midLed2X + 20} ${cy(1) - 32}" fill="none" stroke="#fb923c" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="2 2" opacity="0.6" />
-
-                <!-- Metallic Right-Angle Leads into Col 12 & Col 13 -->
-                <path d="M ${cx(12)} ${cy(1)} L ${cx(12)} ${cy(1) - 8} L ${midLed2X - 4} ${cy(1) - 8}" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <path d="M ${cx(13)} ${cy(1)} L ${cx(13)} ${cy(1) - 8} L ${midLed2X + 4} ${cy(1) - 8}" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-
-                <!-- LED Base Flange Collar -->
-                <rect x="${midLed2X - 9}" y="${cy(1) - 10}" width="18" height="3.5" rx="1.5" fill="#1e1b4b" stroke="#7e22ce" stroke-width="1" />
-                <!-- 5mm Translucent Purple Resin Cylindrical Body -->
-                <rect x="${midLed2X - 7.5}" y="${cy(1) - 26}" width="15" height="16" rx="1.5" fill="url(#irLedGrad)" stroke="#a855f7" stroke-width="1.3" filter="url(#shadow)" />
-                <!-- Hemispherical Dome Facing North -->
-                <path d="M ${midLed2X - 7.5} ${cy(1) - 26} C ${midLed2X - 7.5} ${cy(1) - 37}, ${midLed2X + 7.5} ${cy(1) - 37}, ${midLed2X + 7.5} ${cy(1) - 26} Z" fill="url(#irLedGrad)" stroke="#c084fc" stroke-width="1.3" />
-
-                <!-- Silkscreen label -->
-                <text x="${midLed2X}" y="${cy(1) + 11}" fill="#fb923c" font-size="6" font-weight="900" font-family="monospace" text-anchor="middle">LED 2</text>
-              </g>
-            `;
-        })()}
-
-          <!-- G. RESISTOR R3 (22 Ω, Row 2: Col 13 to Col 16 Horizontal — EXACTLY 4 HOLES) -->
-          ${(() => {
-          const midR3X = (cx(13) + cx(16)) / 2;
-          const r3BodyW = 34;
-          const r3BodyH = 10;
-          return `
-              <g class="daughter-r3" data-net="R3_LED2">
-                <title>IR LED 2 Current Limiter R3: 22 Ω (Horizontal Col 13 to Col 16: EXACTLY 4 HOLES SPAN, 7.62mm pitch)</title>
-                <!-- Axial Leads spanning Col 13 to Col 16 -->
-                <line x1="${cx(13)}" y1="${cy(2)}" x2="${cx(16)}" y2="${cy(2)}" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" />
-                <line x1="${cx(13)}" y1="${cy(2)}" x2="${cx(16)}" y2="${cy(2)}" stroke="#f8fafc" stroke-width="0.8" stroke-linecap="round" opacity="0.85" />
-
-                <!-- Ceramic Body covering Holes 14 and 15 on Row 2 -->
-                <rect x="${midR3X - r3BodyW / 2}" y="${cy(2) - r3BodyH / 2}" width="${r3BodyW}" height="${r3BodyH}" rx="3.5" fill="url(#resistorBodyGrad)" stroke="#78350f" stroke-width="1.1" filter="url(#shadow)" />
-
-                <!-- Color Bands: Red (2), Red (2), Black (x1), Gold (5%) -->
-                <rect x="${midR3X - 10}" y="${cy(2) - r3BodyH / 2}" width="2.4" height="${r3BodyH}" fill="#dc2626" />
-                <rect x="${midR3X - 5}" y="${cy(2) - r3BodyH / 2}" width="2.4" height="${r3BodyH}" fill="#dc2626" />
-                <rect x="${midR3X}" y="${cy(2) - r3BodyH / 2}" width="2.4" height="${r3BodyH}" fill="#0f172a" />
-                <rect x="${midR3X + 6}" y="${cy(2) - r3BodyH / 2}" width="2.2" height="${r3BodyH}" fill="#eab308" />
-
-                <!-- 4-Hole Span Indicator -->
-                <text x="${midR3X}" y="${cy(2) - 8}" fill="#fda4af" font-size="5.5" font-weight="900" font-family="monospace" text-anchor="middle">R3 (22Ω) • 4-HOLES</text>
-              </g>
-            `;
-        })()}
-
-          <!-- H. 5-PIN MALE INTERCONNECT HEADER (Row 3: Cols 1, 3, 7, 9, 11) -->
-          ${[
-          { col: 1, pin: 1, label: 'VSYS', net: 'VSYS_BAT', color: '#f59e0b', desc: 'Pin 1: VSYS (+3.7V - 5V) Power Rail to R2 & R3' },
-          { col: 3, pin: 2, label: 'IR_TX', net: 'IR_TX', color: '#f97316', desc: 'Pin 2: Pico GP28 PWM Base Drive via R1' },
-          { col: 7, pin: 3, label: 'GND', net: 'GND', color: '#64748b', desc: 'Pin 3: Common System Ground (Q1 Emitter & TSOP GND)' },
-          { col: 9, pin: 4, label: 'IR_RX', net: 'IR_RX', color: '#06b6d4', desc: 'Pin 4: Demodulated 38kHz signal from TSOP to Pico GP27' },
-          { col: 11, pin: 5, label: '3V3', net: 'VCC_3V3', color: '#fb923c', desc: 'Pin 5: Clean 3.3V Power for TSOP Receiver VCC' }
-        ].map(h => `
-            <g class="daughter-header-pin" data-net="${h.net}">
-              <title>${h.desc}</title>
-              <!-- Gold Plated Square Male Pin Header Post -->
-              <rect x="${cx(h.col) - 3.5}" y="${cy(3) - 3.5}" width="7" height="7" rx="1" fill="#fbbf24" stroke="#ca8a04" stroke-width="1" />
-              <rect x="${cx(h.col) - 2}" y="${cy(3) - 2}" width="4" height="4" fill="#fef08a" />
-              <!-- Silkscreen Pin Tag Badge below Row 3 -->
-              <rect x="${cx(h.col) - 14}" y="${cy(3) + 10}" width="28" height="15" rx="3" fill="#0f172a" stroke="${h.color}" stroke-width="1" />
-              <text x="${cx(h.col)}" y="${cy(3) + 21}" fill="${h.color}" font-size="6.5" font-weight="900" font-family="monospace" text-anchor="middle">${h.label}</text>
-            </g>
-          `).join('')}
-
-          <!-- ========================================================= -->
-          <!-- TECHNICAL SPECIFICATIONS & MOTHERBOARD PINOUT CARD        -->
-          <!-- ========================================================= -->
-          <g class="daughter-spec-card" transform="translate(${irX + 16}, 285)">
-            <rect x="0" y="0" width="${irW - 32}" height="200" rx="8" fill="#0b1120" stroke="#334155" stroke-width="1.2" />
-            <rect x="0" y="0" width="${irW - 32}" height="24" rx="8" fill="#1e293b" />
-            <text x="${(irW - 32) / 2}" y="16" fill="#f8fafc" font-size="9" font-weight="800" font-family="monospace" text-anchor="middle">16×3 DAUGHTERBOARD ➔ MOTHERBOARD INTERFACE MAP</text>
-
-            <!-- Table Header -->
-            <text x="10" y="42" fill="#94a3b8" font-size="7.5" font-weight="800" font-family="monospace">PIN #</text>
-            <text x="40" y="42" fill="#94a3b8" font-size="7.5" font-weight="800" font-family="monospace">SIGNAL</text>
-            <text x="96" y="42" fill="#94a3b8" font-size="7.5" font-weight="800" font-family="monospace">MB SOCKET</text>
-            <text x="170" y="42" fill="#94a3b8" font-size="7.5" font-weight="800" font-family="monospace">RP2040 PICO PIN</text>
-            <text x="290" y="42" fill="#94a3b8" font-size="7.5" font-weight="800" font-family="monospace">FUNCTION / 4-HOLE SPAN</text>
-            <line x1="8" y1="47" x2="${irW - 40}" y2="47" stroke="#334155" stroke-width="0.8" />
-
-            <!-- Row 1: VSYS -->
-            <text x="14" y="62" fill="#f59e0b" font-size="8" font-weight="900" font-family="monospace">1</text>
-            <text x="40" y="62" fill="#f59e0b" font-size="8" font-weight="800" font-family="monospace">VSYS</text>
-            <text x="104" y="62" fill="#f8fafc" font-size="8" font-family="monospace">Hole C5</text>
-            <text x="170" y="62" fill="#f8fafc" font-size="8" font-family="monospace">Pin 39 (VSYS @ C7)</text>
-            <text x="290" y="62" fill="#cbd5e1" font-size="7.5" font-family="monospace">3.7V Power Rail to R2 & R3</text>
-
-            <!-- Row 2: TX -->
-            <text x="14" y="80" fill="#f97316" font-size="8" font-weight="900" font-family="monospace">2</text>
-            <text x="40" y="80" fill="#f97316" font-size="8" font-weight="800" font-family="monospace">IR_TX</text>
-            <text x="104" y="80" fill="#f8fafc" font-size="8" font-family="monospace">Hole H5</text>
-            <text x="170" y="80" fill="#f8fafc" font-size="8" font-family="monospace">Pin 34 (GP28 @ H7)</text>
-            <text x="290" y="80" fill="#cbd5e1" font-size="7.5" font-family="monospace">PWM Base Drive via R1 (4-Hole)</text>
-
-            <!-- Row 3: GND -->
-            <text x="14" y="98" fill="#64748b" font-size="8" font-weight="900" font-family="monospace">3</text>
-            <text x="40" y="98" fill="#94a3b8" font-size="8" font-weight="800" font-family="monospace">GND</text>
-            <text x="104" y="98" fill="#f8fafc" font-size="8" font-family="monospace">Hole D5</text>
-            <text x="170" y="98" fill="#f8fafc" font-size="8" font-family="monospace">Pin 38 (GND @ D7)</text>
-            <text x="290" y="98" fill="#cbd5e1" font-size="7.5" font-family="monospace">Common Ground (Q1-E & TSOP-2)</text>
-
-            <!-- Row 4: RX -->
-            <text x="14" y="116" fill="#06b6d4" font-size="8" font-weight="900" font-family="monospace">4</text>
-            <text x="40" y="116" fill="#06b6d4" font-size="8" font-weight="800" font-family="monospace">IR_RX</text>
-            <text x="104" y="116" fill="#f8fafc" font-size="8" font-family="monospace">Hole J5</text>
-            <text x="170" y="116" fill="#f8fafc" font-size="8" font-family="monospace">Pin 32 (GP27 @ J7)</text>
-            <text x="290" y="116" fill="#cbd5e1" font-size="7.5" font-family="monospace">Demod 38kHz Input from TSOP</text>
-
-            <!-- Row 5: 3V3 -->
-            <text x="14" y="134" fill="#fb923c" font-size="8" font-weight="900" font-family="monospace">5</text>
-            <text x="40" y="134" fill="#fb923c" font-size="8" font-weight="800" font-family="monospace">3V3</text>
-            <text x="104" y="134" fill="#f8fafc" font-size="8" font-family="monospace">Hole F5</text>
-            <text x="170" y="134" fill="#f8fafc" font-size="8" font-family="monospace">Pin 36 (3V3 @ F7)</text>
-            <text x="290" y="134" fill="#cbd5e1" font-size="7.5" font-family="monospace">Clean TSOP Sensor VCC Power</text>
-
-            <line x1="8" y1="144" x2="${irW - 40}" y2="144" stroke="#334155" stroke-width="0.8" />
-
-            <!-- Key Advantages Bullet Points -->
-            <text x="12" y="160" fill="#a7f3d0" font-size="8" font-weight="800" font-family="monospace">• 4-Hole Resistors:</text>
-            <text x="144" y="160" fill="#cbd5e1" font-size="8" font-family="monospace">R1, R2, R3 lie flat across 4 holes (7.62mm pitch)!</text>
-
-            <text x="12" y="174" fill="#38bdf8" font-size="8" font-weight="800" font-family="monospace">• Strictly 3 Rows:</text>
-            <text x="144" y="174" fill="#cbd5e1" font-size="8" font-family="monospace">Expanded to 16 columns to keep height to only 3 rows.</text>
-
-            <text x="12" y="188" fill="#fef08a" font-size="8" font-weight="800" font-family="monospace">• 100% Orthogonal:</text>
-            <text x="144" y="188" fill="#cbd5e1" font-size="8" font-family="monospace">Zero diagonal tracks; 1:1 straight drops to Pico pins.</text>
-          </g>
-        </g>
-      `;
-
-      g.innerHTML = html;
-    }
 
     // -------------------------------------------------------------
     // 6. NET INSPECTOR & LEGEND
@@ -2350,7 +1891,7 @@
         { name: 'Col U', color: '#22c55e', desc: 'Column U Rail (U15 ➔ U63) [Backside - Green]' },
 
         // Power & Peripheral Nets
-        { name: 'VSYS_BAT', color: '#f59e0b', desc: 'TP4056 OUT+ (3.7V 18650) ➔ Switch ➔ Pad A1 (+VSYS IN) ➔ A2 ➔ Row 2 Bus (A2 ➔ F2) ➔ Pico Pin 39 (VSYS @ C7 via C2 ➔ C7)' },
+        { name: 'VSYS_BAT', color: '#f59e0b', desc: 'TP4056 OUT+ (3.7V 14500 AA) ➔ Switch ➔ Pad A1 (+VSYS IN) ➔ A2 ➔ Row 2 Bus (A2 ➔ F2) ➔ Pico Pin 39 (VSYS @ C7 via C2 ➔ C7)' },
         { name: 'GND', color: '#64748b', desc: 'Common System Ground: TP4056 OUT- (Battery GND) ➔ Pad V1 (Row 1 Bus V1 ➔ K1), Q1 Emitter (K1), and Pico Pin 23 (S7) ➔ S2 (RX1 GND) ➔ S1' },
         { name: 'VCC_3V3', color: '#fb923c', desc: 'Pico Pin 36 (3V3 @ F7) ➔ F3 ➔ Q3 ➔ [Insulated Crossover Jumper] ➔ R2 (RX1 VCC Pin)' },
         { name: 'IR_TX', color: '#f97316', desc: 'Pico Pin 24 (GP18 @ R7) ➔ R3 ➔ Q2 ➔ O2 (R1 Base Resistor Input)' },
@@ -2429,11 +1970,11 @@
     const BOARD_CX = BOARD_X + BOARD_W / 2; // 80 + 292 = 372
     const BOARD_CY = BOARD_Y + BOARD_H / 2; // 60 + 808 = 868
 
-    const SCENE_MIN_X = -360;
-    const SCENE_MAX_X = 1220; // Includes Power Subsystem (-360..20), Motherboard (80..664), and IR Daughterboard (740..1200)
-    const SCENE_W = SCENE_MAX_X - SCENE_MIN_X; // 1580px
-    const SCENE_CX = (SCENE_MIN_X + SCENE_MAX_X) / 2; // 430px
-    const SCENE_CY = BOARD_Y + BOARD_H / 2; // 60 + 808 = 868
+    const SCENE_MIN_X = 20;
+    const SCENE_MAX_X = 724; // Motherboard & Bottom Battery Compartment width: 584px (Cols A..V = 504px)
+    const SCENE_W = SCENE_MAX_X - SCENE_MIN_X; // 704px
+    const SCENE_CX = BOARD_CX; // Centered at 372px
+    const SCENE_CY = (BOARD_Y + BOARD_H + 340) / 2; // ~1032px
 
     function updateTransform() {
       if (!world) return;
@@ -2502,15 +2043,11 @@
         const p42 = getCoordPos('A', 42);
         currentY = 30 - p42.y * currentScale;
       } else if (section === 'battery') {
-        const pwrCenterX = -360 + 380 / 2; // -170
-        currentScale = 0.84;
-        currentX = cW / 2 - pwrCenterX * currentScale;
-        currentY = 30 - 60 * currentScale;
-      } else if (section === 'irModule') {
-        const irCenterX = 740 + 460 / 2; // 970
-        currentScale = 0.95;
-        currentX = cW / 2 - irCenterX * currentScale;
-        currentY = 30 - 60 * currentScale;
+        if (currentScale < 0.75) currentScale = 0.95;
+        currentX = cW / 2 - BOARD_CX * currentScale;
+        const pwrY = BOARD_Y + BOARD_H + 20;
+        currentY = 30 - pwrY * currentScale;
+
       }
       updateTransform();
     }
@@ -2622,8 +2159,6 @@
     const btnJumpBattery = document.getElementById('btnJumpBattery');
     if (btnJumpBattery) btnJumpBattery.addEventListener('click', () => jumpToSection('battery'));
 
-    const btnJumpIrModule = document.getElementById('btnJumpIrModule');
-    if (btnJumpIrModule) btnJumpIrModule.addEventListener('click', () => jumpToSection('irModule'));
 
     // Toggle Sidebar Inspector
     const btnToggleSidebar = document.getElementById('btnToggleSidebar');
@@ -2743,12 +2278,12 @@
       {
         id: 4,
         component: "High-Power IR LEDs (940nm)",
-        spec: "5mm dark purple infrared emitting diodes (Mounted on 16×3 IR Daughterboard Row 1: LED1 @ Col 4,5; LED2 @ Col 12,13)",
+        spec: "5mm dark purple infrared emitting diodes (Mounted on Motherboard Row 1 & 2: D1 @ D1–E1; D2 @ H2–I2)",
         qty: 2,
         designator: "LED1, LED2",
         price: "₹20",
         link: "https://robu.in/product/5mm-940nm-ir-infrared-emitter-led/",
-        role: "Dual high-intensity infrared transmitters on daughterboard facing North for wide-angle 15m optical beam"
+        role: "Dual high-intensity infrared transmitters on motherboard facing North for wide-angle 15m optical beam"
       },
       {
         id: 5,
@@ -2788,7 +2323,7 @@
         designator: "RX1",
         price: "₹30",
         link: "https://robu.in/product/vs1838b-universal-infrared-receiving-sensor/",
-        role: "Demodulates incoming raw 38kHz codes from original remotes for learning; mounted at P2, Q2, R2 facing North"
+        role: "Demodulates incoming raw 38kHz codes from original remotes for learning; mounted at R2, S2, T2 facing North"
       },
       {
         id: 9,
@@ -2812,13 +2347,13 @@
       },
       {
         id: 11,
-        component: "18650 Li-ion Battery",
-        spec: "3.7V 2000mAh Cylindrical Li-ion Rechargeable Cell (with battery holder / solder tabs)",
+        component: "14500 3.7V Li-ion Battery (AA Size)",
+        spec: "3.7V 800–1200mAh Cylindrical 14500 Li-ion Rechargeable Cell (Ø14.5mm × 50.5mm, AA Form Factor) + 1× AA Horizontal Holder",
         qty: 1,
         designator: "BAT1",
-        price: "₹180",
-        link: "https://robu.in/product/orange-icr18650-2000mah-3-7v-lithium-ion-battery/",
-        role: "Main 3.7V rechargeable power source (100+ hours of continuous scanning per charge)"
+        price: "₹160",
+        link: "https://robu.in/product/orange-icr14500-800mah-3-7v-lithium-ion-battery/",
+        role: "Main 3.7V rechargeable power cell (AA size, aligns horizontally across board width: 50.5mm matches 22 cols / 53.3mm)"
       },
       {
         id: 12,
@@ -2839,16 +2374,6 @@
         price: "₹10",
         link: "",
         role: "Master hardware ON/OFF power switch between TP4056 OUT+ and Pico Pin 39 (VSYS)"
-      },
-      {
-        id: 15,
-        component: "3-Row IR Daughterboard Perfboard",
-        spec: "2.54mm pitch double-sided protoboard strip (16 Columns × 3 Rows)",
-        qty: 1,
-        designator: "PCB_IR (16×3)",
-        price: "₹30",
-        link: "",
-        role: "Dedicated ultra-compact breakout board for dual optical transmitters, receiver, driver, and 4-hole axial resistors"
       }
     ];
 
@@ -2955,7 +2480,6 @@
       renderFrontWires();
       renderComponents();
       renderPowerModule();
-      renderIrDaughterboard();
       renderLegend();
       renderBomTable();
       setLayerMode('front');

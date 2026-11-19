@@ -127,41 +127,27 @@ To save space and utilize in-hand surface-mount inventory without consuming 4-ho
 | **IR RX Data** | IR_RX | `GP17` | Pin 26 | `R2 ➔ R6 ➔ P6 ➔ P7` | Demodulated 38kHz signal from RX1 Pin 1 OUT via R3 jumper bridge & Row 6 jog to Pico Pin 26 (GP17) |
 | **IR RX Power**| VCC_3V3| `3V3` | Pin 36 | `F7 ➔ F5 ➔ R5 ➔ R2` | Clean 3.3V power into RX1 Pin 3 VCC at R2 |
 | **Optics Ground 1** | GND | GND | Row 1 | `M2 ➔ M1 ➔ V1` | Upper ground rail anchoring Q1 Emitter across Row 1 |
-| **Battery ADC Monitor**| VSYS/3 | `GP29` (ADC3)| Internal | Internal Divider | RP2040 internal 3:1 divider monitors 18650 cell voltage & battery health |
-
-##### 3. Dedicated 3-Row Optical & IR Daughterboard Breakout Module (16 Cols × 3 Rows)
-To conserve motherboard space, accommodate standard 4-hole horizontal axial resistor footprints, and keep all wiring strictly 100% orthogonal (zero diagonal lines), all optical transceivers and drivers are placed on a compact $16 \times 3$ daughterboard:
-- **Row 1 (North Optical Face)**:
-  - `Col 4, 5`: **IR LED 1** (Anode @ Col 4, Cathode @ Col 5) facing North with optical emission cone.
-  - `Col 9, 10, 11`: **TSOP38238 / VS1838B IR Receiver** (Pin 1 OUT @ Col 9, Pin 2 GND @ Col 10, Pin 3 VCC @ Col 11) facing North with daylight filter.
-  - `Col 12, 13`: **IR LED 2** (Cathode @ Col 12, Anode @ Col 13) facing North with optical emission cone.
-- **Row 2 (Driver & 4-Hole Current Limiting Resistors)**:
-  - `Col 1–4`: **Resistor R2** (22 Ω horizontal across **4 holes**, feeds LED 1 Anode @ Col 4 from VSYS rail at Col 1).
-  - `Col 5, 6, 7`: **Transistor Q1** (2N2222 TO-92 NPN: Col 5 = Collector, Col 6 = Base, Col 7 = Emitter).
-  - `Col 13–16`: **Resistor R3** (22 Ω horizontal across **4 holes**, feeds LED 2 Anode @ Col 13 from VSYS rail at Col 16).
-  - **Cathode Bus**: Ties LED 1 Cathode (Row 1 Col 5) and LED 2 Cathode (Row 1 Col 12) directly to Q1 Collector (Row 2 Col 5).
-- **Row 3 (4-Hole Base Resistor & Interconnect Header Interface)**:
-  - `Col 3–6`: **Resistor R1** (220 Ω horizontal across **4 holes**, connects Header Pin 2 @ Col 3 to Q1 Base @ Row 2 Col 6).
-  - **5-Pin Male Header**: `[Col 1: VSYS, Col 3: IR_TX, Col 7: GND, Col 9: IR_RX, Col 11: 3V3]`. Pins plug cleanly into the Motherboard Socket at Row 5 (`C5, H5, D5, J5, F5`).
+| **Battery ADC Monitor**| VSYS/3 | `GP29` (ADC3)| Internal | Internal Divider | RP2040 internal 3:1 divider monitors 14500 (AA size) cell voltage & battery health |
 
 ---
 
-### 2. Rechargeable Power Architecture (3.7V 18650 2000mAh + TP4056 Type-C)
+### 2. Rechargeable Power Architecture (3.7V 14500 AA-Size Li-ion + TP4056 Type-C)
 
-The remote features a self-contained, rechargeable Lithium-Ion power supply designed for long handheld battery life:
+The remote features a self-contained, rechargeable Lithium-Ion power supply utilizing a compact 14500 (AA form factor) 3.7V cell aligned horizontally across the 22-column (53.3mm) width of the remote:
 
 ```text
     +-------------------------------------------------------------+
-    |  18650 Li-ion Cell (3.7V Nominal, 4.2V Peak, 2000mAh)       |
+    |  14500 Li-ion Cell (3.7V Nominal, 4.2V Peak, AA Size 50.5mm)|
+    |  Aligned Horizontally Across 22-Column Width (Cols A to V)  |
     +------------------------------+------------------------------+
                                    | B+ / B-
                                    v
     +-------------------------------------------------------------+
     |  TP4056 USB-C Charger & DW01A/8205A Protection Board        |
-    |  - Type-C 5V Input (1A charge rate)                         |
+    |  - Type-C 5V Input (Bottom-accessible charging port)        |
     |  - Dual Status LEDs: RED (Charging), BLUE (Full / Standby)  |
     |  - Over-charge Cutoff: 4.2V ± 1%                            |
-    |  - Over-discharge Cutoff: 2.5V (protects 18650 from damage) |
+    |  - Over-discharge Cutoff: 2.5V (protects 14500 from damage) |
     |  - Over-current Protection: 3.0A                            |
     +---------------+-----------------------------+---------------+
                     | OUT+                        | OUT-
@@ -169,14 +155,15 @@ The remote features a self-contained, rechargeable Lithium-Ion power supply desi
            [ SPST Slide Switch ]                  |
                     |                             |
                     v                             v
-       Perfboard C1 ➔ Pico Pin 39 (VSYS)    Perfboard D1 ➔ Pico Pin 38 (GND)
+        Perfboard Pad A1 (+VSYS IN)      Perfboard Pad V1 (GND Rail)
 ```
 
-#### Why 3.7V 18650 Direct into Pico VSYS?
-1. **Wide Input Voltage Range**: The Raspberry Pi Pico's onboard power management IC (RT6150 buck-boost or RT6154) accepts an input range of **1.8V to 5.5V** on `VSYS` (Pin 39).
-2. **Zero Dropout**: A single 18650 cell discharges from 4.2V down to ~3.0V, remaining fully within the Pico's input window at all times while generating a rock-solid, regulated 3.3V for RP2040 and all sensors.
-3. **Internal Hardware ADC Monitoring**: RP2040's internal ADC channel 3 (`GP29`) is hardwired internally to `VSYS / 3` via a 200k/100k resistor divider. You can measure battery voltage and state of charge in software without soldering an extra resistor or wire.
-4. **Massive Battery Life**: With 2000mAh capacity and an active scanning consumption of only ~18–22 mA, the remote operates for **over 100 hours of continuous active use** and **months on standby**.
+#### Why 3.7V 14500 (AA Size) Aligned Horizontally with Board Width?
+1. **Exact Mechanical Fit**: The 22-column 2.54mm perfboard width is $21 \times 2.54\,\text{mm} = 53.34\,\text{mm}$. A standard AA-sized cell is $50.5\,\text{mm}$ long ($\approx 54\,\text{mm}$ in a single AA horizontal leaf/spring holder). Oriented horizontally across the width, it spans from **Column A (x=120) to Column V (x=624)** with 1:1 symmetry, fitting inside the handheld remote handle!
+2. **Li-ion Chemistry Requirement**: You must use a **3.7V 14500 rechargeable Lithium-ion cell** (widely sold in standard AA dimensions: $\varnothing 14.5\,\text{mm} \times 50.5\,\text{mm}$). **Do not use a standard 1.5V alkaline AA**, as 1.5V cannot power the Pico (requires $\ge 1.8\text{V}$) and will be destroyed by the TP4056 4.2V charger.
+3. **Zero Dropout**: A single 14500 Li-ion cell discharges from 4.2V down to ~3.0V, remaining fully within the Pico's input window at all times while generating a rock-solid, regulated 3.3V for RP2040 and all sensors.
+4. **Internal Hardware ADC Monitoring**: RP2040's internal ADC channel 3 (`GP29`) is hardwired internally to `VSYS / 3` via a 200k/100k resistor divider. You can measure battery voltage and state of charge in software without soldering an extra resistor or wire.
+5. **Battery Life**: With 800–1200mAh capacity and an active scanning consumption of only ~18–22 mA, the remote operates for **over 40–60 hours of active use** and **months on standby**.
 
 ---
 
@@ -240,17 +227,17 @@ The buttons are arranged into 8 dual-row button sets (Sets 1 to 8). Each 4.5mm t
 | **1** | **Microcontroller Board** | Raspberry Pi Pico (RP2040, 2MB Flash, Dual-Core 133MHz) | 1 | `U1` | ₹500 | ₹500 | [robu.in](https://robu.in/product/raspberry-pi-pico/) | Main controller: captures raw IR pulses, scans 8x8 matrix, drives 38kHz PWM |
 | **2** | **Tactile Pushbuttons** | 4.5x4.5mm 4-pin through-hole tactile pushbuttons (5.08x2.54mm pitch: 3x2 holes) | 64 | `SW1–SW64` | ~₹0.78 | ₹50 | *[Pending]* | Full 64-button matrix (Buttons 1 to 64) |
 | **3** | **Addressable RGB LED Strip** | WS2812B / NeoPixel 5050 RGB LED strip (8 LEDs) | 1 | `RGB1` | ₹25 | ₹25 | *[Pending]* | Status indicator (TV, AC, Soundbar, Projector) and keypad backlight |
-| **4** | **High-Power IR LEDs (940nm)** | 5mm dark purple IR emitting diodes (Daughterboard Row 1: Col 4,5 & Col 12,13) | 2 | `LED1, LED2` | ₹10 | ₹20 | [robu.in](https://robu.in/product/5mm-940nm-ir-infrared-emitter-led/) | Dual optical transmitters on daughterboard facing North for wide 15m optical beam |
-| **5** | **NPN Switching Transistor** | 2N2222 TO-92 NPN BJT (Motherboard Column K: K1=E, K2=B, K3=C) | 1 | `Q1` | ₹5 | ₹5 | [robu.in](https://robu.in/product/2n2222-npn-transistor-to-92/) | Low-side power switch: amplifies RP2040 GP18 hardware PWM pulses |
+| **4** | **High-Power IR LEDs (940nm)** | 5mm dark purple IR emitting diodes (Motherboard Row 1 & 2: D1 @ D1–E1, D2 @ H2–I2) | 2 | `LED1, LED2` | ₹10 | ₹20 | [robu.in](https://robu.in/product/5mm-940nm-ir-infrared-emitter-led/) | Dual high-power optical transmitters on motherboard facing North for wide 15m optical beam |
+| **5** | **NPN Switching Transistor** | 2N2222 TO-92 NPN BJT (Motherboard Row 1: Collector @ K1, Base @ L1, Emitter @ M1) | 1 | `Q1` | ₹5 | ₹5 | [robu.in](https://robu.in/product/2n2222-npn-transistor-to-92/) | Low-side power switch: amplifies RP2040 GP18 hardware PWM pulses to ground |
 | **6** | **Base Current Limiter** | 220 Ω 1/4W 1206 SMD chip resistor (Motherboard Row 2: N2–O2) | 1 | `R1` | ₹2 | ₹2 | [robu.in](https://robu.in/product/1206-smd-resistor-220-ohm/) | Biases Q1 base with saturation drive for 15m+ range; 1206 package bridges adjacent N2–O2 pads |
 | **7** | **LED Current Limiters** | 22 Ω 1/4W 1206 SMD chip resistors (Motherboard: R2 @ B1–C1, R3 @ F2–G2) | 2 | `R2, R3` | ₹2 | ₹4 | *[In Stock]* | Limits peak pulse current to ~80-100mA per LED from 3.7V VSYS rail. 1206 footprint bridges adjacent 2.54mm annular pads. |
-| **8** | **IR Receiver Sensor** | VS1838B (or TSOP38238) 38kHz Demodulating IR Receiver (Motherboard Row 2: OUT @ P2, GND @ Q2, VCC @ R2) | 1 | `RX1` | ₹30 | ₹30 | [robu.in](https://robu.in/product/vs1838b-universal-infrared-receiving-sensor/) | Demodulates incoming raw 38kHz codes from original remotes for learning; mounted facing North |
+| **8** | **IR Receiver Sensor** | VS1838B (or TSOP38238) 38kHz Demodulating IR Receiver (Motherboard Row 2: VCC @ R2, GND @ S2, OUT @ T2) | 1 | `RX1` | ₹30 | ₹30 | [robu.in](https://robu.in/product/vs1838b-universal-infrared-receiving-sensor/) | Demodulates incoming raw 38kHz codes from original remotes for learning; mounted facing North |
 | **10**| **Double-Sided FR4 Perfboard** | 2.54mm (0.1") pitch protoboard (≥ 22x67 holes) | 1 | `PCB` | ₹260 | ₹260 | *[Pending]* | Main motherboard holding Pico, 64-button matrix, optical circuitry, and RGB strip |
 | **11**| **Insulated Jumper Wire** | 30 AWG Kynar / PTFE wire wrap spool (Red & Green) | 1 | `W_JUMP` | ₹50 | ₹50 | *[Pending]* | Red for Matrix Rows, Green for Matrix Columns, insulated crossover at F20 |
-| **12**| **18650 Li-ion Battery** | 3.7V 2000mAh Cylindrical Li-ion Rechargeable Cell | 1 | `BAT1` | ₹180 | ₹180 | [robu.in](https://robu.in/product/orange-icr18650-2000mah-3-7v-lithium-ion-battery/) | Main 3.7V rechargeable power supply (100+ hrs active scanning runtime) |
+| **12**| **14500 3.7V Li-ion Battery (AA Size)** | 3.7V 800–1200mAh Cylindrical 14500 Li-ion Cell (Ø14.5mm × 50.5mm, AA Form Factor) + 1× AA Horizontal Holder | 1 | `BAT1` | ₹160 | ₹160 | [robu.in](https://robu.in/product/orange-icr14500-800mah-3-7v-lithium-ion-battery/) | Main 3.7V rechargeable power cell (AA size, aligns horizontally across 22 cols / 53.3mm width) |
 | **13**| **TP4056 Charger & Protection**| 5V 1A Li-ion linear charger with Type-C USB port & DW01A protection | 1 | `CHG1` | ₹35 | ₹35 | [robu.in](https://robu.in/product/tp4056-1a-li-ion-lithium-battery-charging-module-with-current-protection-type-c/) | Safe Type-C charging (4.2V cutoff, red/blue status LEDs) and 2.5V cutoff protection |
 | **14**| **Power Slide Switch** | Miniature SPST / SPDT 3-pin slide switch | 1 | `SW_PWR` | ₹10 | ₹10 | *[Pending]* | Master hardware ON/OFF power switch between TP4056 OUT+ and Pico Pin 39 (VSYS) |
-| | **TOTAL ESTIMATED COST** | | | | | **₹1,171.00** | | *(Complete BOM for all core electronic and power components on single board)* |
+| | **TOTAL ESTIMATED COST** | | | | | **₹1,151.00** | | *(Complete BOM for all core electronic and power components on single board)* |
 
 ---
 
