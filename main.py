@@ -1,46 +1,52 @@
 """
 main.py - Universal IR Remote Controller for Raspberry Pi Pico (RP2040)
-Direct 8x8 Keypad Matrix (64 Buttons) + Dedicated IR TX/RX Optics + RGB Addressable LED Strip
-Finalized V2 22x78 Perfboard Architecture (pcb_design_v2.html).
+Direct 8x8 Keypad Matrix (64 Buttons, 4.5mm 3x2 Holes) + Dedicated IR TX/RX Optics + RGB Strip
+3.7V 18650 2000mAh Rechargeable Battery + TP4056 Type-C USB Charger Subsystem
+Finalized V2 22x65 Perfboard Architecture (pcb_design_v2.html).
 
 Hardware Pin Assignment Summary:
   1. Horizontal Pico (90° Rotated): Rows 5 to 12 (Cols B–U).
   2. Direct 8x8 Keypad Matrix (16 GPIOs on Pico Bottom Header, Physical Pins 1 to 20):
        - Rows (8 Outputs, active-LOW):
-           * Row 0 -> GP11 (Physical Pin 15 @ P12)
-           * Row 1 -> GP4  (Physical Pin 6  @ G12)
-           * Row 2 -> GP3  (Physical Pin 5  @ F12)
-           * Row 3 -> GP12 (Physical Pin 16 @ Q12)
-           * Row 4 -> GP8  (Physical Pin 11 @ L12)
-           * Row 5 -> GP7  (Physical Pin 10 @ K12)
-           * Row 6 -> GP0  (Physical Pin 1  @ B12)
-           * Row 7 -> GP15 (Physical Pin 20 @ U12)
+           * Row 0 -> GP12 (Physical Pin 16 @ Q12 ➔ Row 18 Bus [Top-Side Rail])
+           * Row 1 -> GP4  (Physical Pin 6  @ G12 ➔ Row 24 Bus via F18 Jumper)
+           * Row 2 -> GP0  (Physical Pin 1  @ B12 ➔ B30 ➔ C30 ➔ Row 30 Bus [Front Wire])
+           * Row 3 -> GP15 (Physical Pin 20 @ U12 ➔ U36 ➔ T36 ➔ Row 36 Bus [Front Wire])
+           * Row 4 -> GP8  (Physical Pin 11 @ L12 ➔ Row 42 Bus [Backside Lead])
+           * Row 5 -> GP7  (Physical Pin 10 @ K12 ➔ Row 48 Bus)
+           * Row 6 -> GP3  (Physical Pin 5  @ F12 ➔ F54 ➔ Row 54 Bus [Backside Lead])
+           * Row 7 -> GP11 (Physical Pin 15 @ P12 ➔ P15 ➔ Q15 ➔ Q60 ➔ Row 60 Bus [Backside Lead])
        - Columns (8 Inputs with Internal Pull-Ups, idle HIGH):
-           * Col 0 (Rail C) -> GP1  (Physical Pin 2  @ C12)
-           * Col 1 (Rail D) -> GP2  (Physical Pin 4  @ E12)
-           * Col 2 (Rail H) -> GP5  (Physical Pin 7  @ H12)
-           * Col 3 (Rail I) -> GP6  (Physical Pin 9  @ J12)
-           * Col 4 (Rail N) -> GP9  (Physical Pin 12 @ M12)
-           * Col 5 (Rail O) -> GP10 (Physical Pin 14 @ O12)
-           * Col 6 (Rail S) -> GP13 (Physical Pin 17 @ R12)
-           * Col 7 (Rail T) -> GP14 (Physical Pin 19 @ T12)
+           * Col 0 (Rail B) -> GP1  (Physical Pin 2  @ C12 ➔ C16 ➔ B16 ➔ B63)
+           * Col 1 (Rail D) -> GP2  (Physical Pin 4  @ E12 ➔ D15)
+           * Col 2 (Rail G) -> GP5  (Physical Pin 7  @ H12 ➔ H16 ➔ G16 ➔ G63)
+           * Col 3 (Rail I) -> GP6  (Physical Pin 9  @ J12 ➔ I15)
+           * Col 4 (Rail N) -> GP9  (Physical Pin 12 @ M12 ➔ M15 ➔ N15 ➔ N63)
+           * Col 5 (Rail P) -> GP10 (Physical Pin 14 @ O12 ➔ O16 ➔ P16 ➔ P63)
+           * Col 6 (Rail S) -> GP13 (Physical Pin 17 @ R12 ➔ R15 ➔ S15 ➔ S63)
+           * Col 7 (Rail U) -> GP14 (Physical Pin 19 @ T12 ➔ T15 ➔ U15 ➔ U63)
 
   3. Dedicated IR Optical Transceivers (Pico Top Header, Physical Pins 21 to 40):
        - IR Transmitter Module:
-           * SIG -> GP28 (Physical Pin 34 @ H5, 38kHz Hardware PWM)
+           * SIG -> GP18 (Physical Pin 24 @ R7, 38kHz Hardware PWM)
            * GND -> Pico Pin 38 (GND @ D5)
            * VCC -> Pico Pin 36 (3.3V System Rail @ F5)
        - IR Demodulating Receiver (VS1838B / TSOP):
-           * DAT -> GP27 (Physical Pin 32 @ J5, Active-LOW)
-           * GND -> Pico Pin 28 (GND @ N5)
+           * DAT -> GP17 (Physical Pin 22 @ T7, Active-LOW from R2)
+           * GND -> Pico Pin 28 (GND @ M5)
            * VCC -> Pico Pin 36 (3.3V System Rail @ F5)
 
   4. WS2812B / NeoPixel RGB Addressable LED Strip (Indicator & Keypad Backlight):
        - DIN -> GP16 (Physical Pin 21 @ Perfboard U5)
-       - VCC -> Pico Pin 36 (3V3 @ F5) or Pin 39 (VSYS 4.5V @ C5)
+       - VCC -> Pico Pin 36 (3V3 @ F5) or Pin 39 (VSYS @ C5)
        - GND -> Pico Pin 23 (GND @ S5)
 
-  5. Fixed System Buttons (Hardware-locked & Immutable):
+  5. Power Supply (18650 3.7V 2000mAh Battery + TP4056 Type-C Charger):
+       - TP4056 OUT+ (via Power Switch) -> Pico Pin 39 (VSYS @ C5)
+       - TP4056 OUT- -> Pico Pin 38 (GND @ D5)
+       - Battery Monitoring -> GP29 / ADC3 (Internal VSYS/3 divider)
+
+  6. Fixed System Buttons (Hardware-locked & Immutable):
        - Button 2 = LEARN (Amber Cap): Fixed Trigger for Handheld IR Learning
        - Button 3 = MODE  (Emerald Cap): Fixed Appliance Profile Switcher
        * Buttons 2 & 3 CANNOT be changed or overwritten!
@@ -57,8 +63,8 @@ from rgb_strip import RGBIndicator
 # =============================================================================
 # PIN CONFIGURATION (V2 Layout)
 # =============================================================================
-PIN_IR_TX = 28       # GP28 (Physical Pin 34) -> 38kHz PWM Transmitter
-PIN_IR_RX = 27       # GP27 (Physical Pin 32) -> Demodulated Data IN (Active-LOW)
+PIN_IR_TX = 18       # GP18 (Physical Pin 24 @ R7) -> 38kHz PWM Transmitter
+PIN_IR_RX = 17       # GP17 (Physical Pin 22 @ T7) -> Demodulated Data IN (Active-LOW from R2)
 
 # WS2812B NeoPixel RGB Addressable LED Strip
 PIN_RGB_LED = 16     # GP16 (Physical Pin 21 @ Perfboard U5) -> WS2812B DIN
@@ -146,9 +152,9 @@ def handle_keypad_matrix(ir):
     print("      RASPBERRY PI PICO UNIVERSAL IR REMOTE (8x8 MATRIX / 64 KEYS)")
     print("=" * 70)
     print("Hardware Configuration (Finalized V2 Perfboard):")
-    print(f"  Rows (8x) -> GP11, GP4, GP3, GP12, GP8, GP7, GP0, GP15")
+    print(f"  Rows (8x) -> GP12, GP4, GP0, GP15, GP8, GP7, GP3, GP11")
     print(f"  Cols (8x) -> GP1, GP2, GP5, GP6, GP9, GP10, GP13, GP14")
-    print(f"  Optics    -> IR RX @ GP27 (Pin 32) | IR TX @ GP28 (Pin 34)")
+    print(f"  Optics    -> IR RX @ GP17 (Pin 22) | IR TX @ GP18 (Pin 24)")
     print(f"  RGB Strip -> WS2812B DIN @ GP16 (Pin 21) [{NUM_RGB_LEDS} LEDs Backlight]")
     print("-" * 70)
     print("Fixed System Buttons (IMMUTABLE - CANNOT BE OVERWRITTEN):")
@@ -218,7 +224,7 @@ def handle_keypad_matrix(ir):
                     print("\n" + "=" * 65)
                     print(f"  STEP 2: SIGNAL MATCHING FOR {label}")
                     print(f"  Target Device: [{active_dev.upper()}]")
-                    print("  Instructions : Point original remote at the TSOP IR sensor (GP27)")
+                    print("  Instructions : Point original remote at the TSOP IR sensor (GP17)")
                     print("                 and press the button NOW!")
                     print("  Waiting for 38kHz infrared pulses (timeout in 7 seconds)...")
                     print("=" * 65)
@@ -254,7 +260,7 @@ def handle_keypad_matrix(ir):
                     else:
                         print("\n[-] SIGNAL MATCHING TIMEOUT: No valid IR signal detected.")
                         print("    Tips:")
-                        print("      - Point remote 2-5 cm directly in front of the GP27 receiver.")
+                        print("      - Point remote 2-5 cm directly in front of the GP17 receiver.")
                         print("      - Press Button 2 anytime to try again.\n")
                         rgb.flash_error()
                         time.sleep_ms(400)
@@ -426,7 +432,7 @@ def cli_loop(ir):
                 print("Usage: rgb [tv | ac | soundbar | projector | on | off | rainbow | <brightness 0.1-1.0>]")
 
         elif cmd in ("test", "test-ir"):
-            print(f"\n[*] Testing IR LED connection on GP{PIN_IR_TX} (Pin 34)...")
+            print(f"\n[*] Testing IR LED connection on GP{PIN_IR_TX} (Pin 25)...")
             detected_count = 0
             for i in range(5):
                 ir.tx_pwm.duty_u16(ir.duty_on)
